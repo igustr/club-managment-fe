@@ -172,8 +172,8 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 - COACH: view own teams, manage own team roster
 - PLAYER/PARENT: view teams they belong to
 
-### Phase 4: Pitch & Training Management
-**Goal:** Pitch CRUD, training scheduling (single + recurring), pitch schedule view
+### Phase 4: Pitch & Training Management + Monthly Calendar
+**Goal:** Pitch CRUD, training scheduling (single + recurring), pitch schedule view, monthly calendar view
 
 **API modules:**
 - [ ] Create `api/pitch.api.ts`: pitches CRUD, getSchedule + query hooks
@@ -185,16 +185,31 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 - [ ] Create Pitch Schedule page — calendar/timeline view of bookings for a pitch
 
 **Training pages:**
-- [ ] Create Training List page — filtered list/calendar of trainings
+- [ ] Create Training List page with two view modes:
+  - **List view** — filtered table of trainings with sorting/search
+  - **Monthly calendar view** — full month grid showing trainings per day (color-coded by team)
   - ADMIN sees all, COACH/PLAYER/PARENT see own team trainings
+  - Toggle between list/calendar via view switcher
 - [ ] Create TrainingForm — single session: date, startTime, endTime, team, pitch, notes
 - [ ] Create RecurringTrainingForm — day of week, date range, time, team, pitch, notes
 - [ ] Create Training Detail page — training info + attendance section (Phase 5)
 - [ ] Create Cancel Training action with confirmation
 
+**Monthly Calendar (`features/calendar/`):**
+- [ ] Create MonthlyCalendar component — full month grid (MUI-based, custom built)
+  - Navigate between months (prev/next arrows + month/year selector)
+  - Each day cell shows training sessions as colored chips (color = team)
+  - Click on day → show day detail with all trainings
+  - Click on training chip → navigate to training detail page
+  - Today highlighted
+  - Show pitch conflicts visually (overlapping time slots)
+- [ ] Create DayDetailPopover — shows full list of trainings for selected day
+- [ ] Create CalendarFilters — filter by team, pitch, status
+- [ ] Add `/calendar` route to sidebar navigation (visible to all roles)
+
 **RBAC:**
 - ADMIN/COACH: create/edit/cancel trainings (for their teams)
-- All roles: view trainings for their teams
+- All roles: view trainings and calendar for their teams
 
 ### Phase 5: Attendance
 **Goal:** Attendance confirmation for players/parents, summary view for coaches/admins
@@ -236,7 +251,50 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 
 **RBAC:** All roles can send/view messages. Team chats visible only to team members.
 
-### Phase 7: Shared Components & Polish
+### Phase 7: Player Statistics & Analytics
+**Goal:** Per-player statistics, attendance analytics, team performance overview
+
+**Backend endpoints needed (NEW — not yet in backend):**
+- `GET /api/clubs/{clubId}/users/{userId}/statistics` — player attendance rate, training count, etc.
+- `GET /api/clubs/{clubId}/teams/{teamId}/statistics` — team-level aggregates
+- `GET /api/clubs/{clubId}/statistics/attendance?from=&to=` — club-wide attendance analytics
+
+**API module:**
+- [ ] Create `api/statistics.api.ts`: player stats, team stats, club analytics + query hooks
+
+**Pages:**
+- [ ] Create Player Statistics view (embedded in User Detail page):
+  - Attendance rate (% of trainings confirmed/attended)
+  - Total trainings attended / total available
+  - Attendance trend over time (line chart — last 3 months)
+  - Per-team breakdown (if player is in multiple teams)
+- [ ] Create Team Statistics view (embedded in Team Detail page):
+  - Average team attendance rate
+  - Per-player attendance table with percentages
+  - Best/worst attendance players
+  - Training frequency stats (trainings per week)
+- [ ] Create Analytics Dashboard page (`features/statistics/AnalyticsPage.tsx`):
+  - Club-wide attendance rate over time
+  - Team comparison chart (which team has best attendance)
+  - Monthly training count
+  - Active vs inactive members
+
+**Components (`features/statistics/components/`):**
+- [ ] AttendanceRateCard — circular progress + percentage
+- [ ] AttendanceTrendChart — line chart (use MUI-compatible charting, e.g. recharts or lightweight custom SVG)
+- [ ] TeamComparisonChart — bar chart comparing teams
+- [ ] PlayerStatsTable — sortable table with player name, attendance %, trainings count
+- [ ] StatCard — reusable stat display (value, label, trend arrow)
+
+**Route:** `/statistics` — ADMIN/COACH only (sidebar item in admin section)
+
+**RBAC:**
+- ADMIN: full club analytics + all player/team stats
+- COACH: own team statistics + own team player stats
+- PLAYER: own attendance stats (on their profile/dashboard)
+- PARENT: child's attendance stats
+
+### Phase 8: Shared Components & Polish
 **Goal:** Reusable components, error handling, loading states, final UI polish
 
 **Shared form components (`components/form/`):**
@@ -290,12 +348,16 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 /teams                          # All roles — TeamListPage
 /teams/:teamId                  # All roles — TeamDetailPage
 
-/trainings                      # All roles — TrainingListPage
+/trainings                      # All roles — TrainingListPage (list + calendar toggle)
 /trainings/create               # ADMIN/COACH — TrainingForm (create)
 /trainings/:trainingId          # All roles — TrainingDetailPage (includes attendance)
 
+/calendar                       # All roles — Monthly calendar view of all trainings
+
 /pitches                        # All roles — PitchListPage
 /pitches/:pitchId/schedule      # ADMIN — PitchSchedulePage
+
+/statistics                     # ADMIN/COACH — Analytics dashboard
 
 /chat                           # All roles — ConversationListPage
 /chat/:conversationId           # All roles — ConversationPage
@@ -309,21 +371,23 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 ## Sidebar Menu Structure
 
 ```
-┌──────────────────────┐
-│  🏟️  Club Name       │  ← Club name from auth store
-├──────────────────────┤
-│  📊  Dashboard       │  ← All roles
-│  👥  Teams           │  ← All roles
-│  🏋️  Trainings       │  ← All roles
-│  🏟️  Pitches         │  ← All roles
-│  💬  Chat       [3]  │  ← All roles (unread badge)
-├──────────────────────┤  ← Separator (ADMIN section below)
-│  👤  Users           │  ← ADMIN only
-│  ⚙️  Settings        │  ← ADMIN only
-└──────────────────────┘
+┌──────────────────────────┐
+│  [icon]  Club Name       │  ← Club name from auth store
+├──────────────────────────┤
+│  DashboardIcon  Dashboard│  ← All roles
+│  GroupsIcon     Teams    │  ← All roles
+│  FitnessCenterIcon Train.│  ← All roles
+│  CalendarMonthIcon Cal.  │  ← All roles
+│  StadiumIcon    Pitches  │  ← All roles
+│  ChatIcon       Chat [3] │  ← All roles (unread badge)
+├──────────────────────────┤  ← Separator (ADMIN/COACH section)
+│  BarChartIcon   Stats    │  ← ADMIN/COACH
+│  PeopleIcon     Users    │  ← ADMIN only
+│  SettingsIcon   Settings │  ← ADMIN only
+└──────────────────────────┘
 ```
 
-Menu items use MUI icons (not emoji). Unread badge uses MUI Badge component.
+Menu items use MUI Icons (from `@mui/icons-material`). Unread badge uses MUI Badge component.
 
 ---
 
@@ -352,5 +416,16 @@ Three levels (from emde-fe):
 
 ## Current Status
 
-**Phase:** 0 (Project Setup) — NOT STARTED
-**Next action:** Remove Next.js scaffold, init Vite + React + TypeScript
+**Phase:** 0 (Project Setup) — IN PROGRESS
+- [x] Remove Next.js files
+- [x] Create package.json with Vite + all dependencies
+- [x] Install dependencies (`npm install`)
+- [x] Configure tsconfig.json (strict, path aliases)
+- [x] Configure vite.config.ts (aliases, proxy)
+- [x] Configure ESLint + Prettier
+- [x] Create .env
+- [x] Create index.html
+- [x] Create src/ directory structure with all feature folders
+- [ ] Create placeholder theme.ts, App.tsx, main.tsx (minimal to verify `npm run dev` works)
+
+**Next action:** Create minimal App.tsx + main.tsx to verify dev server starts

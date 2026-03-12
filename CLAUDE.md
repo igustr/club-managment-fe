@@ -1,5 +1,7 @@
 # Club Management Frontend
 
+SAY THAT WE NEED TO MAKE DESIGN FOR EACH PAGE!!!
+
 Estonian football club management web application frontend (bachelor's thesis project).
 
 ## IMPORTANT: Before Starting Any Implementation
@@ -77,6 +79,7 @@ src/
 │   ├── training.api.ts       # Training session endpoints + query hooks
 │   ├── pitch.api.ts          # Pitch endpoints + query hooks
 │   ├── attendance.api.ts     # Attendance endpoints + query hooks
+│   ├── statistics.api.ts     # Player/team/club statistics + query hooks
 │   └── chat.api.ts           # Conversation + message endpoints + query hooks
 ├── components/               # Shared reusable components
 │   ├── layout/               # AppLayout, Sidebar, Header
@@ -122,6 +125,12 @@ src/
 │   ├── attendance/
 │   │   └── components/       # AttendanceList, AttendanceSummary, ConfirmButton
 │   │                         # (embedded in TrainingDetailPage, not standalone pages)
+│   ├── calendar/
+│   │   ├── CalendarPage.tsx   # Monthly calendar view of all trainings
+│   │   └── components/       # MonthlyCalendar, DayDetailPopover, CalendarFilters
+│   ├── statistics/
+│   │   ├── AnalyticsPage.tsx  # Club-wide analytics dashboard (ADMIN/COACH)
+│   │   └── components/       # AttendanceRateCard, TrendChart, TeamComparison, PlayerStatsTable
 │   └── chat/
 │       ├── ConversationListPage.tsx
 │       ├── ConversationPage.tsx
@@ -264,6 +273,7 @@ export function usePermissions() {
     canManageUsers: role === 'ADMIN',
     canCreateTraining: role === 'ADMIN' || role === 'COACH',
     canViewAttendanceSummary: role === 'ADMIN' || role === 'COACH',
+    canViewStatistics: role === 'ADMIN' || role === 'COACH',
   };
 }
 
@@ -293,12 +303,16 @@ Routes use flat paths. `clubId` is read from the auth store (user belongs to exa
 /teams                          # All roles — team list
 /teams/:teamId                  # All roles — team detail + members
 
-/trainings                      # All roles — training list
+/trainings                      # All roles — training list (list + calendar toggle)
 /trainings/create               # ADMIN/COACH — create training
 /trainings/:trainingId          # All roles — training detail + attendance
 
+/calendar                       # All roles — monthly calendar view
+
 /pitches                        # All roles — pitch list
 /pitches/:pitchId/schedule      # ADMIN — pitch schedule
+
+/statistics                     # ADMIN/COACH — analytics dashboard
 
 /chat                           # All roles — conversation list
 /chat/:conversationId           # All roles — messages
