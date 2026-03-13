@@ -291,6 +291,25 @@
       "SUNDAY": "Sunday"
     }
   },
+  "attendance": {
+    "confirmed": "Confirmed",
+    "declined": "Declined",
+    "pending": "Pending",
+    "total": "Total",
+    "name": "Name",
+    "role": "Role",
+    "status": "Status",
+    "actions": "Actions",
+    "confirm": "Confirm",
+    "decline": "Decline",
+    "markConfirmed": "Mark as confirmed",
+    "markDeclined": "Mark as declined",
+    "updateSuccess": "Attendance updated",
+    "noData": "No attendance data available",
+    "playerHint": "Confirm or decline your attendance for this training.",
+    "parentHint": "Confirm or decline attendance for your children.",
+    "noChildren": "No linked children found."
+  },
   "calendar": {
     "title": "Calendar",
     "noSessions": "No sessions",

@@ -291,6 +291,25 @@
       "SUNDAY": "Pühapäev"
     }
   },
+  "attendance": {
+    "confirmed": "Kinnitatud",
+    "declined": "Keeldutud",
+    "pending": "Ootel",
+    "total": "Kokku",
+    "name": "Nimi",
+    "role": "Roll",
+    "status": "Staatus",
+    "actions": "Tegevused",
+    "confirm": "Kinnita",
+    "decline": "Keeldu",
+    "markConfirmed": "Märgi kinnitatuks",
+    "markDeclined": "Märgi keeldutuks",
+    "updateSuccess": "Kohalolek uuendatud",
+    "noData": "Kohaloleku andmed puuduvad",
+    "playerHint": "Kinnita või keeldu oma osalemisest sellel treeningul.",
+    "parentHint": "Kinnita või keeldu oma laste osalemisest.",
+    "noChildren": "Seotud lapsi ei leitud."
+  },
   "calendar": {
     "title": "Kalender",
     "noSessions": "Treeninguid pole",

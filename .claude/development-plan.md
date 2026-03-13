@@ -343,20 +343,21 @@ export const useTeams = () => {
 - CLUB_ADMIN/COACH: create/edit/cancel trainings (for their teams)
 - All roles: view trainings and calendar for their teams
 
-### Phase 6: Attendance
+### Phase 6: Attendance ✅ COMPLETE
 **Goal:** Attendance confirmation for players/parents, summary view for coaches/admins
 
 **API module:**
-- [ ] Create `api/attendance.api.ts`: getAttendance, updateAttendance, getSummary + query hooks
+- [x] Create `api/attendance.api.ts`: getAttendance, updateAttendance, getSummary + query hooks
+- [x] Create `types/attendance.types.ts`: AttendanceDTO, AttendanceSummaryDTO, UpdateAttendanceDTO
 
 **Components (embedded in Training Detail page):**
-- [ ] Create AttendanceList — shows all team members with status (PENDING/CONFIRMED/DECLINED)
-- [ ] Create AttendanceSummary — counts: total, confirmed, declined, pending + visual bar
-- [ ] Create ConfirmButton — PLAYER confirms/declines own attendance
-- [ ] Create ParentConfirmButton — PARENT confirms/declines child's attendance
+- [x] Create AttendanceSection — orchestrator component, role-based rendering
+- [x] Create AttendanceList — shows all team members with status (PENDING/CONFIRMED/DECLINED)
+- [x] Create AttendanceSummary — counts: total, confirmed, declined, pending + visual bar
+- [x] Create PlayerAttendanceCard — PLAYER/PARENT confirms/declines attendance with optimistic UI
 
 **RBAC:**
-- CLUB_ADMIN/COACH: view full attendance list + summary
+- CLUB_ADMIN/COACH: view full attendance list + summary, manage all statuses
 - PLAYER: see own status, confirm/decline
 - PARENT: see child's status, confirm/decline for child
 

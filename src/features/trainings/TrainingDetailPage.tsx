@@ -28,6 +28,7 @@ import {
   useDeleteTraining,
 } from '@/api/training.api';
 import { TrainingFormDialog } from './components/TrainingFormDialog';
+import { AttendanceSection } from '@/features/attendance/components/AttendanceSection';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useClubId } from '@/hooks/useClubId';
@@ -195,15 +196,8 @@ export function TrainingDetailPage() {
         </Stack>
       </Paper>
 
-      {/* Attendance section placeholder (Phase 6) */}
-      <Paper variant="outlined" sx={{ p: 3 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
-          {t('trainings.attendance')}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {t('trainings.attendancePlaceholder')}
-        </Typography>
-      </Paper>
+      {/* Attendance */}
+      <AttendanceSection trainingId={trainingId!} />
 
       {/* Dialogs */}
       <TrainingFormDialog
