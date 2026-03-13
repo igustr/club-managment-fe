@@ -361,26 +361,30 @@ export const useTeams = () => {
 - PLAYER: see own status, confirm/decline
 - PARENT: see child's status, confirm/decline for child
 
-### Phase 7: Chat
+### Phase 7: Chat ✅ COMPLETE
 **Goal:** Team conversations, direct messages, unread badges
 
 **API module:**
-- [ ] Create `api/chat.api.ts`: conversations CRUD, messages, markRead, unreadCount + query hooks
+- [x] Create `api/chat.api.ts`: conversations CRUD, messages, markRead, unreadCount + query hooks
+- [x] Create `types/chat.types.ts`: ConversationDTO, MessageDTO, SendMessageDTO, CreateDirectConversationDTO, ParticipantDTO, ConversationType
 
 **Pages:**
-- [ ] Create Conversation List page — team chats (auto-created) + direct chats
-- [ ] Create Conversation page — message list with pagination + send form
+- [x] Create Conversation List page — sorted by last message time, create new direct chat
+- [x] Create Conversation page — message list with send form, auto-scroll, mark as read on open
 
 **Components:**
-- [ ] Create ConversationItem — avatar, name, last message preview, unread count, timestamp
-- [ ] Create MessageList — messages with sender name, timestamp, own/other styling
-- [ ] Create SendMessageForm — text input + send button
-- [ ] Create NewDirectChatDialog — select club member to start direct conversation
+- [x] Create ConversationItem — avatar, name, last message preview, unread badge, timestamp
+- [x] Create MessageList — messages with sender name, timestamp, own/other styling, date separators
+- [x] Create SendMessageForm — text input + send button, Enter to send, Shift+Enter for newline
+- [x] Create NewDirectChatDialog — search club members, select to start direct conversation
+
+**Schemas:**
+- [x] Create `features/chat/schemas.ts`: sendMessageSchema with Zod validation
 
 **Polling:**
-- [ ] Unread count badge on sidebar: poll every 30 seconds (`refetchInterval: 30000`)
-- [ ] Active conversation messages: poll every 10 seconds (`refetchInterval: 10000`)
-- [ ] Mark as read: PUT on conversation open
+- [x] Unread count badge on sidebar: poll every 30 seconds (`refetchInterval: 30000`)
+- [x] Active conversation messages: poll every 10 seconds (`refetchInterval: 10000`)
+- [x] Mark as read: PUT on conversation open
 
 **RBAC:** All roles can send/view messages. Team chats visible only to team members.
 

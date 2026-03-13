@@ -10,6 +10,7 @@ import {
   Typography,
   Box,
   Avatar,
+  Badge,
   Divider,
   IconButton,
   useMediaQuery,
@@ -31,6 +32,8 @@ import {
 } from '@mui/icons-material';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useUnreadCount } from '@/api/chat.api';
+import { useClubId } from '@/hooks/useClubId';
 import { sidebarColors } from '@/theme';
 
 const DRAWER_WIDTH = 260;
@@ -65,6 +68,8 @@ export function Sidebar({
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const user = useAuthStore((s) => s.user);
   const { isClubAdmin, canViewStatistics } = usePermissions();
+  const clubId = useClubId();
+  const { data: unreadCount } = useUnreadCount(clubId);
 
   const mainItems: NavItem[] = [
     { key: 'dashboard', path: '/dashboard', icon: <Dashboard />, labelKey: 'nav.dashboard' },
@@ -72,7 +77,7 @@ export function Sidebar({
     { key: 'trainings', path: '/trainings', icon: <FitnessCenter />, labelKey: 'nav.trainings' },
     { key: 'pitches', path: '/pitches', icon: <Stadium />, labelKey: 'nav.pitches' },
     { key: 'calendar', path: '/calendar', icon: <CalendarMonth />, labelKey: 'nav.calendar' },
-    { key: 'chat', path: '/chat', icon: <Chat />, labelKey: 'nav.chat' },
+    { key: 'chat', path: '/chat', icon: <Chat />, labelKey: 'nav.chat', badge: unreadCount },
   ];
 
   const adminItems: NavItem[] = [
@@ -205,7 +210,13 @@ export function Sidebar({
                     color: 'inherit',
                   }}
                 >
-                  {item.icon}
+                  {item.badge ? (
+                    <Badge badgeContent={item.badge} color="error" variant="dot">
+                      {item.icon}
+                    </Badge>
+                  ) : (
+                    item.icon
+                  )}
                 </ListItemIcon>
                 {!collapsed && (
                   <ListItemText
@@ -213,6 +224,9 @@ export function Sidebar({
                     primaryTypographyProps={{ fontSize: 14, fontWeight: 500 }}
                   />
                 )}
+                {!collapsed && item.badge ? (
+                  <Badge badgeContent={item.badge} color="error" sx={{ mr: 1 }} />
+                ) : null}
               </ListItemButton>
             </ListItem>
           ))}

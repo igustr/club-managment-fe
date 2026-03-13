@@ -310,6 +310,16 @@
     "parentHint": "Confirm or decline attendance for your children.",
     "noChildren": "No linked children found."
   },
+  "chat": {
+    "title": "Messages",
+    "newConversation": "New Conversation",
+    "noConversations": "No conversations yet",
+    "noMessages": "No messages yet",
+    "messagePlaceholder": "Type a message...",
+    "searchUsers": "Search users...",
+    "participants": "participants",
+    "sendSuccess": "Message sent"
+  },
   "calendar": {
     "title": "Calendar",
     "noSessions": "No sessions",

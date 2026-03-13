@@ -310,6 +310,16 @@
     "parentHint": "Kinnita või keeldu oma laste osalemisest.",
     "noChildren": "Seotud lapsi ei leitud."
   },
+  "chat": {
+    "title": "Sõnumid",
+    "newConversation": "Uus vestlus",
+    "noConversations": "Vestlused puuduvad",
+    "noMessages": "Sõnumeid pole",
+    "messagePlaceholder": "Kirjuta sõnum...",
+    "searchUsers": "Otsi kasutajaid...",
+    "participants": "osalejat",
+    "sendSuccess": "Sõnum saadetud"
+  },
   "calendar": {
     "title": "Kalender",
     "noSessions": "Treeninguid pole",

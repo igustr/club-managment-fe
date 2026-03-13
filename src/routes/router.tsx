@@ -93,6 +93,16 @@ const CalendarPage = lazy(() =>
     default: m.CalendarPage,
   })),
 );
+const ConversationListPage = lazy(() =>
+  import('@/features/chat/ConversationListPage').then((m) => ({
+    default: m.ConversationListPage,
+  })),
+);
+const ConversationPage = lazy(() =>
+  import('@/features/chat/ConversationPage').then((m) => ({
+    default: m.ConversationPage,
+  })),
+);
 
 // Layout components (not lazy — always needed)
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -323,7 +333,7 @@ export const router = createBrowserRouter([
                 path: '/chat',
                 element: (
                   <SuspenseWrapper>
-                    <Box>Chat (Phase 7)</Box>
+                    <ConversationListPage />
                   </SuspenseWrapper>
                 ),
               },
@@ -331,7 +341,7 @@ export const router = createBrowserRouter([
                 path: '/chat/:conversationId',
                 element: (
                   <SuspenseWrapper>
-                    <Box>Conversation (Phase 7)</Box>
+                    <ConversationPage />
                   </SuspenseWrapper>
                 ),
               },
