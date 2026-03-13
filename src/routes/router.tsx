@@ -58,6 +58,16 @@ const ClubUserDetailPage = lazy(() =>
     default: m.UserDetailPage,
   })),
 );
+const TeamListPage = lazy(() =>
+  import('@/features/teams/TeamListPage').then((m) => ({
+    default: m.TeamListPage,
+  })),
+);
+const TeamDetailPage = lazy(() =>
+  import('@/features/teams/TeamDetailPage').then((m) => ({
+    default: m.TeamDetailPage,
+  })),
+);
 
 // Layout components (not lazy — always needed)
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -203,7 +213,7 @@ export const router = createBrowserRouter([
                 path: '/teams',
                 element: (
                   <SuspenseWrapper>
-                    <Box>Teams (Phase 4)</Box>
+                    <TeamListPage />
                   </SuspenseWrapper>
                 ),
               },
@@ -211,7 +221,7 @@ export const router = createBrowserRouter([
                 path: '/teams/:teamId',
                 element: (
                   <SuspenseWrapper>
-                    <Box>Team Detail (Phase 4)</Box>
+                    <TeamDetailPage />
                   </SuspenseWrapper>
                 ),
               },

@@ -8,6 +8,7 @@ import type {
   AdminCreateUserDTO,
   AssignAdminDTO,
 } from '@/types/admin.types';
+import type { UpdateClubDTO } from '@/types/club.types';
 import type { Page } from '@/types/common.types';
 
 // --- Query key factory ---
@@ -63,6 +64,9 @@ export const assignClubAdmin = (clubId: string, data: AssignAdminDTO) =>
   api
     .post<UserDTO>(`/api/admin/clubs/${clubId}/admins`, data)
     .then((r) => r.data);
+
+export const adminUpdateClub = (clubId: string, data: UpdateClubDTO) =>
+  api.put<ClubDTO>(`/api/clubs/${clubId}`, data).then((r) => r.data);
 
 export const getClubMembers = (clubId: string, params?: { page?: number; size?: number }) =>
   api
@@ -121,6 +125,14 @@ export const useAdminCreateUser = () =>
     mutationFn: adminCreateUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.users() });
+    },
+  });
+
+export const useAdminUpdateClub = (clubId: string) =>
+  useMutation({
+    mutationFn: (data: UpdateClubDTO) => adminUpdateClub(clubId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.clubs() });
     },
   });
 

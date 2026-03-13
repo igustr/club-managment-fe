@@ -26,6 +26,7 @@ import {
   BarChart,
   Settings,
   ChevronLeft,
+  ChevronRight,
   SportsSoccer,
 } from '@mui/icons-material';
 import { useAuthStore } from '@/stores/authStore';
@@ -132,7 +133,15 @@ export function Sidebar({
             </Typography>
           </Box>
         )}
-        {collapsed && <SportsSoccer sx={{ color: 'primary.main', fontSize: 24 }} />}
+        {collapsed && (
+          <IconButton
+            onClick={onToggleCollapse}
+            size="small"
+            sx={{ color: sidebarColors.text }}
+          >
+            <ChevronRight />
+          </IconButton>
+        )}
         {!isMobile && !collapsed && (
           <IconButton
             onClick={onToggleCollapse}

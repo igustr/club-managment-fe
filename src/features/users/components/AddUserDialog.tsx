@@ -20,9 +20,15 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Collapse,
+  Autocomplete,
+  Chip,
 } from '@mui/material';
-import { useUnaffiliated, useAddUserToClub } from '@/api/user.api';
+import { useUnaffiliated, useAddUserToClub, useClubUsers, linkParent } from '@/api/user.api';
+import { adminKeys } from '@/api/admin.api';
+import { queryClient } from '@/api/query-client';
 import { ClubRole } from '@/types/common.types';
+import type { UserDTO } from '@/types/auth.types';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
 
@@ -37,6 +43,8 @@ export function AddUserDialog({ open, clubId, onClose }: AddUserDialogProps) {
   const [search, setSearch] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [role, setRole] = useState<ClubRole>(ClubRole.PLAYER);
+  const [selectedChildren, setSelectedChildren] = useState<UserDTO[]>([]);
+  const [childSearch, setChildSearch] = useState('');
   const addMutation = useAddUserToClub(clubId);
 
   const { data: usersPage, isLoading } = useUnaffiliated({
@@ -45,19 +53,55 @@ export function AddUserDialog({ open, clubId, onClose }: AddUserDialogProps) {
     size: 10,
   });
 
+  const { data: clubMembersPage } = useClubUsers(
+    role === ClubRole.PARENT && selectedUserId ? clubId : null,
+    { search: childSearch || undefined, page: 0, size: 50 },
+  );
+
+  const playerMembers = (clubMembersPage?.content ?? []).filter(
+    (u) => u.role === ClubRole.PLAYER,
+  );
+
   const users = usersPage?.content ?? [];
 
   const handleClose = () => {
     setSearch('');
     setSelectedUserId(null);
     setRole(ClubRole.PLAYER);
+    setSelectedChildren([]);
+    setChildSearch('');
     onClose();
+  };
+
+  const handleRoleChange = (newRole: ClubRole) => {
+    setRole(newRole);
+    if (newRole !== ClubRole.PARENT) {
+      setSelectedChildren([]);
+      setChildSearch('');
+    }
   };
 
   const handleAdd = async () => {
     if (!selectedUserId) return;
     try {
       await addMutation.mutateAsync({ userId: selectedUserId, role });
+
+      // Link selected children if PARENT role
+      if (role === ClubRole.PARENT && selectedChildren.length > 0) {
+        try {
+          await Promise.all(
+            selectedChildren.map((child) =>
+              linkParent(clubId, child.id, { parentId: selectedUserId }),
+            ),
+          );
+        } catch {
+          toast.error(t('users.linkChildrenPartialError'));
+        }
+      }
+
+      // Invalidate admin club members query for Master Admin context
+      queryClient.invalidateQueries({ queryKey: adminKeys.clubMembers(clubId) });
+
       toast.success(t('users.addSuccess'));
       handleClose();
     } catch (error) {
@@ -122,7 +166,7 @@ export function AddUserDialog({ open, clubId, onClose }: AddUserDialogProps) {
             <Select
               value={role}
               label={t('users.role')}
-              onChange={(e) => setRole(e.target.value as ClubRole)}
+              onChange={(e) => handleRoleChange(e.target.value as ClubRole)}
             >
               {Object.values(ClubRole).map((r) => (
                 <MenuItem key={r} value={r}>
@@ -132,6 +176,43 @@ export function AddUserDialog({ open, clubId, onClose }: AddUserDialogProps) {
             </Select>
           </FormControl>
         )}
+
+        <Collapse in={role === ClubRole.PARENT && !!selectedUserId}>
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+              {t('users.linkChildrenHint')}
+            </Typography>
+            <Autocomplete
+              multiple
+              options={playerMembers}
+              value={selectedChildren}
+              onChange={(_, newValue) => setSelectedChildren(newValue)}
+              onInputChange={(_, value) => setChildSearch(value)}
+              getOptionLabel={(option) =>
+                `${option.firstName} ${option.lastName}`
+              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  placeholder={t('users.searchPlayers')}
+                />
+              )}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip
+                    {...getTagProps({ index })}
+                    key={option.id}
+                    label={`${option.firstName} ${option.lastName}`}
+                    size="small"
+                  />
+                ))
+              }
+              noOptionsText={t('users.noPlayersInClub')}
+            />
+          </Box>
+        </Collapse>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={handleClose}>{t('common.cancel')}</Button>

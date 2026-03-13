@@ -20,9 +20,10 @@ import {
   CircularProgress,
   Chip,
 } from '@mui/material';
-import { Add, Search, Delete } from '@mui/icons-material';
+import { Add, Search, Delete, Edit } from '@mui/icons-material';
 import { useAdminClubs, useDeleteClub } from '@/api/admin.api';
 import { CreateClubDialog } from './components/CreateClubDialog';
+import type { ClubDTO } from '@/types/club.types';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
 
@@ -33,6 +34,7 @@ export function ClubListPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [createOpen, setCreateOpen] = useState(false);
+  const [editClub, setEditClub] = useState<ClubDTO | null>(null);
 
   const { data, isLoading } = useAdminClubs({
     search: search || undefined,
@@ -109,7 +111,7 @@ export function ClubListPage() {
               <TableCell>{t('admin.clubs.address')}</TableCell>
               <TableCell>{t('admin.clubs.contactEmail')}</TableCell>
               <TableCell>{t('admin.clubs.contactPhone')}</TableCell>
-              <TableCell align="right" sx={{ width: 60 }} />
+              <TableCell align="right" sx={{ width: 100 }} />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -153,6 +155,17 @@ export function ClubListPage() {
                   <TableCell>{club.contactEmail || '—'}</TableCell>
                   <TableCell>{club.contactPhone || '—'}</TableCell>
                   <TableCell align="right">
+                    <Tooltip title={t('common.edit')}>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditClub(club);
+                        }}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title={t('common.delete')}>
                       <IconButton
                         size="small"
@@ -187,6 +200,12 @@ export function ClubListPage() {
       <CreateClubDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
+      />
+
+      <CreateClubDialog
+        open={!!editClub}
+        onClose={() => setEditClub(null)}
+        club={editClub}
       />
     </Box>
   );

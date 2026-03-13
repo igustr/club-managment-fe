@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import { ArrowBack, PersonAdd, Delete } from '@mui/icons-material';
 import { useAdminClubs, useDeleteClub, useClubMembers } from '@/api/admin.api';
-import { AssignAdminDialog } from './components/AssignAdminDialog';
+import { AddUserDialog } from '@/features/users/components/AddUserDialog';
 import { clubRoleColors } from '@/utils/roles';
 import type { ClubRole } from '@/types/common.types';
 import toast from 'react-hot-toast';
@@ -104,7 +104,7 @@ export function ClubDetailPage() {
             startIcon={<PersonAdd />}
             onClick={() => setAssignOpen(true)}
           >
-            {t('admin.clubs.assignAdmin')}
+            {t('admin.clubs.addUser')}
           </Button>
           <Button
             variant="outlined"
@@ -216,7 +216,7 @@ export function ClubDetailPage() {
         </Table>
       </TableContainer>
 
-      <AssignAdminDialog
+      <AddUserDialog
         open={assignOpen}
         clubId={clubId!}
         onClose={() => setAssignOpen(false)}

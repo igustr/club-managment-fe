@@ -16,35 +16,47 @@ import {
   Typography,
   Box,
   CircularProgress,
+  Chip,
 } from '@mui/material';
-import { useAdminUsers, useAssignClubAdmin } from '@/api/admin.api';
+import { useClubUsers } from '@/api/user.api';
+import { useAddTeamMember } from '@/api/team.api';
+import type { TeamMemberDTO } from '@/types/team.types';
+import { clubRoleColors } from '@/utils/roles';
+import type { ClubRole } from '@/types/common.types';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
 
-interface AssignAdminDialogProps {
+interface AddMemberDialogProps {
   open: boolean;
   clubId: string;
+  teamId: string;
+  existingMembers: TeamMemberDTO[];
   onClose: () => void;
 }
 
-export function AssignAdminDialog({
+export function AddMemberDialog({
   open,
   clubId,
+  teamId,
+  existingMembers,
   onClose,
-}: AssignAdminDialogProps) {
+}: AddMemberDialogProps) {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const assignMutation = useAssignClubAdmin(clubId);
+  const addMemberMutation = useAddTeamMember(clubId, teamId);
 
-  const { data: usersPage, isLoading } = useAdminUsers({
+  const { data: usersPage, isLoading } = useClubUsers(clubId, {
     search: search || undefined,
-    unaffiliated: true,
     page: 0,
-    size: 10,
+    size: 20,
   });
 
-  const users = usersPage?.content ?? [];
+  // Filter out users already in the team
+  const existingUserIds = new Set(existingMembers.map((m) => m.userId));
+  const availableUsers = (usersPage?.content ?? []).filter(
+    (u) => !existingUserIds.has(u.id),
+  );
 
   const handleClose = () => {
     setSearch('');
@@ -52,11 +64,11 @@ export function AssignAdminDialog({
     onClose();
   };
 
-  const handleAssign = async () => {
+  const handleAdd = async () => {
     if (!selectedUserId) return;
     try {
-      await assignMutation.mutateAsync({ userId: selectedUserId });
-      toast.success(t('admin.clubs.assignAdminSuccess'));
+      await addMemberMutation.mutateAsync({ userId: selectedUserId });
+      toast.success(t('teams.addMemberSuccess'));
       handleClose();
     } catch (error) {
       toast.error(getApiErrorMessage(error));
@@ -65,11 +77,11 @@ export function AssignAdminDialog({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{t('admin.clubs.assignAdmin')}</DialogTitle>
+      <DialogTitle>{t('teams.addMember')}</DialogTitle>
       <DialogContent>
         <TextField
           fullWidth
-          placeholder={t('admin.clubs.searchUsers')}
+          placeholder={t('teams.searchClubMembers')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           size="small"
@@ -80,7 +92,7 @@ export function AssignAdminDialog({
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
             <CircularProgress size={24} />
           </Box>
-        ) : users.length === 0 ? (
+        ) : availableUsers.length === 0 ? (
           <Typography
             variant="body2"
             color="text.secondary"
@@ -91,7 +103,7 @@ export function AssignAdminDialog({
           </Typography>
         ) : (
           <List disablePadding>
-            {users.map((user) => (
+            {availableUsers.map((user) => (
               <ListItem key={user.id} disablePadding>
                 <ListItemButton
                   selected={selectedUserId === user.id}
@@ -108,6 +120,19 @@ export function AssignAdminDialog({
                     primary={`${user.firstName} ${user.lastName}`}
                     secondary={user.email}
                   />
+                  {user.role && (
+                    <Chip
+                      label={t(`roles.${user.role}`)}
+                      size="small"
+                      sx={{
+                        bgcolor:
+                          clubRoleColors[user.role as ClubRole] + '1A',
+                        color: clubRoleColors[user.role as ClubRole],
+                        fontWeight: 600,
+                        fontSize: 11,
+                      }}
+                    />
+                  )}
                 </ListItemButton>
               </ListItem>
             ))}
@@ -118,12 +143,12 @@ export function AssignAdminDialog({
         <Button onClick={handleClose}>{t('common.cancel')}</Button>
         <Button
           variant="contained"
-          onClick={handleAssign}
-          disabled={!selectedUserId || assignMutation.isPending}
+          onClick={handleAdd}
+          disabled={!selectedUserId || addMemberMutation.isPending}
         >
-          {assignMutation.isPending
+          {addMemberMutation.isPending
             ? t('common.loading')
-            : t('common.confirm')}
+            : t('teams.addMember')}
         </Button>
       </DialogActions>
     </Dialog>

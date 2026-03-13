@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,22 +11,26 @@ import {
   Button,
   Stack,
 } from '@mui/material';
-import { useCreateClub } from '@/api/admin.api';
+import { useCreateClub, useAdminUpdateClub } from '@/api/admin.api';
 import {
   createClubSchema,
   type CreateClubFormValues,
 } from '@/features/admin/schemas';
+import type { ClubDTO } from '@/types/club.types';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
 
 interface CreateClubDialogProps {
   open: boolean;
   onClose: () => void;
+  club?: ClubDTO | null;
 }
 
-export function CreateClubDialog({ open, onClose }: CreateClubDialogProps) {
+export function CreateClubDialog({ open, onClose, club }: CreateClubDialogProps) {
   const { t } = useTranslation();
+  const isEdit = !!club;
   const createClubMutation = useCreateClub();
+  const updateClubMutation = useAdminUpdateClub(club?.id ?? '');
 
   const {
     control,
@@ -43,34 +48,65 @@ export function CreateClubDialog({ open, onClose }: CreateClubDialogProps) {
     },
   });
 
+  useEffect(() => {
+    if (open && club) {
+      reset({
+        name: club.name ?? '',
+        registrationCode: club.registrationCode ?? '',
+        address: club.address ?? '',
+        contactEmail: club.contactEmail ?? '',
+        contactPhone: club.contactPhone ?? '',
+      });
+    } else if (open) {
+      reset({
+        name: '',
+        registrationCode: '',
+        address: '',
+        contactEmail: '',
+        contactPhone: '',
+      });
+    }
+  }, [open, club, reset]);
+
   const handleClose = () => {
     reset();
     onClose();
   };
 
   const onSubmit = async (values: CreateClubFormValues) => {
+    const payload = {
+      name: values.name,
+      registrationCode: values.registrationCode || undefined,
+      address: values.address || undefined,
+      contactEmail: values.contactEmail || undefined,
+      contactPhone: values.contactPhone || undefined,
+    };
+
     try {
-      await createClubMutation.mutateAsync({
-        name: values.name,
-        registrationCode: values.registrationCode || undefined,
-        address: values.address || undefined,
-        contactEmail: values.contactEmail || undefined,
-        contactPhone: values.contactPhone || undefined,
-      });
-      toast.success(t('admin.clubs.createSuccess'));
+      if (isEdit) {
+        await updateClubMutation.mutateAsync(payload);
+        toast.success(t('admin.clubs.editSuccess'));
+      } else {
+        await createClubMutation.mutateAsync(payload);
+        toast.success(t('admin.clubs.createSuccess'));
+      }
       handleClose();
     } catch (error) {
       toast.error(getApiErrorMessage(error));
     }
   };
 
+  const isPending = createClubMutation.isPending || updateClubMutation.isPending;
+
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{t('admin.clubs.createClub')}</DialogTitle>
+      <DialogTitle>
+        {isEdit ? t('admin.clubs.editClub') : t('admin.clubs.createClub')}
+      </DialogTitle>
       <DialogContent>
         <Stack
           component="form"
-          id="create-club-form"
+          id="club-form"
           onSubmit={handleSubmit(onSubmit)}
           spacing={2.5}
           sx={{ mt: 1 }}
@@ -148,13 +184,15 @@ export function CreateClubDialog({ open, onClose }: CreateClubDialogProps) {
         <Button onClick={handleClose}>{t('common.cancel')}</Button>
         <Button
           type="submit"
-          form="create-club-form"
+          form="club-form"
           variant="contained"
-          disabled={createClubMutation.isPending}
+          disabled={isPending}
         >
-          {createClubMutation.isPending
+          {isPending
             ? t('common.loading')
-            : t('common.create')}
+            : isEdit
+              ? t('common.save')
+              : t('common.create')}
         </Button>
       </DialogActions>
     </Dialog>

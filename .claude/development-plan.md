@@ -275,20 +275,23 @@ export const useTeams = () => {
 
 **RBAC:** Only CLUB_ADMIN sees Users menu item and Club Settings
 
-### Phase 4: Team Management
+### Phase 4: Team Management ✅ COMPLETE
 **Goal:** Team CRUD, team member roster management
 
 **API module:**
-- [ ] Create `api/team.api.ts`: teams CRUD, members CRUD + query hooks
+- [x] Create `api/team.api.ts`: teams CRUD, members CRUD + query hooks
+- [x] Create `types/team.types.ts`: TeamDTO, CreateTeamDTO, UpdateTeamDTO, TeamMemberDTO, AddTeamMemberDTO
 
 **Pages:**
-- [ ] Create Team List page — MUI cards or table showing all teams with member count
-- [ ] Create Team Detail page — team info header + member roster table
+- [x] Create Team List page — CSS grid card layout showing all teams with member count, age group, season chips
+- [x] Create Team Detail page — team info header + member roster table with role chips and joined date
 
 **Feature components:**
-- [ ] Create TeamForm (mode: create/edit) — name, ageGroup, season fields
-- [ ] Create MemberRoster — table of team members with role/joinedDate
-- [ ] Create AddMemberDialog — search club users not yet in team, add with role
+- [x] Create TeamFormDialog (mode: create/edit) — name, ageGroup, season fields with Zod validation
+- [x] Create AddMemberDialog — search club users not yet in team, shows role chips, filters out existing members
+
+**Schemas:**
+- [x] Create `features/teams/schemas.ts`: teamSchema with i18n validation
 
 **RBAC:**
 - CLUB_ADMIN: CRUD all teams, manage all rosters
