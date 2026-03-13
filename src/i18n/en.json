@@ -143,6 +143,54 @@
       "filterUnaffiliated": "Unaffiliated"
     }
   },
+  "dashboard": {
+    "members": "Members",
+    "teams": "Teams",
+    "trainings": "Trainings",
+    "pitches": "Pitches"
+  },
+  "clubs": {
+    "settings": {
+      "title": "Club Settings",
+      "name": "Club Name",
+      "registrationCode": "Registration Code",
+      "address": "Address",
+      "contactEmail": "Contact Email",
+      "contactPhone": "Contact Phone",
+      "saveSuccess": "Club details updated"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "addUser": "Add User",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "noUsers": "No users found",
+    "addSuccess": "User added to club",
+    "updateSuccess": "User details updated",
+    "removeUser": "Remove user",
+    "removeConfirmTitle": "Remove user",
+    "removeConfirm": "Are you sure you want to remove \"{{name}}\" from the club?",
+    "removeSuccess": "User removed",
+    "searchUnaffiliated": "Search registered users...",
+    "searchClubMembers": "Search club members...",
+    "profileInfo": "Profile Info",
+    "activeStatus": "Active user",
+    "parents": "Parents",
+    "children": "Children",
+    "noParents": "No parents linked",
+    "linkParent": "Link Parent",
+    "linkParentSuccess": "Parent linked",
+    "unlinkParentTitle": "Remove link",
+    "unlinkParentConfirm": "Are you sure you want to unlink parent \"{{name}}\"?",
+    "unlinkParentSuccess": "Parent link removed"
+  },
   "error": {
     "generic": "Something went wrong. Please try again.",
     "network": "Network error. Check your connection.",

@@ -249,27 +249,29 @@ export const useTeams = () => {
 
 **RBAC:** All pages in /admin/* require MASTER_ADMIN systemRole
 
-### Phase 3: Club & User Management
+### Phase 3: Club & User Management ✅ COMPLETE
 **Goal:** Club settings page, user list, add/remove users, role management, parent-child linking
 
 **API modules:**
-- [ ] Create `api/club.api.ts`: getClub, updateClub + query hooks
-- [ ] Create `api/user.api.ts`: getUsers, getUser, addUserToClub, updateUser, removeUser, searchUnaffiliated, parents/children CRUD + query hooks
+- [x] Create `api/club.api.ts`: getClub, updateClub + query hooks
+- [x] Create `api/user.api.ts`: getUsers, getUser, addUserToClub, updateUser, removeUser, searchUnaffiliated, parents/children CRUD + query hooks
 
 **Pages:**
-- [ ] Create Dashboard page (`features/dashboard/DashboardPage.tsx`) — overview cards (team count, upcoming trainings, unread messages)
-- [ ] Create Club Settings page (`features/clubs/ClubSettingsPage.tsx`) — CLUB_ADMIN only, edit name/contact
-- [ ] Create User List page (`features/users/UserListPage.tsx`) — MUI DataGrid with role badges, search, pagination
-- [ ] Create User Detail page (`features/users/UserDetailPage.tsx`) — profile info, role management, parent-child links
+- [x] Create Dashboard page (`features/dashboard/DashboardPage.tsx`) — overview cards (member count, team/training/pitch placeholders)
+- [x] Create Club Settings page (`features/clubs/ClubSettingsPage.tsx`) — CLUB_ADMIN only, edit name/contact
+- [x] Create User List page (`features/users/UserListPage.tsx`) — MUI Table with role badges, search, pagination
+- [x] Create User Detail page (`features/users/UserDetailPage.tsx`) — profile info, role management, parent-child links
 
 **Feature components:**
-- [ ] Create AddUserDialog — search unaffiliated users, assign role, add to club
-- [ ] Create RoleBadge — MUI Chip with role-specific color
-- [ ] Create ParentLinkForm — link/unlink parent to player
-- [ ] Create ConfirmDialog — shared reusable confirmation dialog
+- [x] Create AddUserDialog — search unaffiliated users, assign role, add to club
+- [x] Create LinkParentDialog — search club members, link as parent to player
+- [x] Create ConfirmDialog — shared reusable confirmation dialog (`components/ui/ConfirmDialog.tsx`)
 
 **Schemas:**
-- [ ] Zod schemas for club settings form, add user form, update user form
+- [x] Zod schemas for club settings form, add user form, update user form
+
+**Types:**
+- [x] Create `types/user.types.ts` — AddUserToClubDTO, UpdateUserDTO, LinkParentDTO
 
 **RBAC:** Only CLUB_ADMIN sees Users menu item and Club Settings
 

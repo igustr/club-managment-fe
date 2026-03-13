@@ -143,6 +143,54 @@
       "filterUnaffiliated": "Klubita"
     }
   },
+  "dashboard": {
+    "members": "Liikmeid",
+    "teams": "Meeskondi",
+    "trainings": "Treeninguid",
+    "pitches": "Väljakuid"
+  },
+  "clubs": {
+    "settings": {
+      "title": "Klubi seaded",
+      "name": "Klubi nimi",
+      "registrationCode": "Registrikood",
+      "address": "Aadress",
+      "contactEmail": "Kontakt e-post",
+      "contactPhone": "Kontakttelefon",
+      "saveSuccess": "Klubi andmed uuendatud"
+    }
+  },
+  "users": {
+    "title": "Kasutajad",
+    "addUser": "Lisa kasutaja",
+    "firstName": "Eesnimi",
+    "lastName": "Perekonnanimi",
+    "email": "E-post",
+    "phone": "Telefon",
+    "role": "Roll",
+    "status": "Staatus",
+    "active": "Aktiivne",
+    "inactive": "Mitteaktiivne",
+    "noUsers": "Kasutajaid ei leitud",
+    "addSuccess": "Kasutaja lisatud klubisse",
+    "updateSuccess": "Kasutaja andmed uuendatud",
+    "removeUser": "Eemalda kasutaja",
+    "removeConfirmTitle": "Eemalda kasutaja",
+    "removeConfirm": "Kas oled kindel, et soovid kasutaja \"{{name}}\" klubist eemaldada?",
+    "removeSuccess": "Kasutaja eemaldatud",
+    "searchUnaffiliated": "Otsi registreerunud kasutajaid...",
+    "searchClubMembers": "Otsi klubi liikmeid...",
+    "profileInfo": "Profiili andmed",
+    "activeStatus": "Aktiivne kasutaja",
+    "parents": "Lapsevanemad",
+    "children": "Lapsed",
+    "noParents": "Lapsevanemaid pole seotud",
+    "linkParent": "Seo lapsevanem",
+    "linkParentSuccess": "Lapsevanem seotud",
+    "unlinkParentTitle": "Eemalda seos",
+    "unlinkParentConfirm": "Kas oled kindel, et soovid lapsevanema \"{{name}}\" seose eemaldada?",
+    "unlinkParentSuccess": "Lapsevanema seos eemaldatud"
+  },
   "error": {
     "generic": "Midagi läks valesti. Palun proovi uuesti.",
     "network": "Võrguühenduse viga. Kontrolli oma ühendust.",
