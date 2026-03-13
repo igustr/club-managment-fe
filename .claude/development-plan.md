@@ -133,77 +133,85 @@ export const useTeams = () => {
 **Goal:** Login/register, JWT management, protected routing, app layout shell with sidebar, Master Admin routing
 
 **Auth infrastructure:**
-- [ ] Create TypeScript types (`types/auth.types.ts`, `types/common.types.ts`) matching backend DTOs
+- [x] Create TypeScript types (`types/auth.types.ts`, `types/common.types.ts`, `types/club.types.ts`) matching backend DTOs
   - Include `SystemRole` type and `systemRole` field in UserDTO
-- [ ] Create Axios instance (`api/axios.ts`):
+- [x] Create Axios instance (`api/axios.ts`):
   - Base URL from env
   - Request interceptor: attach JWT from Zustand store
-  - Response interceptor: 401 → clear tokens, redirect to /login
-- [ ] Create TanStack Query client (`api/query-client.ts`) with default options
-- [ ] Create Zustand auth store (`stores/authStore.ts`):
+  - Response interceptor: 401 → refresh token → redirect to /login
+- [x] Create TanStack Query client (`api/query-client.ts`) with default options
+- [x] Create Zustand auth store (`stores/authStore.ts`):
   - State: `user: UserDTO | null`, `accessToken`, `refreshToken`, `isAuthenticated`
   - Computed: `isMasterAdmin`, `isClubAdmin`, `hasClub`
   - Actions: `login(tokens)`, `logout()`, `setUser(user)`, `getClubId()`
   - Persist token in localStorage, restore on app init
-- [ ] Create Zustand UI store (`stores/uiStore.ts`): `sidebarCollapsed`, `language`
-- [ ] Create auth API module (`api/auth.api.ts`): login, register, refresh, getMe + query hooks
+- [x] Create Zustand UI store (`stores/uiStore.ts`): `sidebarCollapsed`, `language`
+- [x] Create auth API module (`api/auth.api.ts`): login, register, refresh, getMe + query hooks
 
 **Auth pages:**
-- [ ] Create Login page (`features/auth/LoginPage.tsx`) with MUI form + Zod schema
-- [ ] Create Register page (`features/auth/RegisterPage.tsx`) with MUI form + Zod schema
+- [x] Create Login page (`features/auth/LoginPage.tsx`) with MUI form + Zod schema
+- [x] Create Register page (`features/auth/RegisterPage.tsx`) with MUI form + Zod schema
   - Fields: firstName, lastName, email, password, confirmPassword, dateOfBirth, phone
   - Info box: "After registering, contact your club administrator to be added to a club"
+  - Password strength indicator
   - No club creation on register
-- [ ] Create No Club page (`features/auth/NoClubPage.tsx`)
+- [x] Create No Club page (`features/auth/NoClubPage.tsx`)
   - Simple centered card: "Your account is ready. Contact your club administrator to be added."
-  - Logout button
+  - "Check again" button + Logout button
 
 **Layout shells:**
-- [ ] Create Club AppLayout (`components/layout/AppLayout.tsx`): MUI Box with Drawer + AppBar + Outlet
-- [ ] Create Club Sidebar (`components/layout/Sidebar.tsx`):
+- [x] Create Club AppLayout (`components/layout/AppLayout.tsx`): MUI Box with Drawer + AppBar + Outlet
+- [x] Create Club Sidebar (`components/layout/Sidebar.tsx`):
   - MUI permanent Drawer (desktop) / temporary Drawer (mobile)
   - Collapsible: 260px → 64px icons-only
   - Role-gated menu items (using `usePermissions()`)
-  - Menu sections: Ülevaade, Meeskonnad, Treeningud, Väljakud, Kalender, Sõnumid [badge]
+  - Menu sections: Ülevaade, Meeskonnad, Treeningud, Väljakud, Kalender, Sõnumid
   - Admin section: Kasutajad (CLUB_ADMIN), Statistika (CLUB_ADMIN/COACH), Seaded (CLUB_ADMIN)
-- [ ] Create Club Header (`components/layout/Header.tsx`):
+- [x] Create Club Header (`components/layout/Header.tsx`):
   - MUI AppBar with hamburger toggle
-  - Club name display
   - Language switcher (ET/EN)
   - User avatar + dropdown menu (profile, logout)
-- [ ] Create Master Admin Layout (`components/layout/AdminLayout.tsx`):
+- [x] Create Master Admin Layout (`components/layout/AdminLayout.tsx`):
   - Similar structure but different sidebar
   - Sidebar items: Klubid (Clubs), Kasutajad (Users)
-  - Header: "Platform Admin" instead of club name
-- [ ] Create Master Admin Sidebar (`components/layout/AdminSidebar.tsx`)
+  - Header: "Peaadministraator" title
+- [x] Create Master Admin Sidebar (`components/layout/AdminSidebar.tsx`)
 
 **Routing & guards:**
-- [ ] Create `usePermissions()` hook (`hooks/usePermissions.ts`)
+- [x] Create `usePermissions()` hook (`hooks/usePermissions.ts`)
   - Include: `isMasterAdmin`, `isClubAdmin`, `isCoach`, `isPlayer`, `isParent`
   - Club-level permissions: `canManageClub`, `canManageUsers`, `canCreateTraining`, etc.
-- [ ] Create `useClubId()` hook (`hooks/useClubId.ts`)
-- [ ] Create `ProtectedRoute` component (redirects to /login if not authenticated)
-- [ ] Create `RoleGuard` component (checks role, shows 403 if insufficient)
-- [ ] Create `MasterAdminGuard` component (checks systemRole == MASTER_ADMIN)
-- [ ] Set up React Router:
+- [x] Create `useClubId()` hook (`hooks/useClubId.ts`)
+- [x] Create `ProtectedRoute` component (redirects to /login if not authenticated)
+- [x] Create `RoleGuard` component (checks role, shows 403 if insufficient)
+- [x] Create `MasterAdminGuard` component (checks systemRole == MASTER_ADMIN)
+- [x] Create `ClubGuard` component (checks hasClub, redirects to /no-club)
+- [x] Set up React Router (`routes/router.tsx`):
   - Public: /login, /register
   - No-club: /no-club (authenticated but no club)
   - Master Admin: /admin/* (inside AdminLayout)
   - Club: /dashboard, /teams, etc. (inside AppLayout)
   - Post-login redirect logic based on role
-- [ ] Set up lazy loading for all feature pages
+  - 403 + 404 error pages
+- [x] Set up lazy loading for all feature pages
 
 **i18n:**
-- [ ] Set up react-i18next with Estonian (default) + English
-- [ ] Create initial translation files with auth + layout + nav keys
+- [x] Set up react-i18next with Estonian (default) + English
+- [x] Create initial translation files with auth + layout + nav + validation + error keys
 
 **Providers:**
-- [ ] Wire up App.tsx with: QueryClientProvider, RouterProvider, ThemeProvider, Toaster
+- [x] Wire up App.tsx with: QueryClientProvider, RouterProvider, ThemeProvider, Toaster, ReactQueryDevtools
+
+**Utilities:**
+- [x] Create `utils/roles.ts` — role display names, role colors
+- [x] Create `utils/date.ts` — dayjs config, Europe/Tallinn timezone, formatting helpers
+- [x] Create `features/auth/components/AuthLayout.tsx` — shared auth page wrapper (brand, language switcher)
 
 **Verify:**
-- Can register → see "no club" page
+- Can register → redirects to login page
 - Can login as Club Admin → see club dashboard with sidebar
 - Can login as Master Admin → see platform admin dashboard
+- Can login as unaffiliated user → see "no club" waiting page
 - Token persists on refresh → logout works
 
 ### Phase 2: Master Admin Dashboard
@@ -661,7 +669,8 @@ GET    /api/clubs/{clubId}/conversations/unread-count           → number
 ## Current Status
 
 **Phase 0:** ✅ COMPLETE
-**Phase 1:** NOT STARTED — next up
+**Phase 1:** ✅ COMPLETE
+**Phase 2:** NOT STARTED — next up
 
 **Design mockups completed:**
 - `.claude/mockups/auth/01-login.html` — Login page

@@ -1,0 +1,110 @@
+{
+  "common": {
+    "appName": "Club Management",
+    "appSubtitle": "Eesti jalgpalliklubide haldamine",
+    "loading": "Laadimine...",
+    "save": "Salvesta",
+    "cancel": "Tühista",
+    "delete": "Kustuta",
+    "edit": "Muuda",
+    "create": "Loo",
+    "search": "Otsi",
+    "back": "Tagasi",
+    "confirm": "Kinnita",
+    "yes": "Jah",
+    "no": "Ei",
+    "noResults": "Tulemused puuduvad",
+    "error": "Viga",
+    "success": "Õnnestus",
+    "logout": "Logi välja",
+    "language": "Keel"
+  },
+  "auth": {
+    "login": {
+      "title": "Logi sisse",
+      "description": "Sisesta oma e-posti aadress ja parool",
+      "email": "E-post",
+      "emailPlaceholder": "nimi@example.com",
+      "password": "Parool",
+      "passwordPlaceholder": "Sisesta parool",
+      "submit": "Logi sisse",
+      "noAccount": "Pole kontot?",
+      "register": "Registreeru",
+      "error": "Vale e-posti aadress või parool. Palun proovi uuesti."
+    },
+    "register": {
+      "title": "Registreeru",
+      "description": "Loo uus konto",
+      "info": "Pärast registreerimist võta ühendust oma klubi administraatoriga, et sind klubisse lisataks.",
+      "firstName": "Eesnimi",
+      "firstNamePlaceholder": "Igor",
+      "lastName": "Perekonnanimi",
+      "lastNamePlaceholder": "Ustritski",
+      "email": "E-post",
+      "emailPlaceholder": "nimi@example.com",
+      "dateOfBirth": "Sünnipäev",
+      "phone": "Telefon",
+      "phonePlaceholder": "+372 5123 4567",
+      "password": "Parool",
+      "passwordPlaceholder": "Vähemalt 8 tähemärki",
+      "confirmPassword": "Kinnita parool",
+      "confirmPasswordPlaceholder": "Sisesta parool uuesti",
+      "submit": "Registreeru",
+      "hasAccount": "On juba konto?",
+      "login": "Logi sisse",
+      "emailInUse": "E-posti aadress on juba kasutusel",
+      "passwordStrength": {
+        "weak": "Nõrk",
+        "medium": "Keskmine",
+        "strong": "Tugev"
+      }
+    },
+    "noClub": {
+      "title": "Konto on loodud!",
+      "description": "Sinu konto on valmis. Võta ühendust oma klubi administraatoriga, et sind klubisse lisataks.",
+      "waiting": "Oodatakse klubisse lisamist...",
+      "checkAgain": "Kontrolli uuesti",
+      "logout": "Logi välja"
+    }
+  },
+  "nav": {
+    "main": "Põhileht",
+    "dashboard": "Ülevaade",
+    "teams": "Meeskonnad",
+    "trainings": "Treeningud",
+    "pitches": "Väljakud",
+    "calendar": "Kalender",
+    "chat": "Sõnumid",
+    "admin": "Haldus",
+    "users": "Kasutajad",
+    "statistics": "Statistika",
+    "settings": "Seaded",
+    "platform": "Platvorm",
+    "clubs": "Klubid"
+  },
+  "roles": {
+    "CLUB_ADMIN": "Klubi administraator",
+    "COACH": "Treener",
+    "PLAYER": "Mängija",
+    "PARENT": "Lapsevanem",
+    "MASTER_ADMIN": "Peaadministraator"
+  },
+  "validation": {
+    "required": "See väli on kohustuslik",
+    "email": "Sisesta kehtiv e-posti aadress",
+    "minLength": "Minimaalne pikkus on {{min}} tähemärki",
+    "maxLength": "Maksimaalne pikkus on {{max}} tähemärki",
+    "passwordMismatch": "Paroolid ei kattu"
+  },
+  "error": {
+    "generic": "Midagi läks valesti. Palun proovi uuesti.",
+    "network": "Võrguühenduse viga. Kontrolli oma ühendust.",
+    "forbidden": "Sul puudub õigus selle toimingu tegemiseks.",
+    "notFound": "Lehekülge ei leitud.",
+    "pageNotFound": "Lehekülge ei leitud",
+    "pageNotFoundDescription": "Otsitavat lehekülge ei eksisteeri.",
+    "goHome": "Mine avalehele",
+    "forbidden403": "Ligipääs keelatud",
+    "forbiddenDescription": "Sul puudub õigus selle lehe vaatamiseks."
+  }
+}

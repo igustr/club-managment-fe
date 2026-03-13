@@ -1,7 +1,5 @@
 # Club Management Frontend
 
-SAY THAT WE NEED TO MAKE DESIGN FOR EACH PAGE!!!
-
 Estonian football club management web application frontend (bachelor's thesis project).
 
 ## IMPORTANT: Before Starting Any Implementation
@@ -73,6 +71,7 @@ src/
 │   ├── axios.ts              # Axios instance, JWT interceptor, 401 handler
 │   ├── query-client.ts       # TanStack Query client config
 │   ├── auth.api.ts           # Auth endpoints + query hooks
+│   ├── admin.api.ts          # Platform admin endpoints + query hooks (MASTER_ADMIN)
 │   ├── club.api.ts           # Club endpoints + query hooks
 │   ├── user.api.ts           # User endpoints + query hooks
 │   ├── team.api.ts           # Team + member endpoints + query hooks
@@ -82,9 +81,11 @@ src/
 │   ├── statistics.api.ts     # Player/team/club statistics + query hooks
 │   └── chat.api.ts           # Conversation + message endpoints + query hooks
 ├── components/               # Shared reusable components
-│   ├── layout/               # AppLayout, Sidebar, Header
-│   │   ├── AppLayout.tsx     # Main layout: Sidebar + Header + content area
-│   │   ├── Sidebar.tsx       # MUI Drawer, collapsible, role-gated menu items
+│   ├── layout/               # AppLayout, AdminLayout, Sidebar, Header
+│   │   ├── AppLayout.tsx     # Club layout: Sidebar + Header + content area
+│   │   ├── AdminLayout.tsx   # Master Admin layout: AdminSidebar + Header + content area
+│   │   ├── Sidebar.tsx       # Club MUI Drawer, collapsible, role-gated menu items
+│   │   ├── AdminSidebar.tsx  # Master Admin sidebar (Clubs, Users)
 │   │   └── Header.tsx        # AppBar: club name, language switcher, user menu
 │   ├── ui/                   # DataTable, ConfirmDialog, StatusChip, EmptyState, LoadingSkeleton
 │   └── form/                 # RHF + MUI field wrappers (reusable across features)
@@ -96,7 +97,14 @@ src/
 │   ├── auth/
 │   │   ├── LoginPage.tsx
 │   │   ├── RegisterPage.tsx
+│   │   ├── NoClubPage.tsx     # Waiting page for users not yet added to a club
 │   │   └── schemas.ts        # loginSchema, registerSchema (Zod)
+│   ├── admin/                 # Master Admin pages (platform management)
+│   │   ├── ClubListPage.tsx   # All clubs list
+│   │   ├── ClubDetailPage.tsx # Manage specific club
+│   │   ├── UserListPage.tsx   # All platform users
+│   │   ├── components/        # CreateClubDialog, AssignAdminDialog
+│   │   └── schemas.ts
 │   ├── dashboard/
 │   │   └── DashboardPage.tsx
 │   ├── clubs/
@@ -129,14 +137,14 @@ src/
 │   │   ├── CalendarPage.tsx   # Monthly calendar view of all trainings
 │   │   └── components/       # MonthlyCalendar, DayDetailPopover, CalendarFilters
 │   ├── statistics/
-│   │   ├── AnalyticsPage.tsx  # Club-wide analytics dashboard (ADMIN/COACH)
+│   │   ├── AnalyticsPage.tsx  # Club-wide analytics dashboard (CLUB_ADMIN/COACH)
 │   │   └── components/       # AttendanceRateCard, TrendChart, TeamComparison, PlayerStatsTable
 │   └── chat/
 │       ├── ConversationListPage.tsx
 │       ├── ConversationPage.tsx
 │       └── components/       # MessageList, SendMessageForm, ConversationItem
 ├── hooks/                    # Non-API custom hooks
-│   ├── usePermissions.ts     # Role-based permission checks (simplified from emde-fe)
+│   ├── usePermissions.ts     # Role-based permission checks (club + platform level)
 │   └── useClubId.ts          # Read clubId from auth store
 ├── i18n/                     # Internationalization
 │   ├── i18n.ts               # i18next config (Estonian default, browser detection)
@@ -145,12 +153,14 @@ src/
 ├── routes/                   # Route definitions + guards
 │   ├── router.tsx            # React Router config with lazy-loaded routes
 │   ├── ProtectedRoute.tsx    # Auth guard (redirects to /login if unauthenticated)
-│   └── RoleGuard.tsx         # Role-based route guard (shows 403 if insufficient role)
+│   ├── RoleGuard.tsx         # Club role-based route guard (shows 403 if insufficient role)
+│   └── MasterAdminGuard.tsx  # Platform admin guard (checks systemRole == MASTER_ADMIN)
 ├── stores/                   # Zustand stores
-│   ├── authStore.ts          # Auth state: user, tokens, role, clubId, login(), logout()
+│   ├── authStore.ts          # Auth state: user, tokens, clubRole, systemRole, clubId, login(), logout()
 │   └── uiStore.ts            # UI preferences: sidebarCollapsed, language
 ├── types/                    # TypeScript types/interfaces (mirror backend DTOs)
 │   ├── auth.types.ts         # UserDTO, LoginRequestDTO, AuthResponseDTO, RegisterRequestDTO
+│   ├── admin.types.ts        # AdminCreateUserDTO, AssignAdminDTO, CreateClubDTO (platform admin)
 │   ├── club.types.ts         # ClubDTO, UpdateClubDTO
 │   ├── user.types.ts         # UpdateUserDTO, AddUserToClubDTO, LinkParentDTO
 │   ├── team.types.ts         # TeamDTO, TeamMemberDTO, CreateTeamDTO, AddTeamMemberDTO
@@ -158,7 +168,7 @@ src/
 │   ├── pitch.types.ts        # PitchDTO, CreatePitchDTO
 │   ├── attendance.types.ts   # AttendanceDTO, AttendanceSummaryDTO, UpdateAttendanceDTO
 │   ├── chat.types.ts         # ConversationDTO, MessageDTO, SendMessageDTO, ParticipantDTO
-│   └── common.types.ts       # Page<T>, ApiError, ClubRole enum, AttendanceStatus, TrainingSessionStatus
+│   └── common.types.ts       # Page<T>, ApiError, ClubRole enum, SystemRole enum, AttendanceStatus, TrainingSessionStatus
 ├── utils/
 │   ├── date.ts               # dayjs config, Europe/Tallinn timezone, formatting helpers
 │   └── roles.ts              # ClubRole constants, role display names, role color mapping
@@ -254,65 +264,87 @@ export const teamSchema = (t: TFunction) =>
 export type TeamFormValues = z.infer<ReturnType<typeof teamSchema>>;
 ```
 
-### Permission System (simplified from emde-fe)
-Role-based checks via `usePermissions()` hook, matching backend's `@clubSecurity` / `@teamSecurity`:
+### Permission System
+Two-level role checks: platform level (`SystemRole`) and club level (`ClubRole`).
 
 ```typescript
 // hooks/usePermissions.ts
 export function usePermissions() {
   const { user } = useAuthStore();
-  const role = user?.role;
+  const clubRole = user?.role;        // ClubRole: CLUB_ADMIN, COACH, PLAYER, PARENT
+  const systemRole = user?.systemRole; // SystemRole: MASTER_ADMIN | null
   return {
-    role,
-    isAdmin: role === 'ADMIN',
-    isCoach: role === 'COACH',
-    isPlayer: role === 'PLAYER',
-    isParent: role === 'PARENT',
-    canManageClub: role === 'ADMIN',
-    canManagePitches: role === 'ADMIN',
-    canManageUsers: role === 'ADMIN',
-    canCreateTraining: role === 'ADMIN' || role === 'COACH',
-    canViewAttendanceSummary: role === 'ADMIN' || role === 'COACH',
-    canViewStatistics: role === 'ADMIN' || role === 'COACH',
+    clubRole,
+    systemRole,
+    isMasterAdmin: systemRole === 'MASTER_ADMIN',
+    isClubAdmin: clubRole === 'CLUB_ADMIN',
+    isCoach: clubRole === 'COACH',
+    isPlayer: clubRole === 'PLAYER',
+    isParent: clubRole === 'PARENT',
+    hasClub: !!user?.clubId,
+    canManageClub: clubRole === 'CLUB_ADMIN',
+    canManagePitches: clubRole === 'CLUB_ADMIN',
+    canManageUsers: clubRole === 'CLUB_ADMIN',
+    canCreateTraining: clubRole === 'CLUB_ADMIN' || clubRole === 'COACH',
+    canViewAttendanceSummary: clubRole === 'CLUB_ADMIN' || clubRole === 'COACH',
+    canViewStatistics: clubRole === 'CLUB_ADMIN' || clubRole === 'COACH',
   };
 }
 
 // Usage in components:
-const { isAdmin, canCreateTraining } = usePermissions();
-{isAdmin && <Button>Manage Users</Button>}
+const { isClubAdmin, canCreateTraining } = usePermissions();
+{isClubAdmin && <Button>Manage Users</Button>}
 
-// Usage in routes (RoleGuard):
-<Route element={<RoleGuard roles={['ADMIN']} />}>
+// Usage in routes:
+<Route element={<RoleGuard roles={['CLUB_ADMIN']} />}>
   <Route path="settings" element={<ClubSettingsPage />} />
+</Route>
+<Route element={<MasterAdminGuard />}>
+  <Route path="admin/*" element={<AdminLayout />} />
 </Route>
 ```
 
 ### Routing (simplified — no clubId in URL)
 Routes use flat paths. `clubId` is read from the auth store (user belongs to exactly one club).
 
+**Post-login routing logic:**
+- `systemRole == MASTER_ADMIN` → redirect to `/admin/clubs`
+- `clubId != null` → redirect to `/dashboard`
+- `clubId == null` → redirect to `/no-club` (waiting page)
+
 ```
-/login                          # Public
-/register                       # Public
+# Public
+/login                          # LoginPage
+/register                       # RegisterPage
 
-/dashboard                      # All roles — landing page
-/settings                       # ADMIN — club settings
+# Authenticated but no club
+/no-club                        # NoClubPage ("waiting to be added")
 
-/users                          # ADMIN — user management
-/users/:userId                  # ADMIN — user detail
+# Master Admin routes (inside AdminLayout)
+/admin/clubs                    # ClubListPage — all clubs
+/admin/clubs/:clubId            # ClubDetailPage — manage specific club
+/admin/users                    # Platform UserListPage — all users
+
+# Club routes (inside AppLayout — requires club membership)
+/dashboard                      # All roles — DashboardPage
+/settings                       # CLUB_ADMIN — club settings
+
+/users                          # CLUB_ADMIN — user management
+/users/:userId                  # CLUB_ADMIN — user detail
 
 /teams                          # All roles — team list
 /teams/:teamId                  # All roles — team detail + members
 
 /trainings                      # All roles — training list (list + calendar toggle)
-/trainings/create               # ADMIN/COACH — create training
+/trainings/create               # CLUB_ADMIN/COACH — create training
 /trainings/:trainingId          # All roles — training detail + attendance
 
 /calendar                       # All roles — monthly calendar view
 
 /pitches                        # All roles — pitch list
-/pitches/:pitchId/schedule      # ADMIN — pitch schedule
+/pitches/:pitchId/schedule      # CLUB_ADMIN — pitch schedule
 
-/statistics                     # ADMIN/COACH — analytics dashboard
+/statistics                     # CLUB_ADMIN/COACH — analytics dashboard
 
 /chat                           # All roles — conversation list
 /chat/:conversationId           # All roles — messages
@@ -320,12 +352,16 @@ Routes use flat paths. `clubId` is read from the auth store (user belongs to exa
 
 ### Security / RBAC
 - JWT stored in localStorage (matching coop-admin pattern)
+- JWT claims include: `userId`, `email`, `role` (ClubRole), `systemRole` (SystemRole), `clubId`
 - Axios request interceptor attaches `Authorization: Bearer <token>`
 - Axios response interceptor: 401 → clear tokens, redirect to `/login`
 - `ProtectedRoute` — checks auth state, redirects unauthenticated users
-- `RoleGuard` — checks user role against allowed roles, renders 403 if insufficient
+- `RoleGuard` — checks club role against allowed roles, renders 403 if insufficient
+- `MasterAdminGuard` — checks `systemRole == MASTER_ADMIN`, protects `/admin/*` routes
 - UI elements conditionally rendered via `usePermissions()` hook
-- Four roles: **ADMIN**, **COACH**, **PLAYER**, **PARENT** (see RBAC matrix below)
+- **Platform role:** `SystemRole.MASTER_ADMIN` (platform-scoped, separate from club roles)
+- **Club roles:** `ClubRole.CLUB_ADMIN`, `COACH`, `PLAYER`, `PARENT` (club-scoped)
+- Master Admin is seeded in DB, not created via registration
 
 ### Internationalization
 - Estonian (default) + English
@@ -337,7 +373,7 @@ Routes use flat paths. `clubId` is read from the auth store (user belongs to exa
 
 ### State Management
 - **Server state:** TanStack Query only (all API data — teams, trainings, users, etc.)
-- **Auth state:** Zustand `authStore` (user, accessToken, refreshToken, role, clubId, login/logout actions)
+- **Auth state:** Zustand `authStore` (user, accessToken, refreshToken, clubRole, systemRole, clubId, login/logout actions)
 - **UI preferences:** Zustand `uiStore` (sidebarCollapsed, language)
 - **Ephemeral UI:** React local state (`useState`) — modals, form visibility, etc.
 - **No Redux** — TanStack Query + Zustand covers all needs
@@ -355,6 +391,9 @@ Routes use flat paths. `clubId` is read from the auth store (user belongs to exa
 
 ## Layout Structure
 
+Two layout shells depending on user role:
+
+### Club Layout (AppLayout — for club members)
 ```
 ┌─────────────────────────────────────────────────┐
 │  Header (AppBar)                                │
@@ -363,21 +402,39 @@ Routes use flat paths. `clubId` is read from the auth store (user belongs to exa
 │ Sidebar  │  Main Content Area                   │
 │ (Drawer) │                                      │
 │          │  ┌────────────────────────────────┐  │
-│ Dashboard│  │  Page content (lazy-loaded)    │  │
-│ Teams    │  │                                │  │
-│ Trainings│  │                                │  │
-│ Pitches  │  │                                │  │
-│ Chat [3] │  │                                │  │
+│ Ülevaade │  │  Page content (lazy-loaded)    │  │
+│ Meeskon. │  │                                │  │
+│ Treenin. │  │                                │  │
+│ Väljakud │  │                                │  │
+│ Kalender │  │                                │  │
+│ Sõnumid  │  │                                │  │
 │ ──────── │  │                                │  │
-│ ADMIN:   │  │                                │  │
-│ Users    │  │                                │  │
-│ Settings │  │                                │  │
+│ HALDUS:  │  │  (CLUB_ADMIN/COACH section)    │  │
+│ Kasutajad│  │                                │  │
+│ Statist. │  │                                │  │
+│ Seaded   │  │                                │  │
 │          │  └────────────────────────────────┘  │
 └──────────┴──────────────────────────────────────┘
-
-Desktop: Sidebar permanently visible (240px), collapsible to 64px (icons only)
-Mobile:  Sidebar as temporary MUI Drawer (overlay), toggled via hamburger
 ```
+
+### Master Admin Layout (AdminLayout — for platform admin)
+```
+┌─────────────────────────────────────────────────┐
+│  Header (AppBar)                                │
+│  [☰ Toggle] [Platform Admin] [🌐 ET/EN] [👤]   │
+├──────────┬──────────────────────────────────────┤
+│ Admin    │  Main Content Area                   │
+│ Sidebar  │                                      │
+│          │  ┌────────────────────────────────┐  │
+│ PLATVORM │  │  Page content (lazy-loaded)    │  │
+│ Klubid   │  │                                │  │
+│ Kasutajad│  │                                │  │
+│          │  └────────────────────────────────┘  │
+└──────────┴──────────────────────────────────────┘
+```
+
+Desktop: Sidebar permanently visible (260px), collapsible to 64px (icons only)
+Mobile:  Sidebar as temporary MUI Drawer (overlay), toggled via hamburger
 
 ## Backend API
 
@@ -385,13 +442,21 @@ Backend runs at `http://localhost:8080`. All club-scoped endpoints use `/api/clu
 Frontend reads `clubId` from the auth store (returned in `/api/auth/me` response).
 
 ```
+# Platform Admin (MASTER_ADMIN only)
+GET    /api/admin/clubs                          → Page<ClubDTO>
+POST   /api/admin/clubs                          → CreateClubDTO → ClubDTO
+DELETE /api/admin/clubs/{clubId}                  → void
+GET    /api/admin/users                           → Page<UserDTO>
+POST   /api/admin/users                           → AdminCreateUserDTO → UserDTO
+POST   /api/admin/clubs/{clubId}/admins           → AssignAdminDTO → UserDTO
+
 # Auth (public)
-POST   /api/auth/register          → RegisterRequestDTO → AuthResponseDTO
+POST   /api/auth/register          → RegisterRequestDTO → UserDTO
 POST   /api/auth/login             → LoginRequestDTO → AuthResponseDTO
 POST   /api/auth/refresh           → RefreshTokenRequestDTO → AuthResponseDTO
-GET    /api/auth/me                → UserDTO (includes role, clubId)
+GET    /api/auth/me                → UserDTO (includes systemRole, role, clubId)
 
-# Club (ADMIN manages, all members view)
+# Club (CLUB_ADMIN manages, all members view)
 GET    /api/clubs/{clubId}                              → ClubDTO
 PUT    /api/clubs/{clubId}                              → UpdateClubDTO → ClubDTO
 
@@ -453,20 +518,26 @@ GET    /api/clubs/{clubId}/conversations/unread-count           → number
 
 ## RBAC Matrix
 
-| Action                           | ADMIN | COACH | PLAYER | PARENT |
-|----------------------------------|-------|-------|--------|--------|
-| Manage club settings             | Yes   | No    | No     | No     |
-| Add/remove users to club         | Yes   | No    | No     | No     |
-| Manage all teams                 | Yes   | No    | No     | No     |
-| Manage own team roster           | Yes   | Yes   | No     | No     |
-| Manage pitches                   | Yes   | No    | No     | No     |
-| Create/edit training (own team)  | Yes   | Yes   | No     | No     |
-| Cancel training                  | Yes   | Yes   | No     | No     |
-| View own team trainings          | Yes   | Yes   | Yes    | Yes    |
-| Confirm attendance (self)        | No    | No    | Yes    | No     |
-| Confirm attendance (child)       | No    | No    | No     | Yes    |
-| View attendance summary          | Yes   | Yes   | No     | No     |
-| Send/view messages               | Yes   | Yes   | Yes    | Yes    |
+| Action | Master Admin | Club Admin | Coach | Player | Parent |
+|--------|-------------|------------|-------|--------|--------|
+| Create/delete clubs | Yes | — | — | — | — |
+| Assign first Club Admin | Yes | — | — | — | — |
+| View all clubs | Yes | — | — | — | — |
+| Create user accounts | Yes | — | — | — | — |
+| Enter any club as admin | Yes | — | — | — | — |
+| Manage club settings | (via enter) | Yes | — | — | — |
+| Add/remove users to club | (via enter) | Yes | — | — | — |
+| Manage all teams | (via enter) | Yes | — | — | — |
+| Manage own team roster | — | Yes | Yes | — | — |
+| Manage pitches | (via enter) | Yes | — | — | — |
+| Create/edit training | — | Yes | Yes | — | — |
+| Cancel training | — | Yes | Yes | — | — |
+| View own team trainings | — | Yes | Yes | Yes | Yes |
+| Confirm attendance (self) | — | — | — | Yes | — |
+| Confirm attendance (child) | — | — | — | — | Yes |
+| View attendance summary | — | Yes | Yes | — | — |
+| View statistics | — | Yes | Yes | — | — |
+| Send/view messages | — | Yes | Yes | Yes | Yes |
 
 ## Commands
 
