@@ -670,7 +670,8 @@ GET    /api/clubs/{clubId}/conversations/unread-count           → number
 
 **Phase 0:** ✅ COMPLETE
 **Phase 1:** ✅ COMPLETE
-**Phase 2:** NOT STARTED — next up
+**Phase 2:** ✅ COMPLETE
+**Phase 3:** NOT STARTED — next up
 
 **Design mockups completed:**
 - `.claude/mockups/auth/01-login.html` — Login page

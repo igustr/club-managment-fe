@@ -30,11 +30,12 @@ export function Header({ title, onToggleSidebar, drawerWidth }: HeaderProps) {
   const logout = useAuthStore((s) => s.logout);
   const setLanguage = useUiStore((s) => s.setLanguage);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [langAnchorEl, setLangAnchorEl] = useState<null | HTMLElement>(null);
 
-  const toggleLanguage = () => {
-    const newLang = i18n.language === 'et' ? 'en' : 'et';
-    i18n.changeLanguage(newLang);
-    setLanguage(newLang);
+  const handleLanguageChange = (lang: string) => {
+    i18n.changeLanguage(lang);
+    setLanguage(lang);
+    setLangAnchorEl(null);
   };
 
   const handleLogout = () => {
@@ -79,7 +80,7 @@ export function Header({ title, onToggleSidebar, drawerWidth }: HeaderProps) {
 
         {/* Language switcher */}
         <Button
-          onClick={toggleLanguage}
+          onClick={(e) => setLangAnchorEl(e.currentTarget)}
           size="small"
           sx={{
             mr: 1,
@@ -89,8 +90,28 @@ export function Header({ title, onToggleSidebar, drawerWidth }: HeaderProps) {
             fontSize: 13,
           }}
         >
-          {i18n.language === 'et' ? 'EN' : 'ET'}
+          {i18n.language.toUpperCase()}
         </Button>
+        <Menu
+          anchorEl={langAnchorEl}
+          open={!!langAnchorEl}
+          onClose={() => setLangAnchorEl(null)}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+          <MenuItem
+            selected={i18n.language === 'et'}
+            onClick={() => handleLanguageChange('et')}
+          >
+            Eesti
+          </MenuItem>
+          <MenuItem
+            selected={i18n.language === 'en'}
+            onClick={() => handleLanguageChange('en')}
+          >
+            English
+          </MenuItem>
+        </Menu>
 
         {/* User menu */}
         <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} size="small">

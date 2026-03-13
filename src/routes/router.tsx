@@ -28,6 +28,21 @@ const DashboardPage = lazy(() =>
     default: m.DashboardPage,
   })),
 );
+const AdminClubListPage = lazy(() =>
+  import('@/features/admin/ClubListPage').then((m) => ({
+    default: m.ClubListPage,
+  })),
+);
+const AdminClubDetailPage = lazy(() =>
+  import('@/features/admin/ClubDetailPage').then((m) => ({
+    default: m.ClubDetailPage,
+  })),
+);
+const AdminUserListPage = lazy(() =>
+  import('@/features/admin/UserListPage').then((m) => ({
+    default: m.UserListPage,
+  })),
+);
 
 // Layout components (not lazy — always needed)
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -96,9 +111,7 @@ export const router = createBrowserRouter([
                 path: '/admin/clubs',
                 element: (
                   <SuspenseWrapper>
-                    <Box sx={{ typography: 'h5', fontWeight: 700 }}>
-                      Club List (Phase 2)
-                    </Box>
+                    <AdminClubListPage />
                   </SuspenseWrapper>
                 ),
               },
@@ -106,9 +119,7 @@ export const router = createBrowserRouter([
                 path: '/admin/clubs/:clubId',
                 element: (
                   <SuspenseWrapper>
-                    <Box sx={{ typography: 'h5', fontWeight: 700 }}>
-                      Club Detail (Phase 2)
-                    </Box>
+                    <AdminClubDetailPage />
                   </SuspenseWrapper>
                 ),
               },
@@ -116,9 +127,7 @@ export const router = createBrowserRouter([
                 path: '/admin/users',
                 element: (
                   <SuspenseWrapper>
-                    <Box sx={{ typography: 'h5', fontWeight: 700 }}>
-                      Platform Users (Phase 2)
-                    </Box>
+                    <AdminUserListPage />
                   </SuspenseWrapper>
                 ),
               },
