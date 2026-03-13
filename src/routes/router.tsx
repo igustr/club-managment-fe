@@ -68,6 +68,31 @@ const TeamDetailPage = lazy(() =>
     default: m.TeamDetailPage,
   })),
 );
+const PitchListPage = lazy(() =>
+  import('@/features/pitches/PitchListPage').then((m) => ({
+    default: m.PitchListPage,
+  })),
+);
+const PitchSchedulePage = lazy(() =>
+  import('@/features/pitches/PitchSchedulePage').then((m) => ({
+    default: m.PitchSchedulePage,
+  })),
+);
+const TrainingListPage = lazy(() =>
+  import('@/features/trainings/TrainingListPage').then((m) => ({
+    default: m.TrainingListPage,
+  })),
+);
+const TrainingDetailPage = lazy(() =>
+  import('@/features/trainings/TrainingDetailPage').then((m) => ({
+    default: m.TrainingDetailPage,
+  })),
+);
+const CalendarPage = lazy(() =>
+  import('@/features/calendar/CalendarPage').then((m) => ({
+    default: m.CalendarPage,
+  })),
+);
 
 // Layout components (not lazy — always needed)
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -229,7 +254,7 @@ export const router = createBrowserRouter([
                 path: '/trainings',
                 element: (
                   <SuspenseWrapper>
-                    <Box>Trainings (Phase 5)</Box>
+                    <TrainingListPage />
                   </SuspenseWrapper>
                 ),
               },
@@ -237,7 +262,7 @@ export const router = createBrowserRouter([
                 path: '/trainings/:trainingId',
                 element: (
                   <SuspenseWrapper>
-                    <Box>Training Detail (Phase 5)</Box>
+                    <TrainingDetailPage />
                   </SuspenseWrapper>
                 ),
               },
@@ -245,7 +270,7 @@ export const router = createBrowserRouter([
                 path: '/calendar',
                 element: (
                   <SuspenseWrapper>
-                    <Box>Calendar (Phase 5)</Box>
+                    <CalendarPage />
                   </SuspenseWrapper>
                 ),
               },
@@ -253,7 +278,7 @@ export const router = createBrowserRouter([
                 path: '/pitches',
                 element: (
                   <SuspenseWrapper>
-                    <Box>Pitches (Phase 5)</Box>
+                    <PitchListPage />
                   </SuspenseWrapper>
                 ),
               },
@@ -261,7 +286,7 @@ export const router = createBrowserRouter([
                 path: '/pitches/:pitchId/schedule',
                 element: (
                   <SuspenseWrapper>
-                    <Box>Pitch Schedule (Phase 5)</Box>
+                    <PitchSchedulePage />
                   </SuspenseWrapper>
                 ),
               },
@@ -278,7 +303,7 @@ export const router = createBrowserRouter([
                     path: '/trainings/create',
                     element: (
                       <SuspenseWrapper>
-                        <Box>Create Training (Phase 5)</Box>
+                        <TrainingListPage />
                       </SuspenseWrapper>
                     ),
                   },

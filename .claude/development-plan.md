@@ -214,38 +214,37 @@ export const useTeams = () => {
 - Can login as unaffiliated user → see "no club" waiting page
 - Token persists on refresh → logout works
 
-### Phase 2: Master Admin Dashboard
+### Phase 2: Master Admin Dashboard ✅ COMPLETE
 **Goal:** Master Admin can create/manage clubs, view all users, assign first Club Admins
 
 **API modules:**
-- [ ] Create `api/admin.api.ts`:
+- [x] Create `api/admin.api.ts`:
   - listAllClubs, createClub, deleteClub
   - listAllUsers, createUser
   - assignClubAdmin
   - + TanStack Query hooks for all
 
 **Pages:**
-- [ ] Create Club List page (`features/admin/ClubListPage.tsx`)
+- [x] Create Club List page (`features/admin/ClubListPage.tsx`)
   - Table of all clubs: name, member count, admin name, created date
   - Search/filter
   - "Create Club" button
-- [ ] Create Club Detail/Edit page (`features/admin/ClubDetailPage.tsx`)
+- [x] Create Club Detail/Edit page (`features/admin/ClubDetailPage.tsx`)
   - Club info form (name, address, contact)
   - Members table (all users in this club with roles)
-  - "Assign Admin" action
+  - "Add User" action (via AddUserDialog)
   - "Delete Club" action with confirmation
-- [ ] Create Create Club dialog/page (`features/admin/components/CreateClubDialog.tsx`)
+- [x] Create Create Club dialog/page (`features/admin/components/CreateClubDialog.tsx`)
   - Form: name (required), registrationCode, address, contactEmail, contactPhone
-- [ ] Create Platform User List page (`features/admin/UserListPage.tsx`)
+- [x] Create Platform User List page (`features/admin/UserListPage.tsx`)
   - All users across platform
-  - Filter: by club, unaffiliated only, search by name/email
+  - Filter: unaffiliated only, search by name/email
   - "Create User" button
-- [ ] Create Assign Admin dialog (`features/admin/components/AssignAdminDialog.tsx`)
-  - Search unaffiliated users
-  - Assign as CLUB_ADMIN to selected club
+- [x] Create Create User dialog (`features/admin/components/CreateUserDialog.tsx`)
+  - Create user with email, password, name, dateOfBirth, phone
 
 **Schemas:**
-- [ ] Zod schemas for create club, create user, assign admin forms
+- [x] Zod schemas for create club, create user forms
 
 **RBAC:** All pages in /admin/* require MASTER_ADMIN systemRole
 
@@ -298,40 +297,47 @@ export const useTeams = () => {
 - COACH: view own teams, manage own team roster
 - PLAYER/PARENT: view teams they belong to
 
-### Phase 5: Pitch & Training Management + Monthly Calendar
+### Phase 5: Pitch & Training Management + Monthly Calendar ✅ COMPLETE
 **Goal:** Pitch CRUD, training scheduling (single + recurring), pitch schedule view, monthly calendar view
 
 **API modules:**
-- [ ] Create `api/pitch.api.ts`: pitches CRUD, getSchedule + query hooks
-- [ ] Create `api/training.api.ts`: trainings CRUD, createRecurring, cancel + query hooks
+- [x] Create `api/pitch.api.ts`: pitches CRUD, getSchedule + query hooks
+- [x] Create `api/training.api.ts`: trainings CRUD, createRecurring, cancel + query hooks
+
+**Types:**
+- [x] Create `types/pitch.types.ts`: PitchDTO, CreatePitchDTO, UpdatePitchDTO
+- [x] Create `types/training.types.ts`: TrainingSessionDTO, CreateTrainingSessionDTO, CreateRecurringTrainingDTO, UpdateTrainingSessionDTO
 
 **Pitch pages:**
-- [ ] Create Pitch List page (CLUB_ADMIN manages, all view)
-- [ ] Create PitchForm (mode: create/edit) — name, address, surfaceType, capacity
-- [ ] Create Pitch Schedule page — calendar/timeline view of bookings for a pitch
+- [x] Create Pitch List page (CLUB_ADMIN manages, all view) — card grid with address, surface type, capacity
+- [x] Create PitchFormDialog (mode: create/edit) — name, address, surfaceType, capacity
+- [x] Create Pitch Schedule page — weekly view with day-by-day session list, week navigation
 
 **Training pages:**
-- [ ] Create Training List page with two view modes:
+- [x] Create Training List page with two view modes:
   - **List view** — filtered table of trainings with sorting/search
-  - **Monthly calendar view** — full month grid showing trainings per day (color-coded by team)
-  - CLUB_ADMIN sees all, COACH/PLAYER/PARENT see own team trainings
-  - Toggle between list/calendar via view switcher
-- [ ] Create TrainingForm — single session: date, startTime, endTime, team, pitch, notes
-- [ ] Create RecurringTrainingForm — day of week, date range, time, team, pitch, notes
-- [ ] Create Training Detail page — training info + attendance section (Phase 6)
-- [ ] Create Cancel Training action with confirmation
+  - Toggle to calendar view navigates to /calendar
+  - Filter by team, status, search by name/pitch/notes
+- [x] Create TrainingFormDialog — single session: date, startTime, endTime, team, pitch, notes
+- [x] Create RecurringTrainingDialog — day of week, date range, time, team, pitch, notes
+- [x] Create Training Detail page — training info + attendance placeholder (Phase 6)
+- [x] Create Cancel Training action with confirmation dialog
+- [x] Create Delete Training action with confirmation dialog (CLUB_ADMIN only)
+
+**Schemas:**
+- [x] Create `features/pitches/schemas.ts`: pitchSchema with i18n validation
+- [x] Create `features/trainings/schemas.ts`: trainingSchema, recurringTrainingSchema with i18n validation
 
 **Monthly Calendar (`features/calendar/`):**
-- [ ] Create MonthlyCalendar component — full month grid (MUI-based, custom built)
-  - Navigate between months (prev/next arrows + month/year selector)
+- [x] Create MonthlyCalendar component — full month grid (MUI-based, custom built)
+  - Navigate between months (prev/next arrows)
   - Each day cell shows training sessions as colored chips (color = team)
-  - Click on day → show day detail with all trainings
+  - Click on day → show day detail popover with all trainings
   - Click on training chip → navigate to training detail page
-  - Today highlighted
-  - Show pitch conflicts visually (overlapping time slots)
-- [ ] Create DayDetailPopover — shows full list of trainings for selected day
-- [ ] Create CalendarFilters — filter by team, pitch, status
-- [ ] Add `/calendar` route to sidebar navigation (visible to all roles)
+  - Today highlighted with primary color
+- [x] Create DayDetailPopover — shows full list of trainings for selected day
+- [x] Create CalendarFilters — filter by team, pitch, status
+- [x] Add `/calendar` route to sidebar navigation (visible to all roles)
 
 **RBAC:**
 - CLUB_ADMIN/COACH: create/edit/cancel trainings (for their teams)
@@ -673,18 +679,13 @@ GET    /api/clubs/{clubId}/conversations/unread-count           → number
 
 ## Current Status
 
-**Phase 0:** ✅ COMPLETE
-**Phase 1:** ✅ COMPLETE
-**Phase 2:** ✅ COMPLETE
-**Phase 3:** NOT STARTED — next up
-
-**Design mockups completed:**
-- `.claude/mockups/auth/01-login.html` — Login page
-- `.claude/mockups/auth/02-register.html` — Register page (needs update: remove club name field, add dateOfBirth + phone, update info box text)
-- `.claude/mockups/auth/03-layout-shell.html` — Club layout shell (sidebar + header)
-- `.claude/mockups/color-preview.html` — Dashboard with color palette
-
-**Design mockups needed:**
-- Master Admin dashboard (club list)
-- Master Admin club detail page
-- No-club waiting page
+**Phase 0:** ✅ COMPLETE — Project setup
+**Phase 1:** ✅ COMPLETE — Auth & Core Infrastructure
+**Phase 2:** ✅ COMPLETE — Master Admin Dashboard
+**Phase 3:** ✅ COMPLETE — Club & User Management
+**Phase 4:** ✅ COMPLETE — Team Management
+**Phase 5:** ✅ COMPLETE — Pitch & Training Management + Monthly Calendar
+**Phase 6:** NOT STARTED — Attendance (next up)
+**Phase 7:** NOT STARTED — Chat
+**Phase 8:** NOT STARTED — Player Statistics & Analytics
+**Phase 9:** NOT STARTED — Shared Components & Polish

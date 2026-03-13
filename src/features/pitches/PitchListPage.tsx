@@ -1,0 +1,184 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import {
+  Box,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  CardActions,
+  Chip,
+  CircularProgress,
+  IconButton,
+  Tooltip,
+  Grid2 as Grid,
+} from '@mui/material';
+import {
+  Add,
+  Place,
+  Grass,
+  People,
+  Edit,
+  Delete,
+  CalendarMonth,
+} from '@mui/icons-material';
+import { usePitches, useDeletePitch } from '@/api/pitch.api';
+import { PitchFormDialog } from './components/PitchFormDialog';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useClubId } from '@/hooks/useClubId';
+import type { PitchDTO } from '@/types/pitch.types';
+import toast from 'react-hot-toast';
+import { getApiErrorMessage } from '@/api/axios';
+
+export function PitchListPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const clubId = useClubId();
+  const { isClubAdmin } = usePermissions();
+
+  const { data: pitches, isLoading } = usePitches(clubId);
+  const deleteMutation = useDeletePitch(clubId!);
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [editPitch, setEditPitch] = useState<PitchDTO | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<PitchDTO | null>(null);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      toast.success(t('pitches.deleteSuccess'));
+      setDeleteTarget(null);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error));
+    }
+  };
+
+  return (
+    <Box>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
+        <Typography variant="h5" fontWeight={700}>
+          {t('pitches.title')}
+        </Typography>
+        {isClubAdmin && (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => setFormOpen(true)}
+          >
+            {t('pitches.createPitch')}
+          </Button>
+        )}
+      </Box>
+
+      {isLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
+      ) : !pitches || pitches.length === 0 ? (
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Place sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+          <Typography color="text.secondary">
+            {t('pitches.noPitches')}
+          </Typography>
+        </Box>
+      ) : (
+        <Grid container spacing={2}>
+          {pitches.map((pitch) => (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={pitch.id}>
+              <Card variant="outlined" sx={{ height: '100%' }}>
+                <CardContent>
+                  <Typography variant="h6" fontWeight={600} gutterBottom>
+                    {pitch.name}
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    {pitch.address && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Place fontSize="small" color="action" />
+                        <Typography variant="body2" color="text.secondary">
+                          {pitch.address}
+                        </Typography>
+                      </Box>
+                    )}
+                    {pitch.surfaceType && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Grass fontSize="small" color="action" />
+                        <Chip label={pitch.surfaceType} size="small" variant="outlined" />
+                      </Box>
+                    )}
+                    {pitch.capacity && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <People fontSize="small" color="action" />
+                        <Typography variant="body2" color="text.secondary">
+                          {t('pitches.capacityValue', { count: pitch.capacity })}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </CardContent>
+                {isClubAdmin && (
+                  <CardActions sx={{ justifyContent: 'flex-end', pt: 0 }}>
+                    <Tooltip title={t('pitches.schedule')}>
+                      <IconButton
+                        size="small"
+                        onClick={() => navigate(`/pitches/${pitch.id}/schedule`)}
+                      >
+                        <CalendarMonth fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={t('common.edit')}>
+                      <IconButton
+                        size="small"
+                        onClick={() => setEditPitch(pitch)}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={t('common.delete')}>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => setDeleteTarget(pitch)}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </CardActions>
+                )}
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
+
+      <PitchFormDialog
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+      />
+
+      <PitchFormDialog
+        open={!!editPitch}
+        onClose={() => setEditPitch(null)}
+        pitch={editPitch}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title={t('pitches.deletePitch')}
+        message={t('pitches.deleteConfirm', { name: deleteTarget?.name })}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+        loading={deleteMutation.isPending}
+      />
+    </Box>
+  );
+}
