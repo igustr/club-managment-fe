@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register — Club Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #F1F5F9;
+    color: #1E293B;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .register-wrapper {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  /* === BRAND === */
+  .brand {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .brand-icon {
+    width: 56px;
+    height: 56px;
+    background: #0D9488;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    margin-bottom: 16px;
+  }
+  .brand-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 4px;
+  }
+  .brand-subtitle {
+    font-size: 14px;
+    color: #64748B;
+  }
+
+  /* === CARD === */
+  .card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    border: 1px solid #E2E8F0;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 4px;
+  }
+  .card-description {
+    font-size: 14px;
+    color: #64748B;
+    margin-bottom: 24px;
+  }
+
+  /* === FORM === */
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+  }
+  .form-label .required {
+    color: #EF4444;
+    margin-left: 2px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1E293B;
+    background: #FFFFFF;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+  }
+  .form-input:focus {
+    border-color: #0D9488;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+  }
+  .form-input::placeholder {
+    color: #94A3B8;
+  }
+  .form-input.error {
+    border-color: #EF4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  }
+  .form-error {
+    font-size: 12px;
+    color: #EF4444;
+    margin-top: 4px;
+  }
+  .form-hint {
+    font-size: 12px;
+    color: #94A3B8;
+    margin-top: 4px;
+  }
+
+  /* === NAME ROW === */
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* === PASSWORD FIELD === */
+  .password-wrapper {
+    position: relative;
+  }
+  .password-wrapper .form-input {
+    padding-right: 44px;
+  }
+  .password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94A3B8;
+    font-size: 16px;
+    padding: 2px;
+  }
+  .password-toggle:hover {
+    color: #64748B;
+  }
+
+  /* === PASSWORD STRENGTH === */
+  .strength-bar {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .strength-segment {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: #E2E8F0;
+  }
+  .strength-segment.active.weak { background: #EF4444; }
+  .strength-segment.active.medium { background: #F59E0B; }
+  .strength-segment.active.strong { background: #22C55E; }
+  .strength-text {
+    font-size: 11px;
+    margin-top: 4px;
+    color: #94A3B8;
+  }
+  .strength-text.weak { color: #EF4444; }
+  .strength-text.medium { color: #F59E0B; }
+  .strength-text.strong { color: #22C55E; }
+
+  /* === ALERT === */
+  .alert-error {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #991B1B;
+  }
+  .alert-error .alert-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* === BUTTONS === */
+  .btn-primary {
+    width: 100%;
+    padding: 12px 20px;
+    background: #0D9488;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-primary:hover {
+    background: #0F766E;
+  }
+  .btn-primary:disabled {
+    background: #94A3B8;
+    cursor: not-allowed;
+  }
+
+  /* === FOOTER === */
+  .card-footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #F1F5F9;
+  }
+  .card-footer p {
+    font-size: 14px;
+    color: #64748B;
+  }
+  .card-footer a {
+    color: #0D9488;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .card-footer a:hover {
+    text-decoration: underline;
+  }
+
+  /* === LANG === */
+  .lang-switch {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+  }
+  .lang-btn {
+    padding: 6px 12px;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    background: white;
+    color: #475569;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .lang-btn:hover {
+    border-color: #0D9488;
+    color: #0D9488;
+  }
+
+  /* === INFO BOX === */
+  .info-box {
+    background: #F0FDFA;
+    border: 1px solid #CCFBF1;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: #0F766E;
+  }
+  .info-box .info-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Language switcher -->
+<div class="lang-switch">
+  <button class="lang-btn">ET / EN</button>
+</div>
+
+<div class="register-wrapper">
+  <!-- Brand -->
+  <div class="brand">
+    <div class="brand-icon">&#9917;</div>
+    <div class="brand-title">Club Management</div>
+    <div class="brand-subtitle">Estonian football club management</div>
+  </div>
+
+  <!-- Register Card -->
+  <div class="card">
+    <div class="card-title">Registreeru</div>
+    <div class="card-description">Loo uus konto ja klubi</div>
+
+    <!-- Info box -->
+    <div class="info-box">
+      <span class="info-icon">&#9432;</span>
+      <span>Registreerides luuakse automaatselt uus klubi ja sind m&auml;&auml;ratakse selle administraatoriks.</span>
+    </div>
+
+    <form>
+      <!-- First name + Last name -->
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Eesnimi <span class="required">*</span></label>
+          <input type="text" class="form-input" placeholder="Igor" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Perekonnanimi <span class="required">*</span></label>
+          <input type="text" class="form-input" placeholder="Ustritski" />
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label class="form-label">E-post <span class="required">*</span></label>
+        <input type="email" class="form-input" placeholder="nimi@example.com" />
+      </div>
+
+      <!-- Club name -->
+      <div class="form-group">
+        <label class="form-label">Klubi nimi <span class="required">*</span></label>
+        <input type="text" class="form-input" placeholder="FC Tallinn" />
+        <div class="form-hint">Sinu klubi nimi, mida n&auml;evad k&otilde;ik liikmed</div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label class="form-label">Parool <span class="required">*</span></label>
+        <div class="password-wrapper">
+          <input type="password" class="form-input" placeholder="V&auml;hemalt 8 t&auml;hem&auml;rki" />
+          <button type="button" class="password-toggle" title="Show password">&#128065;</button>
+        </div>
+        <div class="strength-bar">
+          <div class="strength-segment active medium"></div>
+          <div class="strength-segment active medium"></div>
+          <div class="strength-segment"></div>
+          <div class="strength-segment"></div>
+        </div>
+        <div class="strength-text medium">Keskmine</div>
+      </div>
+
+      <!-- Confirm password -->
+      <div class="form-group">
+        <label class="form-label">Kinnita parool <span class="required">*</span></label>
+        <div class="password-wrapper">
+          <input type="password" class="form-input" placeholder="Sisesta parool uuesti" />
+          <button type="button" class="password-toggle" title="Show password">&#128065;</button>
+        </div>
+      </div>
+
+      <!-- Validation error example -->
+      <!--
+      <div class="form-group">
+        <label class="form-label">E-post <span class="required">*</span></label>
+        <input type="email" class="form-input error" value="invalid-email" />
+        <div class="form-error">Sisesta kehtiv e-posti aadress</div>
+      </div>
+      -->
+
+      <!-- Submit -->
+      <button type="submit" class="btn-primary">Registreeru</button>
+    </form>
+
+    <!-- Login link -->
+    <div class="card-footer">
+      <p>On juba konto? <a href="01-login.html">Logi sisse</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- DESIGN NOTES (for developers)              -->
+<!-- ========================================== -->
+<!--
+  REGISTER PAGE DESIGN SPEC
+  =========================
+
+  Layout:
+  - Same centered card layout as login (max-width 420px)
+  - Language switcher in top-right corner
+  - Brand section + white card
+
+  Form Fields:
+  - First name (required, min 1 char)
+  - Last name (required, min 1 char)
+  - Email (required, email format)
+  - Club name (required, min 2 chars) — creates new club on register
+  - Password (required, min 8 chars, show/hide toggle)
+  - Confirm password (required, must match password)
+
+  Info Box:
+  - Teal info box explaining that registration creates a new club
+    and assigns the user as admin
+  - This helps set expectations for the user flow
+
+  Password Strength Indicator:
+  - 4 segments, colored by strength: red (weak), amber (medium), green (strong)
+  - Text label below: "Nõrk" / "Keskmine" / "Tugev"
+
+  States:
+  - Default: empty form with info box
+  - Field error: red border + error text below specific field
+  - Server error: red alert banner (e.g., "email already in use")
+  - Loading: button loading state, inputs disabled
+  - Success: redirect to /dashboard (auto-login after register)
+
+  Interactions:
+  - Submit: POST /api/auth/register { firstName, lastName, email, clubName, password }
+  - Response: AuthResponseDTO (same as login — tokens + user)
+  - On success: store tokens, redirect to /dashboard
+  - On 409 (conflict): show "E-posti aadress on juba kasutusel" error
+  - "Logi sisse" link navigates to /login
+
+  MUI Components:
+  - TextField (all fields), with Controller wrapper from RHF
+  - Button (submit)
+  - Alert (info box + error state)
+  - IconButton (password toggle)
+  - LinearProgress or custom component for password strength
+
+  i18n keys:
+  - auth.register.title = "Registreeru" / "Register"
+  - auth.register.description = "Loo uus konto ja klubi" / "Create a new account and club"
+  - auth.register.info = "Registreerides luuakse automaatselt uus klubi..." / "Registration will automatically create a new club..."
+  - auth.register.firstName = "Eesnimi" / "First name"
+  - auth.register.lastName = "Perekonnanimi" / "Last name"
+  - auth.register.email = "E-post" / "Email"
+  - auth.register.clubName = "Klubi nimi" / "Club name"
+  - auth.register.clubNameHint = "Sinu klubi nimi, mida näevad kõik liikmed" / "Your club name, visible to all members"
+  - auth.register.password = "Parool" / "Password"
+  - auth.register.passwordPlaceholder = "Vähemalt 8 tähemärki" / "At least 8 characters"
+  - auth.register.confirmPassword = "Kinnita parool" / "Confirm password"
+  - auth.register.submit = "Registreeru" / "Register"
+  - auth.register.hasAccount = "On juba konto?" / "Already have an account?"
+  - auth.register.login = "Logi sisse" / "Sign in"
+  - auth.register.passwordStrength.weak = "Nõrk" / "Weak"
+  - auth.register.passwordStrength.medium = "Keskmine" / "Medium"
+  - auth.register.passwordStrength.strong = "Tugev" / "Strong"
+  - auth.register.emailInUse = "E-posti aadress on juba kasutusel" / "Email is already in use"
+
+  Zod Schema:
+  - firstName: z.string().min(1, t('validation.required'))
+  - lastName: z.string().min(1, t('validation.required'))
+  - email: z.string().email(t('validation.email'))
+  - clubName: z.string().min(2, t('validation.minLength', { min: 2 }))
+  - password: z.string().min(8, t('validation.minLength', { min: 8 }))
+  - confirmPassword: z.string() + .refine(match password, t('validation.passwordMismatch'))
+
+  Colors: Same as login (Modern Navy palette)
+-->
+
+</body>
+</html>

@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App Layout Shell — Club Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #F1F5F9; color: #1E293B; }
+
+  /* === LAYOUT === */
+  .app { display: flex; height: 100vh; }
+
+  /* === SIDEBAR (EXPANDED — 260px) === */
+  .sidebar {
+    width: 260px;
+    background: #0F172A;
+    color: #94A3B8;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width 0.2s ease;
+    overflow: hidden;
+  }
+
+  /* === SIDEBAR HEADER === */
+  .sidebar-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid #1E293B;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 65px;
+  }
+  .club-icon {
+    width: 36px;
+    height: 36px;
+    background: #0D9488;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: white;
+    flex-shrink: 0;
+  }
+  .club-name {
+    color: #FFFFFF;
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  /* === SIDEBAR NAV === */
+  .sidebar-nav {
+    padding: 12px 10px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #475569;
+    padding: 16px 12px 8px;
+    white-space: nowrap;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: #94A3B8;
+    text-decoration: none;
+    margin-bottom: 2px;
+    white-space: nowrap;
+  }
+  .nav-item:hover {
+    background: #1E293B;
+    color: #E2E8F0;
+  }
+  .nav-item.active {
+    background: rgba(13, 148, 136, 0.15);
+    color: #FFFFFF;
+  }
+  .nav-item.active .nav-icon {
+    color: #0D9488;
+  }
+  .nav-icon {
+    font-size: 18px;
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .nav-badge {
+    margin-left: auto;
+    background: #0D9488;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+  }
+
+  /* === SIDEBAR FOOTER (USER) === */
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #1E293B;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .avatar {
+    width: 34px;
+    height: 34px;
+    background: #4F46E5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { color: #E2E8F0; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { color: #64748B; font-size: 11px; }
+
+  /* === MAIN AREA === */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* === HEADER === */
+  .header {
+    background: #FFFFFF;
+    border-bottom: 1px solid #E2E8F0;
+    padding: 0 28px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .hamburger {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid #E2E8F0;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    color: #475569;
+    transition: all 0.15s;
+  }
+  .hamburger:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+  }
+  .header-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0F172A;
+  }
+  .header-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .lang-switch {
+    padding: 6px 12px;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    background: white;
+    color: #475569;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .lang-switch:hover {
+    border-color: #0D9488;
+    color: #0D9488;
+  }
+
+  /* User menu button */
+  .user-menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px 4px 4px;
+    border-radius: 8px;
+    border: 1px solid #E2E8F0;
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .user-menu-btn:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+  }
+  .user-menu-avatar {
+    width: 30px;
+    height: 30px;
+    background: #4F46E5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .user-menu-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+  }
+  .user-menu-arrow {
+    font-size: 10px;
+    color: #94A3B8;
+  }
+
+  /* === USER DROPDOWN MENU === */
+  .dropdown-menu {
+    position: absolute;
+    top: 54px;
+    right: 28px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    padding: 4px;
+    z-index: 100;
+    display: none; /* toggle with JS in real app */
+  }
+  .dropdown-menu.show { display: block; }
+  .dropdown-header {
+    padding: 12px 12px 8px;
+    border-bottom: 1px solid #F1F5F9;
+    margin-bottom: 4px;
+  }
+  .dropdown-header .name { font-size: 14px; font-weight: 600; color: #0F172A; }
+  .dropdown-header .email { font-size: 12px; color: #64748B; }
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #475569;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .dropdown-item:hover { background: #F1F5F9; }
+  .dropdown-item.danger { color: #EF4444; }
+  .dropdown-item.danger:hover { background: #FEF2F2; }
+  .dropdown-divider {
+    height: 1px;
+    background: #F1F5F9;
+    margin: 4px 0;
+  }
+
+  /* === CONTENT === */
+  .content {
+    flex: 1;
+    padding: 28px;
+    overflow-y: auto;
+  }
+
+  /* === PLACEHOLDER CONTENT === */
+  .placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #94A3B8;
+  }
+  .placeholder-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  .placeholder-text {
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .placeholder-hint {
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  /* ======================================== */
+  /* COLLAPSED SIDEBAR (64px)                 */
+  /* ======================================== */
+  .sidebar.collapsed {
+    width: 64px;
+  }
+  .sidebar.collapsed .club-name,
+  .sidebar.collapsed .section-label,
+  .sidebar.collapsed .nav-item span:not(.nav-icon),
+  .sidebar.collapsed .nav-badge,
+  .sidebar.collapsed .user-info {
+    display: none;
+  }
+  .sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 20px 14px 16px;
+  }
+  .sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 10px;
+  }
+  .sidebar.collapsed .sidebar-footer {
+    justify-content: center;
+    padding: 16px 14px;
+  }
+
+  /* ======================================== */
+  /* ROLE VARIATIONS                          */
+  /* ======================================== */
+  .role-section { /* Admin-only section */ }
+  .role-hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============================= -->
+  <!-- SIDEBAR (EXPANDED — ADMIN)    -->
+  <!-- ============================= -->
+  <div class="sidebar" id="sidebar">
+    <!-- Sidebar Header -->
+    <div class="sidebar-header">
+      <div class="club-icon">&#9917;</div>
+      <div class="club-name">FC Tallinn</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <!-- Main Section -->
+      <div class="section-label">P&otilde;hileht</div>
+      <a class="nav-item active" href="#">
+        <span class="nav-icon">&#128202;</span>
+        <span>&#220;levaade</span>
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">&#128101;</span>
+        <span>Meeskonnad</span>
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">&#127947;</span>
+        <span>Treeningud</span>
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">&#127967;</span>
+        <span>Väljakud</span>
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">&#128197;</span>
+        <span>Kalender</span>
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">&#128172;</span>
+        <span>S&otilde;numid</span>
+        <span class="nav-badge">3</span>
+      </a>
+
+      <!-- Admin Section (role-gated) -->
+      <div class="section-label role-section">Haldus</div>
+      <a class="nav-item role-section" href="#">
+        <span class="nav-icon">&#128100;</span>
+        <span>Kasutajad</span>
+      </a>
+      <a class="nav-item role-section" href="#">
+        <span class="nav-icon">&#128200;</span>
+        <span>Statistika</span>
+      </a>
+      <a class="nav-item role-section" href="#">
+        <span class="nav-icon">&#9881;</span>
+        <span>Seaded</span>
+      </a>
+    </nav>
+
+    <!-- User Footer -->
+    <div class="sidebar-footer">
+      <div class="avatar">IU</div>
+      <div class="user-info">
+        <div class="user-name">Igor Ustritski</div>
+        <div class="user-role">Administraator</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================= -->
+  <!-- MAIN CONTENT AREA             -->
+  <!-- ============================= -->
+  <div class="main">
+    <!-- Header -->
+    <div class="header" style="position: relative;">
+      <div class="header-left">
+        <button class="hamburger" onclick="toggleSidebar()" title="Toggle sidebar">&#9776;</button>
+        <div class="header-title">&#220;levaade</div>
+      </div>
+      <div class="header-right">
+        <button class="lang-switch" onclick="toggleLang(this)">ET</button>
+        <button class="user-menu-btn" onclick="toggleDropdown()">
+          <div class="user-menu-avatar">IU</div>
+          <span class="user-menu-name">Igor</span>
+          <span class="user-menu-arrow">&#9660;</span>
+        </button>
+      </div>
+
+      <!-- Dropdown Menu -->
+      <div class="dropdown-menu" id="dropdown">
+        <div class="dropdown-header">
+          <div class="name">Igor Ustritski</div>
+          <div class="email">igor@fctallinn.ee</div>
+        </div>
+        <div class="dropdown-item">&#128100; &nbsp;Profiil</div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item danger">&#128682; &nbsp;Logi välja</div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content">
+      <div class="placeholder">
+        <div class="placeholder-icon">&#128202;</div>
+        <div class="placeholder-text">Dashboard content loads here</div>
+        <div class="placeholder-hint">Each page is lazy-loaded into this area</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Interactive demos -->
+<script>
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+  }
+  function toggleDropdown() {
+    document.getElementById('dropdown').classList.toggle('show');
+  }
+  function toggleLang(btn) {
+    btn.textContent = btn.textContent === 'ET' ? 'EN' : 'ET';
+  }
+  // Close dropdown on outside click
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.user-menu-btn') && !e.target.closest('.dropdown-menu')) {
+      document.getElementById('dropdown').classList.remove('show');
+    }
+  });
+</script>
+
+<!-- ========================================== -->
+<!-- DESIGN NOTES (for developers)              -->
+<!-- ========================================== -->
+<!--
+  APP LAYOUT SHELL DESIGN SPEC
+  ============================
+
+  Structure:
+  ┌─────────────────────────────────────────────────┐
+  │  Header (64px, white, border-bottom)            │
+  │  [☰ Toggle] [Page Title]    [ET/EN] [👤 User▼] │
+  ├──────────┬──────────────────────────────────────┤
+  │ Sidebar  │  Main Content Area                   │
+  │ (260px)  │  (scrollable, padding 28px)          │
+  │          │                                      │
+  │ Dark     │  Lazy-loaded page content             │
+  │ #0F172A  │  renders here via <Outlet />          │
+  │          │                                      │
+  └──────────┴──────────────────────────────────────┘
+
+  SIDEBAR (MUI Drawer):
+  - Desktop: permanent variant, 260px expanded / 64px collapsed
+  - Mobile (<768px): temporary variant (overlay), toggled via hamburger
+  - Background: #0F172A (dark navy)
+  - Collapse toggle: hamburger button in header
+
+  Sidebar Sections:
+  1. Header: Club icon + name (from API /clubs/{clubId})
+  2. Main nav:
+     - Ülevaade (Dashboard) — all roles
+     - Meeskonnad (Teams) — all roles
+     - Treeningud (Trainings) — all roles
+     - Väljakud (Pitches) — all roles
+     - Kalender (Calendar) — all roles
+     - Sõnumid (Chat) — all roles, with unread badge
+  3. Admin nav (role-gated: ADMIN only):
+     - Kasutajad (Users)
+     - Statistika (Statistics) — ADMIN + COACH
+     - Seaded (Settings)
+  4. Footer: user avatar + name + role
+
+  Role-based menu visibility:
+  - ADMIN: sees all items
+  - COACH: sees main + Statistics (no Users/Settings)
+  - PLAYER: sees main only (no Admin section)
+  - PARENT: sees main only (no Admin section)
+
+  Collapsed state (64px):
+  - Only icons visible, labels hidden
+  - Tooltips on hover (MUI Tooltip)
+  - Section labels hidden
+  - User: only avatar, no name/role
+
+  HEADER (MUI AppBar):
+  - White background, 64px height
+  - Left: hamburger toggle + page title (dynamic)
+  - Right: language switcher (ET/EN) + user menu button
+  - User menu dropdown: profile link, logout
+
+  User Menu Dropdown (MUI Menu):
+  - User name + email
+  - "Profiil" (Profile) link
+  - Divider
+  - "Logi välja" (Logout) — red, calls authStore.logout()
+
+  Language Switcher:
+  - Simple button showing current lang (ET / EN)
+  - Click toggles between Estonian and English
+  - Persisted in uiStore (Zustand)
+  - Triggers i18next.changeLanguage()
+
+  CONTENT AREA:
+  - Flex-grow, scrollable
+  - 28px padding
+  - React Router <Outlet /> renders here
+  - Pages are lazy-loaded (React.lazy + Suspense)
+
+  MUI Components:
+  - Drawer (sidebar — permanent on desktop, temporary on mobile)
+  - AppBar + Toolbar (header)
+  - IconButton (hamburger, language)
+  - Menu + MenuItem (user dropdown)
+  - Tooltip (collapsed sidebar icons)
+  - List + ListItem + ListItemIcon + ListItemText (nav items)
+  - Badge (unread messages count)
+  - Divider (between nav sections)
+  - Avatar (user)
+
+  Responsive breakpoints:
+  - >= 768px: Sidebar permanent (MUI Drawer variant="permanent")
+  - < 768px: Sidebar temporary (MUI Drawer variant="temporary")
+  - Hamburger always visible (toggles collapsed on desktop, open/close on mobile)
+
+  i18n keys for nav:
+  - nav.dashboard = "Ülevaade" / "Dashboard"
+  - nav.teams = "Meeskonnad" / "Teams"
+  - nav.trainings = "Treeningud" / "Trainings"
+  - nav.pitches = "Väljakud" / "Pitches"
+  - nav.calendar = "Kalender" / "Calendar"
+  - nav.chat = "Sõnumid" / "Messages"
+  - nav.users = "Kasutajad" / "Users"
+  - nav.statistics = "Statistika" / "Statistics"
+  - nav.settings = "Seaded" / "Settings"
+  - nav.sectionMain = "Põhileht" / "Main"
+  - nav.sectionAdmin = "Haldus" / "Administration"
+  - header.logout = "Logi välja" / "Sign out"
+  - header.profile = "Profiil" / "Profile"
+
+  Colors (from theme.ts):
+  - Sidebar bg: #0F172A
+  - Sidebar text: #94A3B8
+  - Sidebar text active: #FFFFFF
+  - Sidebar hover bg: #1E293B
+  - Active item bg: rgba(13, 148, 136, 0.15)
+  - Active icon color: #0D9488
+  - Header bg: #FFFFFF
+  - Header border: #E2E8F0
+  - Content bg: #F1F5F9
+-->
+
+</body>
+</html>

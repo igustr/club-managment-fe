@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Club Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #F1F5F9;
+    color: #1E293B;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  /* === LOGIN CONTAINER === */
+  .login-wrapper {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  /* === LOGO / BRAND === */
+  .brand {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .brand-icon {
+    width: 56px;
+    height: 56px;
+    background: #0D9488;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    margin-bottom: 16px;
+  }
+  .brand-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 4px;
+  }
+  .brand-subtitle {
+    font-size: 14px;
+    color: #64748B;
+  }
+
+  /* === CARD === */
+  .card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    border: 1px solid #E2E8F0;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 4px;
+  }
+  .card-description {
+    font-size: 14px;
+    color: #64748B;
+    margin-bottom: 24px;
+  }
+
+  /* === FORM === */
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1E293B;
+    background: #FFFFFF;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+  }
+  .form-input:focus {
+    border-color: #0D9488;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+  }
+  .form-input::placeholder {
+    color: #94A3B8;
+  }
+  .form-input.error {
+    border-color: #EF4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  }
+  .form-error {
+    font-size: 12px;
+    color: #EF4444;
+    margin-top: 4px;
+  }
+  .form-hint {
+    font-size: 12px;
+    color: #94A3B8;
+    margin-top: 4px;
+  }
+
+  /* === PASSWORD FIELD === */
+  .password-wrapper {
+    position: relative;
+  }
+  .password-wrapper .form-input {
+    padding-right: 44px;
+  }
+  .password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94A3B8;
+    font-size: 16px;
+    padding: 2px;
+  }
+  .password-toggle:hover {
+    color: #64748B;
+  }
+
+  /* === FORGOT PASSWORD LINK === */
+  .form-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  /* === ERROR ALERT === */
+  .alert-error {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #991B1B;
+  }
+  .alert-error .alert-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* === BUTTONS === */
+  .btn-primary {
+    width: 100%;
+    padding: 12px 20px;
+    background: #0D9488;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-primary:hover {
+    background: #0F766E;
+  }
+  .btn-primary:disabled {
+    background: #94A3B8;
+    cursor: not-allowed;
+  }
+  .btn-primary.loading {
+    background: #0F766E;
+    pointer-events: none;
+    position: relative;
+  }
+
+  /* === FOOTER LINK === */
+  .card-footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #F1F5F9;
+  }
+  .card-footer p {
+    font-size: 14px;
+    color: #64748B;
+  }
+  .card-footer a {
+    color: #0D9488;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .card-footer a:hover {
+    text-decoration: underline;
+  }
+
+  /* === LANGUAGE SWITCHER === */
+  .lang-switch {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+  }
+  .lang-btn {
+    padding: 6px 12px;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    background: white;
+    color: #475569;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .lang-btn:hover {
+    border-color: #0D9488;
+    color: #0D9488;
+  }
+</style>
+</head>
+<body>
+
+<!-- Language switcher -->
+<div class="lang-switch">
+  <button class="lang-btn">ET / EN</button>
+</div>
+
+<div class="login-wrapper">
+  <!-- Brand -->
+  <div class="brand">
+    <div class="brand-icon">&#9917;</div>
+    <div class="brand-title">Club Management</div>
+    <div class="brand-subtitle">Estonian football club management</div>
+  </div>
+
+  <!-- Login Card -->
+  <div class="card">
+    <div class="card-title">Logi sisse</div>
+    <div class="card-description">Sisesta oma e-posti aadress ja parool</div>
+
+    <!-- Error alert (shown on failed login) -->
+    <!--
+    <div class="alert-error">
+      <span class="alert-icon">&#9888;</span>
+      <span>Vale e-posti aadress v&otilde;i parool. Palun proovi uuesti.</span>
+    </div>
+    -->
+
+    <form>
+      <!-- Email -->
+      <div class="form-group">
+        <label class="form-label">E-post</label>
+        <input type="email" class="form-input" placeholder="nimi@example.com" />
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <div class="form-row">
+          <label class="form-label" style="margin-bottom: 0;">Parool</label>
+        </div>
+        <div class="password-wrapper">
+          <input type="password" class="form-input" placeholder="Sisesta parool" />
+          <button type="button" class="password-toggle" title="Show password">&#128065;</button>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn-primary">Logi sisse</button>
+    </form>
+
+    <!-- Register link -->
+    <div class="card-footer">
+      <p>Pole kontot? <a href="02-register.html">Registreeru</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- DESIGN NOTES (for developers)              -->
+<!-- ========================================== -->
+<!--
+  LOGIN PAGE DESIGN SPEC
+  ======================
+
+  Layout:
+  - Centered card (max-width 420px) on light gray background (#F1F5F9)
+  - Language switcher (ET/EN) in top-right corner
+  - Brand section: teal icon + app name + subtitle
+  - White card with login form
+
+  Form Fields:
+  - Email (text input, required, email validation)
+  - Password (password input with show/hide toggle, required, min 8 chars)
+
+  States:
+  - Default: empty form
+  - Error: red alert banner above form (wrong email/password)
+  - Field error: red border + error text below field (Zod validation)
+  - Loading: button shows loading state, inputs disabled
+  - Success: redirect to /dashboard
+
+  Interactions:
+  - Submit: POST /api/auth/login { email, password }
+  - On 401: show error alert
+  - On success: store JWT tokens in authStore, redirect to /dashboard
+  - Language toggle: switches between Estonian (default) and English
+  - "Registreeru" link navigates to /register
+
+  MUI Components to use:
+  - TextField (email + password)
+  - Button (submit)
+  - Alert (error state)
+  - IconButton (password toggle - Visibility/VisibilityOff)
+  - Select or ToggleButtonGroup (language)
+
+  i18n keys:
+  - auth.login.title = "Logi sisse" / "Sign in"
+  - auth.login.description = "Sisesta oma e-posti aadress ja parool" / "Enter your email and password"
+  - auth.login.email = "E-post" / "Email"
+  - auth.login.emailPlaceholder = "nimi@example.com" / "name@example.com"
+  - auth.login.password = "Parool" / "Password"
+  - auth.login.passwordPlaceholder = "Sisesta parool" / "Enter password"
+  - auth.login.submit = "Logi sisse" / "Sign in"
+  - auth.login.noAccount = "Pole kontot?" / "Don't have an account?"
+  - auth.login.register = "Registreeru" / "Register"
+  - auth.login.error = "Vale e-posti aadress või parool" / "Invalid email or password"
+
+  Colors:
+  - Primary: #0D9488 (teal)
+  - Primary hover: #0F766E
+  - Error: #EF4444
+  - Background: #F1F5F9
+  - Card: #FFFFFF
+  - Text primary: #0F172A / #1E293B
+  - Text secondary: #64748B
+  - Border: #E2E8F0
+-->
+
+</body>
+</html>

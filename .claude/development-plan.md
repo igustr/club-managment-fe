@@ -27,12 +27,78 @@
 
 ---
 
+## User Roles & Registration Flow
+
+### Role Hierarchy
+
+| Level | Role | Backend Enum | Description |
+|-------|------|-------------|-------------|
+| Platform | Master Admin | `SystemRole.MASTER_ADMIN` | Platform owner — creates clubs, manages all |
+| Club | Club Admin | `ClubRole.CLUB_ADMIN` | Full club management |
+| Club | Coach | `ClubRole.COACH` | Team/training management |
+| Club | Player | `ClubRole.PLAYER` | View trainings, confirm attendance |
+| Club | Parent | `ClubRole.PARENT` | View child's trainings, confirm attendance |
+
+### Registration & Onboarding Flow
+
+```
+1. SELF-REGISTRATION (open to all)
+   User registers → account created with NO club, NO role
+   User logs in → sees "waiting" page ("Contact your club admin to be added")
+
+2. MASTER ADMIN creates clubs
+   Master Admin logs in → platform dashboard
+   Creates club (name, contact info)
+   Assigns first Club Admin (searches registered users → assigns CLUB_ADMIN role)
+
+3. CLUB ADMIN adds members
+   Club Admin searches registered users (unaffiliated)
+   Adds them to club with role: CLUB_ADMIN / COACH / PLAYER / PARENT
+   Users can now log in and see club content
+
+4. MASTER ADMIN can also:
+   - Create user accounts (for people who haven't self-registered)
+   - Enter any club and manage it like a Club Admin
+   - View all clubs and all users across the platform
+   - Delete clubs (users become unaffiliated)
+```
+
+### Post-Login Routing Logic
+
+```
+Login → /api/auth/me → check user state:
+  ├── systemRole == MASTER_ADMIN → redirect to /admin/clubs (platform dashboard)
+  ├── clubId != null → redirect to /dashboard (club dashboard)
+  └── clubId == null → redirect to /no-club (waiting page)
+```
+
+---
+
 ## Backend Changes Needed
 
-The frontend uses simplified routes (no `clubId` in URL). The backend currently requires `clubId` in every URL path. Two options:
+### Already in backend
+- `ClubRole` enum: `CLUB_ADMIN`, `COACH`, `PLAYER`, `PARENT`
+- User registration creates unaffiliated user (no club, no role)
+- Club Admin adds users to club via `POST /api/clubs/{clubId}/users`
+- JWT tokens with role, clubId, email claims
 
-### Option A: Frontend reads clubId from auth store (RECOMMENDED — no backend changes)
-The `/api/auth/me` endpoint already returns `UserDTO` with `clubId`. The frontend stores this in Zustand and passes it to every API call. **No backend changes needed.** The API modules in the frontend will inject `clubId` automatically:
+### Backend additions for Master Admin (separate task)
+- `SystemRole` enum: `MASTER_ADMIN`
+- `system_role` field on User entity
+- `systemRole` claim in JWT token
+- `AdminController` (`/api/admin/*`):
+  - `GET /api/admin/clubs` — list all clubs
+  - `POST /api/admin/clubs` — create club
+  - `DELETE /api/admin/clubs/{clubId}` — delete club
+  - `GET /api/admin/users` — list all users
+  - `POST /api/admin/users` — create user account
+  - `POST /api/admin/clubs/{clubId}/admins` — assign first Club Admin
+- `ClubMembershipChecker` updated: Master Admin passes all club security checks
+- `SecurityConfiguration`: `/api/admin/**` requires ROLE_MASTER_ADMIN
+- Master Admin seeded in DB (not created via registration)
+
+### Frontend reads clubId from auth store (no clubId in URL)
+The `/api/auth/me` endpoint returns `UserDTO` with `clubId`. The frontend stores this in Zustand and passes it to every API call.
 
 ```typescript
 // hooks/useClubId.ts
@@ -45,42 +111,30 @@ export const useTeams = () => {
 };
 ```
 
-### Option B: Backend adds club-implicit endpoints (alternative)
-Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` instead of `GET /api/clubs/{clubId}/teams`. This is cleaner long-term but requires backend changes. **Defer to later if needed.**
-
 ---
 
 ## Development Phases
 
-### Phase 0: Project Setup
+### Phase 0: Project Setup ✅ COMPLETE
 **Goal:** Replace Next.js scaffold with Vite + React + TypeScript, install all dependencies, configure tooling
 
-- [ ] Remove Next.js files (app/, next.config.ts, next-env.d.ts, postcss.config.mjs, eslint.config.mjs)
-- [ ] Init Vite + React + TypeScript (`npm create vite@latest . -- --template react-ts`)
-- [ ] Install core dependencies:
-  - `@mui/material @mui/icons-material @emotion/react @emotion/styled`
-  - `react-router-dom@7`
-  - `@tanstack/react-query @tanstack/react-query-devtools`
-  - `axios`
-  - `react-hook-form @hookform/resolvers zod`
-  - `react-i18next i18next i18next-browser-languagedetector`
-  - `zustand`
-  - `react-hot-toast`
-  - `dayjs`
-- [ ] Install dev dependencies: `prettier eslint-config-prettier eslint-plugin-react-hooks`
-- [ ] Configure ESLint + Prettier
-- [ ] Configure `tsconfig.json` (strict mode, path aliases `@/*` → `./src/*`)
-- [ ] Configure `vite.config.ts` (path aliases, proxy to `http://localhost:8080/api`)
-- [ ] Create `.env` with `VITE_API_BASE_URL=http://localhost:8080`
-- [ ] Create base `src/` directory structure per CLAUDE.md architecture
-- [ ] Create placeholder MUI theme (`src/theme.ts`) — colors TBD
-- [ ] Verify `npm run dev` starts cleanly with blank MUI app
+- [x] Remove Next.js files
+- [x] Create package.json with Vite + all dependencies
+- [x] Install dependencies (`npm install`)
+- [x] Configure tsconfig.json (strict, path aliases)
+- [x] Configure vite.config.ts (aliases, proxy)
+- [x] Configure ESLint + Prettier
+- [x] Create .env
+- [x] Create index.html
+- [x] Create src/ directory structure with all feature folders
+- [x] Create theme.ts (Modern Navy palette), App.tsx, main.tsx
 
 ### Phase 1: Auth & Core Infrastructure
-**Goal:** Login/register, JWT management, protected routing, app layout shell with sidebar
+**Goal:** Login/register, JWT management, protected routing, app layout shell with sidebar, Master Admin routing
 
 **Auth infrastructure:**
 - [ ] Create TypeScript types (`types/auth.types.ts`, `types/common.types.ts`) matching backend DTOs
+  - Include `SystemRole` type and `systemRole` field in UserDTO
 - [ ] Create Axios instance (`api/axios.ts`):
   - Base URL from env
   - Request interceptor: attach JWT from Zustand store
@@ -88,6 +142,7 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 - [ ] Create TanStack Query client (`api/query-client.ts`) with default options
 - [ ] Create Zustand auth store (`stores/authStore.ts`):
   - State: `user: UserDTO | null`, `accessToken`, `refreshToken`, `isAuthenticated`
+  - Computed: `isMasterAdmin`, `isClubAdmin`, `hasClub`
   - Actions: `login(tokens)`, `logout()`, `setUser(user)`, `getClubId()`
   - Persist token in localStorage, restore on app init
 - [ ] Create Zustand UI store (`stores/uiStore.ts`): `sidebarCollapsed`, `language`
@@ -96,39 +151,97 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 **Auth pages:**
 - [ ] Create Login page (`features/auth/LoginPage.tsx`) with MUI form + Zod schema
 - [ ] Create Register page (`features/auth/RegisterPage.tsx`) with MUI form + Zod schema
+  - Fields: firstName, lastName, email, password, confirmPassword, dateOfBirth, phone
+  - Info box: "After registering, contact your club administrator to be added to a club"
+  - No club creation on register
+- [ ] Create No Club page (`features/auth/NoClubPage.tsx`)
+  - Simple centered card: "Your account is ready. Contact your club administrator to be added."
+  - Logout button
 
-**Layout shell (from coop-admin + partner-admin-ui patterns):**
-- [ ] Create AppLayout (`components/layout/AppLayout.tsx`): MUI Box with Drawer + AppBar + main
-- [ ] Create Sidebar (`components/layout/Sidebar.tsx`):
+**Layout shells:**
+- [ ] Create Club AppLayout (`components/layout/AppLayout.tsx`): MUI Box with Drawer + AppBar + Outlet
+- [ ] Create Club Sidebar (`components/layout/Sidebar.tsx`):
   - MUI permanent Drawer (desktop) / temporary Drawer (mobile)
-  - Collapsible: 240px → 64px icons-only
+  - Collapsible: 260px → 64px icons-only
   - Role-gated menu items (using `usePermissions()`)
-  - Menu sections: Dashboard, Teams, Trainings, Pitches, Chat [badge], separator, Users (ADMIN), Settings (ADMIN)
-  - Active link highlighting
-- [ ] Create Header (`components/layout/Header.tsx`):
+  - Menu sections: Ülevaade, Meeskonnad, Treeningud, Väljakud, Kalender, Sõnumid [badge]
+  - Admin section: Kasutajad (CLUB_ADMIN), Statistika (CLUB_ADMIN/COACH), Seaded (CLUB_ADMIN)
+- [ ] Create Club Header (`components/layout/Header.tsx`):
   - MUI AppBar with hamburger toggle
   - Club name display
-  - Language switcher (ET/EN dropdown)
-  - User avatar + dropdown menu (profile info, logout)
+  - Language switcher (ET/EN)
+  - User avatar + dropdown menu (profile, logout)
+- [ ] Create Master Admin Layout (`components/layout/AdminLayout.tsx`):
+  - Similar structure but different sidebar
+  - Sidebar items: Klubid (Clubs), Kasutajad (Users)
+  - Header: "Platform Admin" instead of club name
+- [ ] Create Master Admin Sidebar (`components/layout/AdminSidebar.tsx`)
 
 **Routing & guards:**
 - [ ] Create `usePermissions()` hook (`hooks/usePermissions.ts`)
+  - Include: `isMasterAdmin`, `isClubAdmin`, `isCoach`, `isPlayer`, `isParent`
+  - Club-level permissions: `canManageClub`, `canManageUsers`, `canCreateTraining`, etc.
 - [ ] Create `useClubId()` hook (`hooks/useClubId.ts`)
 - [ ] Create `ProtectedRoute` component (redirects to /login if not authenticated)
 - [ ] Create `RoleGuard` component (checks role, shows 403 if insufficient)
-- [ ] Set up React Router with public routes (/login, /register) and protected routes inside AppLayout
+- [ ] Create `MasterAdminGuard` component (checks systemRole == MASTER_ADMIN)
+- [ ] Set up React Router:
+  - Public: /login, /register
+  - No-club: /no-club (authenticated but no club)
+  - Master Admin: /admin/* (inside AdminLayout)
+  - Club: /dashboard, /teams, etc. (inside AppLayout)
+  - Post-login redirect logic based on role
 - [ ] Set up lazy loading for all feature pages
 
 **i18n:**
 - [ ] Set up react-i18next with Estonian (default) + English
-- [ ] Create initial translation files with auth + layout keys
+- [ ] Create initial translation files with auth + layout + nav keys
 
 **Providers:**
 - [ ] Wire up App.tsx with: QueryClientProvider, RouterProvider, ThemeProvider, Toaster
 
-**Verify:** Can login with seeded admin user → see dashboard with sidebar → token persists on refresh → logout works
+**Verify:**
+- Can register → see "no club" page
+- Can login as Club Admin → see club dashboard with sidebar
+- Can login as Master Admin → see platform admin dashboard
+- Token persists on refresh → logout works
 
-### Phase 2: Club & User Management
+### Phase 2: Master Admin Dashboard
+**Goal:** Master Admin can create/manage clubs, view all users, assign first Club Admins
+
+**API modules:**
+- [ ] Create `api/admin.api.ts`:
+  - listAllClubs, createClub, deleteClub
+  - listAllUsers, createUser
+  - assignClubAdmin
+  - + TanStack Query hooks for all
+
+**Pages:**
+- [ ] Create Club List page (`features/admin/ClubListPage.tsx`)
+  - Table of all clubs: name, member count, admin name, created date
+  - Search/filter
+  - "Create Club" button
+- [ ] Create Club Detail/Edit page (`features/admin/ClubDetailPage.tsx`)
+  - Club info form (name, address, contact)
+  - Members table (all users in this club with roles)
+  - "Assign Admin" action
+  - "Delete Club" action with confirmation
+- [ ] Create Create Club dialog/page (`features/admin/components/CreateClubDialog.tsx`)
+  - Form: name (required), registrationCode, address, contactEmail, contactPhone
+- [ ] Create Platform User List page (`features/admin/UserListPage.tsx`)
+  - All users across platform
+  - Filter: by club, unaffiliated only, search by name/email
+  - "Create User" button
+- [ ] Create Assign Admin dialog (`features/admin/components/AssignAdminDialog.tsx`)
+  - Search unaffiliated users
+  - Assign as CLUB_ADMIN to selected club
+
+**Schemas:**
+- [ ] Zod schemas for create club, create user, assign admin forms
+
+**RBAC:** All pages in /admin/* require MASTER_ADMIN systemRole
+
+### Phase 3: Club & User Management
 **Goal:** Club settings page, user list, add/remove users, role management, parent-child linking
 
 **API modules:**
@@ -137,7 +250,7 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 
 **Pages:**
 - [ ] Create Dashboard page (`features/dashboard/DashboardPage.tsx`) — overview cards (team count, upcoming trainings, unread messages)
-- [ ] Create Club Settings page (`features/clubs/ClubSettingsPage.tsx`) — ADMIN only, edit name/contact
+- [ ] Create Club Settings page (`features/clubs/ClubSettingsPage.tsx`) — CLUB_ADMIN only, edit name/contact
 - [ ] Create User List page (`features/users/UserListPage.tsx`) — MUI DataGrid with role badges, search, pagination
 - [ ] Create User Detail page (`features/users/UserDetailPage.tsx`) — profile info, role management, parent-child links
 
@@ -150,9 +263,9 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 **Schemas:**
 - [ ] Zod schemas for club settings form, add user form, update user form
 
-**RBAC:** Only ADMIN sees Users menu item and Club Settings
+**RBAC:** Only CLUB_ADMIN sees Users menu item and Club Settings
 
-### Phase 3: Team Management
+### Phase 4: Team Management
 **Goal:** Team CRUD, team member roster management
 
 **API module:**
@@ -168,11 +281,11 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 - [ ] Create AddMemberDialog — search club users not yet in team, add with role
 
 **RBAC:**
-- ADMIN: CRUD all teams, manage all rosters
+- CLUB_ADMIN: CRUD all teams, manage all rosters
 - COACH: view own teams, manage own team roster
 - PLAYER/PARENT: view teams they belong to
 
-### Phase 4: Pitch & Training Management + Monthly Calendar
+### Phase 5: Pitch & Training Management + Monthly Calendar
 **Goal:** Pitch CRUD, training scheduling (single + recurring), pitch schedule view, monthly calendar view
 
 **API modules:**
@@ -180,7 +293,7 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 - [ ] Create `api/training.api.ts`: trainings CRUD, createRecurring, cancel + query hooks
 
 **Pitch pages:**
-- [ ] Create Pitch List page (ADMIN manages, all view)
+- [ ] Create Pitch List page (CLUB_ADMIN manages, all view)
 - [ ] Create PitchForm (mode: create/edit) — name, address, surfaceType, capacity
 - [ ] Create Pitch Schedule page — calendar/timeline view of bookings for a pitch
 
@@ -188,11 +301,11 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 - [ ] Create Training List page with two view modes:
   - **List view** — filtered table of trainings with sorting/search
   - **Monthly calendar view** — full month grid showing trainings per day (color-coded by team)
-  - ADMIN sees all, COACH/PLAYER/PARENT see own team trainings
+  - CLUB_ADMIN sees all, COACH/PLAYER/PARENT see own team trainings
   - Toggle between list/calendar via view switcher
 - [ ] Create TrainingForm — single session: date, startTime, endTime, team, pitch, notes
 - [ ] Create RecurringTrainingForm — day of week, date range, time, team, pitch, notes
-- [ ] Create Training Detail page — training info + attendance section (Phase 5)
+- [ ] Create Training Detail page — training info + attendance section (Phase 6)
 - [ ] Create Cancel Training action with confirmation
 
 **Monthly Calendar (`features/calendar/`):**
@@ -208,10 +321,10 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 - [ ] Add `/calendar` route to sidebar navigation (visible to all roles)
 
 **RBAC:**
-- ADMIN/COACH: create/edit/cancel trainings (for their teams)
+- CLUB_ADMIN/COACH: create/edit/cancel trainings (for their teams)
 - All roles: view trainings and calendar for their teams
 
-### Phase 5: Attendance
+### Phase 6: Attendance
 **Goal:** Attendance confirmation for players/parents, summary view for coaches/admins
 
 **API module:**
@@ -224,11 +337,11 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 - [ ] Create ParentConfirmButton — PARENT confirms/declines child's attendance
 
 **RBAC:**
-- ADMIN/COACH: view full attendance list + summary
+- CLUB_ADMIN/COACH: view full attendance list + summary
 - PLAYER: see own status, confirm/decline
 - PARENT: see child's status, confirm/decline for child
 
-### Phase 6: Chat
+### Phase 7: Chat
 **Goal:** Team conversations, direct messages, unread badges
 
 **API module:**
@@ -251,7 +364,7 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 
 **RBAC:** All roles can send/view messages. Team chats visible only to team members.
 
-### Phase 7: Player Statistics & Analytics
+### Phase 8: Player Statistics & Analytics
 **Goal:** Per-player statistics, attendance analytics, team performance overview
 
 **Backend endpoints needed (NEW — not yet in backend):**
@@ -263,38 +376,20 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 - [ ] Create `api/statistics.api.ts`: player stats, team stats, club analytics + query hooks
 
 **Pages:**
-- [ ] Create Player Statistics view (embedded in User Detail page):
-  - Attendance rate (% of trainings confirmed/attended)
-  - Total trainings attended / total available
-  - Attendance trend over time (line chart — last 3 months)
-  - Per-team breakdown (if player is in multiple teams)
-- [ ] Create Team Statistics view (embedded in Team Detail page):
-  - Average team attendance rate
-  - Per-player attendance table with percentages
-  - Best/worst attendance players
-  - Training frequency stats (trainings per week)
-- [ ] Create Analytics Dashboard page (`features/statistics/AnalyticsPage.tsx`):
-  - Club-wide attendance rate over time
-  - Team comparison chart (which team has best attendance)
-  - Monthly training count
-  - Active vs inactive members
+- [ ] Create Player Statistics view (embedded in User Detail page)
+- [ ] Create Team Statistics view (embedded in Team Detail page)
+- [ ] Create Analytics Dashboard page (`features/statistics/AnalyticsPage.tsx`)
 
 **Components (`features/statistics/components/`):**
 - [ ] AttendanceRateCard — circular progress + percentage
-- [ ] AttendanceTrendChart — line chart (use MUI-compatible charting, e.g. recharts or lightweight custom SVG)
+- [ ] AttendanceTrendChart — line chart
 - [ ] TeamComparisonChart — bar chart comparing teams
 - [ ] PlayerStatsTable — sortable table with player name, attendance %, trainings count
 - [ ] StatCard — reusable stat display (value, label, trend arrow)
 
-**Route:** `/statistics` — ADMIN/COACH only (sidebar item in admin section)
+**Route:** `/statistics` — CLUB_ADMIN/COACH only
 
-**RBAC:**
-- ADMIN: full club analytics + all player/team stats
-- COACH: own team statistics + own team player stats
-- PLAYER: own attendance stats (on their profile/dashboard)
-- PARENT: child's attendance stats
-
-### Phase 8: Shared Components & Polish
+### Phase 9: Shared Components & Polish
 **Goal:** Reusable components, error handling, loading states, final UI polish
 
 **Shared form components (`components/form/`):**
@@ -335,29 +430,38 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 ## Routing Structure
 
 ```
-/login                          # Public — LoginPage
-/register                       # Public — RegisterPage
+# Public routes
+/login                          # LoginPage
+/register                       # RegisterPage
 
-# Protected routes (inside AppLayout with sidebar)
+# Authenticated but no club
+/no-club                        # NoClubPage ("waiting to be added")
+
+# Master Admin routes (inside AdminLayout)
+/admin/clubs                    # ClubListPage — all clubs
+/admin/clubs/:clubId            # ClubDetailPage — manage specific club
+/admin/users                    # Platform UserListPage — all users
+
+# Club routes (inside AppLayout — requires club membership)
 /dashboard                      # All roles — DashboardPage
-/settings                       # ADMIN only — ClubSettingsPage
+/settings                       # CLUB_ADMIN only — ClubSettingsPage
 
-/users                          # ADMIN only — UserListPage
-/users/:userId                  # ADMIN only — UserDetailPage
+/users                          # CLUB_ADMIN only — UserListPage
+/users/:userId                  # CLUB_ADMIN only — UserDetailPage
 
 /teams                          # All roles — TeamListPage
 /teams/:teamId                  # All roles — TeamDetailPage
 
 /trainings                      # All roles — TrainingListPage (list + calendar toggle)
-/trainings/create               # ADMIN/COACH — TrainingForm (create)
+/trainings/create               # CLUB_ADMIN/COACH — TrainingForm (create)
 /trainings/:trainingId          # All roles — TrainingDetailPage (includes attendance)
 
-/calendar                       # All roles — Monthly calendar view of all trainings
+/calendar                       # All roles — Monthly calendar view
 
 /pitches                        # All roles — PitchListPage
-/pitches/:pitchId/schedule      # ADMIN — PitchSchedulePage
+/pitches/:pitchId/schedule      # CLUB_ADMIN — PitchSchedulePage
 
-/statistics                     # ADMIN/COACH — Analytics dashboard
+/statistics                     # CLUB_ADMIN/COACH — Analytics dashboard
 
 /chat                           # All roles — ConversationListPage
 /chat/:conversationId           # All roles — ConversationPage
@@ -368,26 +472,69 @@ Add endpoints that infer clubId from the JWT token, e.g. `GET /api/my/teams` ins
 
 ---
 
-## Sidebar Menu Structure
+## Sidebar Menu Structures
 
+### Club Sidebar (for CLUB_ADMIN / COACH / PLAYER / PARENT)
 ```
 ┌──────────────────────────┐
-│  [icon]  Club Name       │  ← Club name from auth store
+│  [⚽]  Club Name          │  ← Club name from auth store
 ├──────────────────────────┤
-│  DashboardIcon  Dashboard│  ← All roles
-│  GroupsIcon     Teams    │  ← All roles
-│  FitnessCenterIcon Train.│  ← All roles
-│  CalendarMonthIcon Cal.  │  ← All roles
-│  StadiumIcon    Pitches  │  ← All roles
-│  ChatIcon       Chat [3] │  ← All roles (unread badge)
-├──────────────────────────┤  ← Separator (ADMIN/COACH section)
-│  BarChartIcon   Stats    │  ← ADMIN/COACH
-│  PeopleIcon     Users    │  ← ADMIN only
-│  SettingsIcon   Settings │  ← ADMIN only
+│  PÕHILEHT                │  ← Section label
+│  📊  Ülevaade            │  ← All roles
+│  👥  Meeskonnad          │  ← All roles
+│  🏋  Treeningud          │  ← All roles
+│  🏟  Väljakud            │  ← All roles
+│  📅  Kalender            │  ← All roles
+│  💬  Sõnumid        [3]  │  ← All roles (unread badge)
+├──────────────────────────┤
+│  HALDUS                  │  ← CLUB_ADMIN/COACH section
+│  👤  Kasutajad           │  ← CLUB_ADMIN only
+│  📈  Statistika          │  ← CLUB_ADMIN/COACH
+│  ⚙  Seaded               │  ← CLUB_ADMIN only
+└──────────────────────────┘
+│  [avatar] User Name      │
+│  Klubi administraator    │
 └──────────────────────────┘
 ```
 
-Menu items use MUI Icons (from `@mui/icons-material`). Unread badge uses MUI Badge component.
+### Master Admin Sidebar
+```
+┌──────────────────────────┐
+│  [⚽]  Club Management    │  ← Platform name
+├──────────────────────────┤
+│  PLATVORM                │  ← Section label
+│  🏢  Klubid              │  ← All clubs
+│  👥  Kasutajad           │  ← All platform users
+├──────────────────────────┤
+│  [avatar] Platform Admin │
+│  Peaadministraator       │
+└──────────────────────────┘
+```
+
+---
+
+## RBAC Matrix
+
+| Action | Master Admin | Club Admin | Coach | Player | Parent |
+|--------|-------------|------------|-------|--------|--------|
+| Create/delete clubs | ✅ | — | — | — | — |
+| Assign first Club Admin | ✅ | — | — | — | — |
+| View all clubs | ✅ | — | — | — | — |
+| Create user accounts | ✅ | — | — | — | — |
+| Enter any club as admin | ✅ | — | — | — | — |
+| Manage club settings | (via enter) | ✅ | — | — | — |
+| Add/remove users to club | (via enter) | ✅ | — | — | — |
+| Manage all teams | (via enter) | ✅ | — | — | — |
+| Manage own team roster | — | ✅ | ✅ | — | — |
+| Manage pitches | (via enter) | ✅ | — | — | — |
+| Create/edit training | — | ✅ | ✅ | — | — |
+| Cancel training | — | ✅ | ✅ | — | — |
+| View own team trainings | — | ✅ | ✅ | ✅ | ✅ |
+| Confirm attendance (self) | — | — | — | ✅ | — |
+| Confirm attendance (child) | — | — | — | — | ✅ |
+| View attendance summary | — | ✅ | ✅ | — | — |
+| View statistics | — | ✅ | ✅ | — | — |
+| Send/view messages | — | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
@@ -408,24 +555,121 @@ Every feature with forms follows this pattern (from coop-admin):
 
 ### Permission Checks
 Three levels (from emde-fe):
-1. **Route level** — `<RoleGuard roles={['ADMIN']}>` wraps admin-only routes
-2. **Component level** — `{isAdmin && <Button>Delete</Button>}` via `usePermissions()`
+1. **Route level** — `<RoleGuard roles={['CLUB_ADMIN']}>` or `<MasterAdminGuard>` wraps protected routes
+2. **Component level** — `{isClubAdmin && <Button>Delete</Button>}` via `usePermissions()`
 3. **Menu level** — Sidebar items conditionally rendered by role
+
+---
+
+## Backend API Reference
+
+### Platform Admin (MASTER_ADMIN only)
+```
+GET    /api/admin/clubs                          → Page<ClubDTO>
+POST   /api/admin/clubs                          → CreateClubDTO → ClubDTO
+DELETE /api/admin/clubs/{clubId}                  → void
+GET    /api/admin/users                           → Page<UserDTO>
+POST   /api/admin/users                           → AdminCreateUserDTO → UserDTO
+POST   /api/admin/clubs/{clubId}/admins           → AssignAdminDTO → UserDTO
+```
+
+### Auth (public)
+```
+POST   /api/auth/register          → RegisterRequestDTO → UserDTO
+POST   /api/auth/login             → LoginRequestDTO → AuthResponseDTO
+POST   /api/auth/refresh           → RefreshTokenRequestDTO → AuthResponseDTO
+GET    /api/auth/me                → UserDTO (includes systemRole, role, clubId)
+```
+
+### Club (CLUB_ADMIN manages, all members view)
+```
+GET    /api/clubs/{clubId}                              → ClubDTO
+PUT    /api/clubs/{clubId}                              → UpdateClubDTO → ClubDTO
+```
+
+### Users
+```
+GET    /api/clubs/{clubId}/users                        → Page<UserDTO>
+POST   /api/clubs/{clubId}/users                        → AddUserToClubDTO → UserDTO
+GET    /api/clubs/{clubId}/users/{userId}               → UserDTO
+PUT    /api/clubs/{clubId}/users/{userId}               → UpdateUserDTO → UserDTO
+DELETE /api/clubs/{clubId}/users/{userId}               → void
+GET    /api/users/unaffiliated?search=                  → Page<UserDTO>
+```
+
+### Parent-child
+```
+GET    /api/clubs/{clubId}/users/{userId}/parents       → List<UserDTO>
+POST   /api/clubs/{clubId}/users/{userId}/parents       → LinkParentDTO → void
+DELETE /api/clubs/{clubId}/users/{userId}/parents/{pId}  → void
+GET    /api/clubs/{clubId}/users/{userId}/children      → List<UserDTO>
+```
+
+### Teams
+```
+GET    /api/clubs/{clubId}/teams                        → List<TeamDTO>
+POST   /api/clubs/{clubId}/teams                        → CreateTeamDTO → TeamDTO
+GET    /api/clubs/{clubId}/teams/{teamId}               → TeamDTO
+PUT    /api/clubs/{clubId}/teams/{teamId}               → UpdateTeamDTO → TeamDTO
+DELETE /api/clubs/{clubId}/teams/{teamId}               → void
+GET    /api/clubs/{clubId}/teams/{teamId}/members       → List<TeamMemberDTO>
+POST   /api/clubs/{clubId}/teams/{teamId}/members       → AddTeamMemberDTO → TeamMemberDTO
+DELETE /api/clubs/{clubId}/teams/{teamId}/members/{uId}  → void
+```
+
+### Trainings
+```
+GET    /api/clubs/{clubId}/trainings                    → List<TrainingSessionDTO>
+GET    /api/clubs/{clubId}/trainings/{trainingId}       → TrainingSessionDTO
+POST   /api/clubs/{clubId}/teams/{teamId}/trainings     → CreateTrainingSessionDTO → TrainingSessionDTO
+POST   /api/clubs/{clubId}/teams/{teamId}/trainings/recurring → CreateRecurringTrainingDTO → List<TrainingSessionDTO>
+PUT    /api/clubs/{clubId}/trainings/{trainingId}       → UpdateTrainingSessionDTO → TrainingSessionDTO
+PUT    /api/clubs/{clubId}/trainings/{trainingId}/cancel → void
+DELETE /api/clubs/{clubId}/trainings/{trainingId}       → void
+```
+
+### Pitches
+```
+GET    /api/clubs/{clubId}/pitches                      → List<PitchDTO>
+POST   /api/clubs/{clubId}/pitches                      → CreatePitchDTO → PitchDTO
+GET    /api/clubs/{clubId}/pitches/{pitchId}            → PitchDTO
+PUT    /api/clubs/{clubId}/pitches/{pitchId}            → UpdatePitchDTO → PitchDTO
+DELETE /api/clubs/{clubId}/pitches/{pitchId}            → void
+GET    /api/clubs/{clubId}/pitches/{pitchId}/schedule?startDate=&endDate= → List<TrainingSessionDTO>
+```
+
+### Attendance
+```
+GET    /api/clubs/{clubId}/trainings/{tId}/attendance          → List<AttendanceDTO>
+GET    /api/clubs/{clubId}/trainings/{tId}/attendance/summary  → AttendanceSummaryDTO
+PUT    /api/clubs/{clubId}/trainings/{tId}/attendance/{userId}  → UpdateAttendanceDTO → AttendanceDTO
+```
+
+### Chat
+```
+GET    /api/clubs/{clubId}/conversations                       → List<ConversationDTO>
+POST   /api/clubs/{clubId}/conversations                       → CreateDirectConversationDTO → ConversationDTO
+GET    /api/clubs/{clubId}/conversations/{id}                  → ConversationDTO
+GET    /api/clubs/{clubId}/conversations/{id}/messages          → Page<MessageDTO>
+POST   /api/clubs/{clubId}/conversations/{id}/messages          → SendMessageDTO → MessageDTO
+PUT    /api/clubs/{clubId}/conversations/{id}/read              → void
+GET    /api/clubs/{clubId}/conversations/unread-count           → number
+```
 
 ---
 
 ## Current Status
 
-**Phase:** 0 (Project Setup) — IN PROGRESS
-- [x] Remove Next.js files
-- [x] Create package.json with Vite + all dependencies
-- [x] Install dependencies (`npm install`)
-- [x] Configure tsconfig.json (strict, path aliases)
-- [x] Configure vite.config.ts (aliases, proxy)
-- [x] Configure ESLint + Prettier
-- [x] Create .env
-- [x] Create index.html
-- [x] Create src/ directory structure with all feature folders
-- [ ] Create placeholder theme.ts, App.tsx, main.tsx (minimal to verify `npm run dev` works)
+**Phase 0:** ✅ COMPLETE
+**Phase 1:** NOT STARTED — next up
 
-**Next action:** Create minimal App.tsx + main.tsx to verify dev server starts
+**Design mockups completed:**
+- `.claude/mockups/auth/01-login.html` — Login page
+- `.claude/mockups/auth/02-register.html` — Register page (needs update: remove club name field, add dateOfBirth + phone, update info box text)
+- `.claude/mockups/auth/03-layout-shell.html` — Club layout shell (sidebar + header)
+- `.claude/mockups/color-preview.html` — Dashboard with color palette
+
+**Design mockups needed:**
+- Master Admin dashboard (club list)
+- Master Admin club detail page
+- No-club waiting page
