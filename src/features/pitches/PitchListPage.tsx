@@ -13,6 +13,8 @@ import {
   IconButton,
   Tooltip,
   Grid2 as Grid,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
 import {
   Add,
@@ -22,6 +24,7 @@ import {
   Edit,
   Delete,
   CalendarMonth,
+  Search,
 } from '@mui/icons-material';
 import { usePitches, useDeletePitch } from '@/api/pitch.api';
 import { PitchFormDialog } from './components/PitchFormDialog';
@@ -41,6 +44,7 @@ export function PitchListPage() {
   const { data: pitches, isLoading } = usePitches(clubId);
   const deleteMutation = useDeletePitch(clubId!);
 
+  const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editPitch, setEditPitch] = useState<PitchDTO | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PitchDTO | null>(null);
@@ -80,6 +84,23 @@ export function PitchListPage() {
         )}
       </Box>
 
+      <TextField
+        placeholder={t('common.search')}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        size="small"
+        sx={{ mb: 3, width: 280 }}
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search fontSize="small" />
+              </InputAdornment>
+            ),
+          },
+        }}
+      />
+
       {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
           <CircularProgress />
@@ -93,7 +114,15 @@ export function PitchListPage() {
         </Box>
       ) : (
         <Grid container spacing={2}>
-          {pitches.map((pitch) => (
+          {pitches.filter((pitch) => {
+            if (!search) return true;
+            const q = search.toLowerCase();
+            return (
+              pitch.name.toLowerCase().includes(q) ||
+              (pitch.address?.toLowerCase().includes(q) ?? false) ||
+              (pitch.surfaceType ? t(`pitches.surfaceTypes.${pitch.surfaceType}`).toLowerCase().includes(q) : false)
+            );
+          }).map((pitch) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={pitch.id}>
               <Card variant="outlined" sx={{ height: '100%' }}>
                 <CardContent>

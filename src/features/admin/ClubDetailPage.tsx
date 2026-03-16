@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -16,8 +16,10 @@ import {
   CircularProgress,
   IconButton,
   Stack,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
-import { ArrowBack, PersonAdd, Delete } from '@mui/icons-material';
+import { ArrowBack, PersonAdd, Delete, Search } from '@mui/icons-material';
 import { useAdminClubs, useDeleteClub, useClubMembers } from '@/api/admin.api';
 import { AddUserDialog } from '@/features/users/components/AddUserDialog';
 import { clubRoleColors } from '@/utils/roles';
@@ -30,6 +32,7 @@ export function ClubDetailPage() {
   const { clubId } = useParams<{ clubId: string }>();
   const navigate = useNavigate();
   const [assignOpen, setAssignOpen] = useState(false);
+  const [memberSearch, setMemberSearch] = useState('');
 
   const { data: clubsPage, isLoading: clubsLoading } = useAdminClubs({
     page: 0,
@@ -41,7 +44,18 @@ export function ClubDetailPage() {
     clubId!,
     { page: 0, size: 100 },
   );
-  const members = membersPage?.content ?? [];
+  const allMembers = membersPage?.content ?? [];
+
+  const members = useMemo(() => {
+    if (!memberSearch) return allMembers;
+    const q = memberSearch.toLowerCase();
+    return allMembers.filter(
+      (m) =>
+        m.firstName.toLowerCase().includes(q) ||
+        m.lastName.toLowerCase().includes(q) ||
+        m.email.toLowerCase().includes(q),
+    );
+  }, [allMembers, memberSearch]);
 
   const deleteClubMutation = useDeleteClub();
 
@@ -148,9 +162,27 @@ export function ClubDetailPage() {
       </Paper>
 
       {/* Members */}
-      <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-        {t('admin.clubs.members')} ({members.length})
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="subtitle1" fontWeight={600}>
+          {t('admin.clubs.members')} ({members.length})
+        </Typography>
+        <TextField
+          placeholder={t('users.searchClubMembers')}
+          value={memberSearch}
+          onChange={(e) => setMemberSearch(e.target.value)}
+          size="small"
+          sx={{ width: 280 }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search fontSize="small" />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+      </Box>
       <TableContainer component={Paper} variant="outlined">
         <Table>
           <TableHead>

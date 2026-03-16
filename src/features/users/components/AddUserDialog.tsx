@@ -138,43 +138,46 @@ export function AddUserDialog({ open, clubId, onClose }: AddUserDialogProps) {
         ) : (
           <List disablePadding>
             {users.map((user) => (
-              <ListItem key={user.id} disablePadding>
-                <ListItemButton
-                  selected={selectedUserId === user.id}
-                  onClick={() => setSelectedUserId(user.id)}
-                  sx={{ borderRadius: 1 }}
-                >
-                  <ListItemAvatar>
-                    <Avatar sx={{ width: 32, height: 32, fontSize: 13 }}>
-                      {user.firstName.charAt(0)}
-                      {user.lastName.charAt(0)}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={`${user.firstName} ${user.lastName}`}
-                    secondary={user.email}
-                  />
-                </ListItemButton>
-              </ListItem>
+              <Box key={user.id}>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    selected={selectedUserId === user.id}
+                    onClick={() => setSelectedUserId(user.id)}
+                    sx={{ borderRadius: 1 }}
+                  >
+                    <ListItemAvatar>
+                      <Avatar sx={{ width: 32, height: 32, fontSize: 13 }}>
+                        {user.firstName.charAt(0)}
+                        {user.lastName.charAt(0)}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={`${user.firstName} ${user.lastName}`}
+                      secondary={user.email}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                <Collapse in={selectedUserId === user.id}>
+                  <Box sx={{ pl: 7, pr: 2, py: 1 }}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>{t('users.role')}</InputLabel>
+                      <Select
+                        value={role}
+                        label={t('users.role')}
+                        onChange={(e) => handleRoleChange(e.target.value as ClubRole)}
+                      >
+                        {Object.values(ClubRole).map((r) => (
+                          <MenuItem key={r} value={r}>
+                            {t(`roles.${r}`)}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Collapse>
+              </Box>
             ))}
           </List>
-        )}
-
-        {selectedUserId && (
-          <FormControl fullWidth size="small" sx={{ mt: 2 }}>
-            <InputLabel>{t('users.role')}</InputLabel>
-            <Select
-              value={role}
-              label={t('users.role')}
-              onChange={(e) => handleRoleChange(e.target.value as ClubRole)}
-            >
-              {Object.values(ClubRole).map((r) => (
-                <MenuItem key={r} value={r}>
-                  {t(`roles.${r}`)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
         )}
 
         <Collapse in={role === ClubRole.PARENT && !!selectedUserId}>

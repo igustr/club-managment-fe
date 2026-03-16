@@ -156,7 +156,9 @@
     "members": "Liikmeid",
     "teams": "Meeskondi",
     "trainings": "Treeninguid",
-    "pitches": "Väljakuid"
+    "pitches": "Väljakuid",
+    "upcomingTrainings": "Tulevased treeningud",
+    "noUpcoming": "Tulevasi treeninguid pole"
   },
   "clubs": {
     "settings": {

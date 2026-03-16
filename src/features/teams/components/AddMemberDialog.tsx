@@ -22,7 +22,7 @@ import { useClubUsers } from '@/api/user.api';
 import { useAddTeamMember } from '@/api/team.api';
 import type { TeamMemberDTO } from '@/types/team.types';
 import { clubRoleColors } from '@/utils/roles';
-import type { ClubRole } from '@/types/common.types';
+import { ClubRole } from '@/types/common.types';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
 
@@ -52,10 +52,12 @@ export function AddMemberDialog({
     size: 20,
   });
 
-  // Filter out users already in the team
+  // Filter out users already in the team + only show PLAYER and COACH
   const existingUserIds = new Set(existingMembers.map((m) => m.userId));
   const availableUsers = (usersPage?.content ?? []).filter(
-    (u) => !existingUserIds.has(u.id),
+    (u) =>
+      !existingUserIds.has(u.id) &&
+      (u.role === ClubRole.PLAYER || u.role === ClubRole.COACH),
   );
 
   const handleClose = () => {

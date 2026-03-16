@@ -20,17 +20,17 @@ export const statisticsKeys = {
 // --- API functions ---
 export const getPlayerStatistics = (clubId: string, userId: string) =>
   api
-    .get<PlayerStatisticsDTO>(`/clubs/${clubId}/users/${userId}/statistics`)
+    .get<PlayerStatisticsDTO>(`/api/clubs/${clubId}/users/${userId}/statistics`)
     .then((r) => r.data);
 
 export const getTeamStatistics = (clubId: string, teamId: string) =>
   api
-    .get<TeamStatisticsDTO>(`/clubs/${clubId}/teams/${teamId}/statistics`)
+    .get<TeamStatisticsDTO>(`/api/clubs/${clubId}/teams/${teamId}/statistics`)
     .then((r) => r.data);
 
 export const getClubStatistics = (clubId: string) =>
   api
-    .get<ClubStatisticsDTO>(`/clubs/${clubId}/statistics`)
+    .get<ClubStatisticsDTO>(`/api/clubs/${clubId}/statistics`)
     .then((r) => r.data);
 
 // --- TanStack Query hooks ---

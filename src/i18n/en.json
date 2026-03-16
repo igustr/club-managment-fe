@@ -156,7 +156,9 @@
     "members": "Members",
     "teams": "Teams",
     "trainings": "Trainings",
-    "pitches": "Pitches"
+    "pitches": "Pitches",
+    "upcomingTrainings": "Upcoming Trainings",
+    "noUpcoming": "No upcoming trainings"
   },
   "clubs": {
     "settings": {

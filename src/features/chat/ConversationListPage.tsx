@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,8 +8,10 @@ import {
   List,
   Paper,
   CircularProgress,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Add, Search } from '@mui/icons-material';
 import { useConversations, useCreateDirectConversation } from '@/api/chat.api';
 import { useClubId } from '@/hooks/useClubId';
 import { ConversationItem } from './components/ConversationItem';
@@ -26,6 +28,7 @@ export function ConversationListPage() {
   const createMutation = useCreateDirectConversation(clubId!);
 
   const [newChatOpen, setNewChatOpen] = useState(false);
+  const [search, setSearch] = useState('');
 
   const handleSelectUser = async (participantId: string) => {
     try {
@@ -37,12 +40,27 @@ export function ConversationListPage() {
     }
   };
 
-  const sorted = [...(conversations ?? [])].sort((a, b) => {
-    if (!a.lastMessageTime && !b.lastMessageTime) return 0;
-    if (!a.lastMessageTime) return 1;
-    if (!b.lastMessageTime) return -1;
-    return new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime();
-  });
+  const sorted = useMemo(() => {
+    let list = [...(conversations ?? [])];
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          c.participants.some(
+            (p) =>
+              p.firstName.toLowerCase().includes(q) ||
+              p.lastName.toLowerCase().includes(q),
+          ),
+      );
+    }
+    return list.sort((a, b) => {
+      if (!a.lastMessageTime && !b.lastMessageTime) return 0;
+      if (!a.lastMessageTime) return 1;
+      if (!b.lastMessageTime) return -1;
+      return new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime();
+    });
+  }, [conversations, search]);
 
   return (
     <Box>
@@ -65,6 +83,23 @@ export function ConversationListPage() {
           {t('chat.newConversation')}
         </Button>
       </Box>
+
+      <TextField
+        placeholder={t('common.search')}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        size="small"
+        sx={{ mb: 2, width: 320 }}
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search fontSize="small" />
+              </InputAdornment>
+            ),
+          },
+        }}
+      />
 
       {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
