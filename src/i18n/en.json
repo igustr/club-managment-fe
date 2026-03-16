@@ -320,6 +320,27 @@
     "participants": "participants",
     "sendSuccess": "Message sent"
   },
+  "statistics": {
+    "title": "Statistics",
+    "noData": "No statistics data available",
+    "totalMembers": "Total Members",
+    "totalTeams": "Total Teams",
+    "totalTrainings": "Total Trainings",
+    "overallAttendance": "Overall Attendance",
+    "overallAttendanceRate": "Overall Attendance Rate",
+    "teamComparison": "Team Comparison",
+    "monthlyTrend": "Monthly Trend",
+    "teamDetails": "Team Details",
+    "selectTeam": "Select Team",
+    "selectTeamPlaceholder": "Select a team...",
+    "playerStatistics": "Player Statistics",
+    "playerName": "Player Name",
+    "trainings": "Trainings",
+    "attended": "Attended",
+    "attendanceRate": "Attendance %",
+    "averageAttendance": "Average Attendance",
+    "memberCount": "Members"
+  },
   "calendar": {
     "title": "Calendar",
     "noSessions": "No sessions",

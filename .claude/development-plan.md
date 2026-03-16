@@ -388,28 +388,30 @@ export const useTeams = () => {
 
 **RBAC:** All roles can send/view messages. Team chats visible only to team members.
 
-### Phase 8: Player Statistics & Analytics
+### Phase 8: Player Statistics & Analytics ✅ COMPLETE
 **Goal:** Per-player statistics, attendance analytics, team performance overview
 
-**Backend endpoints needed (NEW — not yet in backend):**
-- `GET /api/clubs/{clubId}/users/{userId}/statistics` — player attendance rate, training count, etc.
-- `GET /api/clubs/{clubId}/teams/{teamId}/statistics` — team-level aggregates
-- `GET /api/clubs/{clubId}/statistics/attendance?from=&to=` — club-wide attendance analytics
+**Backend endpoints (NEW):**
+- [x] `GET /api/clubs/{clubId}/users/{userId}/statistics` — PlayerStatisticsDTO
+- [x] `GET /api/clubs/{clubId}/teams/{teamId}/statistics` — TeamStatisticsDTO (with player breakdown)
+- [x] `GET /api/clubs/{clubId}/statistics` — ClubStatisticsDTO (club-wide analytics + monthly trend)
+- [x] StatisticsController + StatisticsService + 4 DTOs (Player, Team, Club, MonthlyAttendance)
+- [x] New repository methods in AttendanceRepository, UserRepository
 
 **API module:**
-- [ ] Create `api/statistics.api.ts`: player stats, team stats, club analytics + query hooks
+- [x] Create `api/statistics.api.ts`: player stats, team stats, club analytics + query hooks
 
 **Pages:**
-- [ ] Create Player Statistics view (embedded in User Detail page)
-- [ ] Create Team Statistics view (embedded in Team Detail page)
-- [ ] Create Analytics Dashboard page (`features/statistics/AnalyticsPage.tsx`)
+- [x] Create Player Statistics view (embedded in User Detail page)
+- [x] Create Team Statistics view (embedded in Team Detail page)
+- [x] Create Analytics Dashboard page (`features/statistics/AnalyticsPage.tsx`)
 
 **Components (`features/statistics/components/`):**
-- [ ] AttendanceRateCard — circular progress + percentage
-- [ ] AttendanceTrendChart — line chart
-- [ ] TeamComparisonChart — bar chart comparing teams
-- [ ] PlayerStatsTable — sortable table with player name, attendance %, trainings count
-- [ ] StatCard — reusable stat display (value, label, trend arrow)
+- [x] AttendanceRateCard — circular progress + percentage
+- [x] MonthlyAttendanceChart — bar chart with confirmed vs total
+- [x] TeamComparisonChart — horizontal bar chart comparing teams
+- [x] PlayerStatsTable — sortable table with player name, attendance %, trainings count
+- [x] StatCard — reusable stat display (value, label, icon)
 
 **Route:** `/statistics` — CLUB_ADMIN/COACH only
 
@@ -690,7 +692,7 @@ GET    /api/clubs/{clubId}/conversations/unread-count           → number
 **Phase 3:** ✅ COMPLETE — Club & User Management
 **Phase 4:** ✅ COMPLETE — Team Management
 **Phase 5:** ✅ COMPLETE — Pitch & Training Management + Monthly Calendar
-**Phase 6:** NOT STARTED — Attendance (next up)
-**Phase 7:** NOT STARTED — Chat
-**Phase 8:** NOT STARTED — Player Statistics & Analytics
+**Phase 6:** ✅ COMPLETE — Attendance
+**Phase 7:** ✅ COMPLETE — Chat
+**Phase 8:** ✅ COMPLETE — Player Statistics & Analytics
 **Phase 9:** NOT STARTED — Shared Components & Polish

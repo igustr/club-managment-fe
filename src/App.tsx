@@ -3,6 +3,9 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import 'dayjs/locale/et';
 import { theme } from './theme';
 import { queryClient } from './api/query-client';
 import { router } from './routes/router';
@@ -11,18 +14,20 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <RouterProvider router={router} />
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              fontFamily: '"Inter", sans-serif',
-              fontSize: 14,
-            },
-          }}
-        />
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="et">
+          <CssBaseline />
+          <RouterProvider router={router} />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                fontFamily: '"Inter", sans-serif',
+                fontSize: 14,
+              },
+            }}
+          />
+        </LocalizationProvider>
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

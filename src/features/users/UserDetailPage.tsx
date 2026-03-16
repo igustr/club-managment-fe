@@ -34,11 +34,13 @@ import {
   useUnlinkParent,
 } from '@/api/user.api';
 import { useClubId } from '@/hooks/useClubId';
+import { usePermissions } from '@/hooks/usePermissions';
 import { clubRoleColors } from '@/utils/roles';
 import { ClubRole } from '@/types/common.types';
 import { updateUserSchema, type UpdateUserFormValues } from './schemas';
 import { LinkParentDialog } from './components/LinkParentDialog';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { usePlayerStatistics } from '@/api/statistics.api';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
 
@@ -47,6 +49,7 @@ export function UserDetailPage() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const clubId = useClubId();
+  const { canViewStatistics } = usePermissions();
   const [linkParentOpen, setLinkParentOpen] = useState(false);
   const [unlinkTarget, setUnlinkTarget] = useState<{
     id: string;
@@ -58,6 +61,10 @@ export function UserDetailPage() {
   const { data: parents } = useParents(clubId, userId);
   const { data: children } = useChildren(clubId, userId);
   const unlinkMutation = useUnlinkParent(clubId!, userId!);
+  const { data: playerStats } = usePlayerStatistics(
+    canViewStatistics ? clubId : null,
+    canViewStatistics ? userId : null,
+  );
 
   const {
     control,
@@ -258,6 +265,66 @@ export function UserDetailPage() {
           </Box>
         </Stack>
       </Paper>
+
+      {/* Player statistics */}
+      {canViewStatistics && playerStats && playerStats.totalTrainings > 0 && (
+        <Paper variant="outlined" sx={{ p: 3, mb: 3, maxWidth: 600 }}>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+            {t('statistics.playerStatistics')}
+          </Typography>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 2,
+              mb: 2,
+            }}
+          >
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                {t('statistics.trainings')}
+              </Typography>
+              <Typography variant="h6" fontWeight={700}>
+                {playerStats.totalTrainings}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                {t('statistics.attended')}
+              </Typography>
+              <Typography variant="h6" fontWeight={700}>
+                {playerStats.confirmedCount}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                {t('attendance.declined')}
+              </Typography>
+              <Typography variant="h6" fontWeight={700}>
+                {playerStats.declinedCount}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                {t('statistics.attendanceRate')}
+              </Typography>
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                color={
+                  playerStats.attendanceRate >= 75
+                    ? 'success.main'
+                    : playerStats.attendanceRate >= 50
+                      ? 'warning.main'
+                      : 'error.main'
+                }
+              >
+                {playerStats.attendanceRate}%
+              </Typography>
+            </Box>
+          </Box>
+        </Paper>
+      )}
 
       {/* Parent-child section — only for PLAYER/PARENT */}
       {isPlayerOrParent && (

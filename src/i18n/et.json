@@ -320,6 +320,27 @@
     "participants": "osalejat",
     "sendSuccess": "Sõnum saadetud"
   },
+  "statistics": {
+    "title": "Statistika",
+    "noData": "Statistika andmed puuduvad",
+    "totalMembers": "Liikmeid kokku",
+    "totalTeams": "Meeskondi kokku",
+    "totalTrainings": "Treeninguid kokku",
+    "overallAttendance": "Üldine kohalolek",
+    "overallAttendanceRate": "Üldine kohaloleku määr",
+    "teamComparison": "Meeskondade võrdlus",
+    "monthlyTrend": "Igakuine trend",
+    "teamDetails": "Meeskonna detailid",
+    "selectTeam": "Vali meeskond",
+    "selectTeamPlaceholder": "Vali meeskond...",
+    "playerStatistics": "Mängija statistika",
+    "playerName": "Mängija nimi",
+    "trainings": "Treeningud",
+    "attended": "Osalenud",
+    "attendanceRate": "Kohaloleku %",
+    "averageAttendance": "Keskmine kohalolek",
+    "memberCount": "Liikmeid"
+  },
   "calendar": {
     "title": "Kalender",
     "noSessions": "Treeninguid pole",

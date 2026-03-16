@@ -11,6 +11,8 @@ import {
   Stack,
   MenuItem,
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { useCreateRecurringTraining } from '@/api/training.api';
 import { useTeams } from '@/api/team.api';
 import { usePitches } from '@/api/pitch.api';
@@ -21,6 +23,7 @@ import {
 import { useClubId } from '@/hooks/useClubId';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
+import dayjs from 'dayjs';
 
 const DAYS_OF_WEEK = [
   'MONDAY',
@@ -151,14 +154,20 @@ export function RecurringTrainingDialog({
               name="startDate"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
+                <DatePicker
                   label={t('trainings.startDate')}
-                  type="date"
-                  error={!!errors.startDate}
-                  helperText={errors.startDate?.message}
-                  slotProps={{ inputLabel: { shrink: true } }}
+                  value={field.value ? dayjs(field.value) : null}
+                  onChange={(val) =>
+                    field.onChange(val ? val.format('YYYY-MM-DD') : '')
+                  }
+                  format="DD.MM.YYYY"
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      error: !!errors.startDate,
+                      helperText: errors.startDate?.message,
+                    },
+                  }}
                 />
               )}
             />
@@ -166,14 +175,20 @@ export function RecurringTrainingDialog({
               name="endDate"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
+                <DatePicker
                   label={t('trainings.endDate')}
-                  type="date"
-                  error={!!errors.endDate}
-                  helperText={errors.endDate?.message}
-                  slotProps={{ inputLabel: { shrink: true } }}
+                  value={field.value ? dayjs(field.value) : null}
+                  onChange={(val) =>
+                    field.onChange(val ? val.format('YYYY-MM-DD') : '')
+                  }
+                  format="DD.MM.YYYY"
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      error: !!errors.endDate,
+                      helperText: errors.endDate?.message,
+                    },
+                  }}
                 />
               )}
             />
@@ -183,14 +198,24 @@ export function RecurringTrainingDialog({
               name="startTime"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
+                <TimePicker
                   label={t('trainings.startTime')}
-                  type="time"
-                  error={!!errors.startTime}
-                  helperText={errors.startTime?.message}
-                  slotProps={{ inputLabel: { shrink: true } }}
+                  value={
+                    field.value
+                      ? dayjs(`2000-01-01T${field.value}`)
+                      : null
+                  }
+                  onChange={(val) =>
+                    field.onChange(val ? val.format('HH:mm') : '')
+                  }
+                  ampm={false}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      error: !!errors.startTime,
+                      helperText: errors.startTime?.message,
+                    },
+                  }}
                 />
               )}
             />
@@ -198,14 +223,24 @@ export function RecurringTrainingDialog({
               name="endTime"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
+                <TimePicker
                   label={t('trainings.endTime')}
-                  type="time"
-                  error={!!errors.endTime}
-                  helperText={errors.endTime?.message}
-                  slotProps={{ inputLabel: { shrink: true } }}
+                  value={
+                    field.value
+                      ? dayjs(`2000-01-01T${field.value}`)
+                      : null
+                  }
+                  onChange={(val) =>
+                    field.onChange(val ? val.format('HH:mm') : '')
+                  }
+                  ampm={false}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      error: !!errors.endTime,
+                      helperText: errors.endTime?.message,
+                    },
+                  }}
                 />
               )}
             />

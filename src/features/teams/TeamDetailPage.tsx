@@ -39,6 +39,7 @@ import type { TeamDTO } from '@/types/team.types';
 import { TeamFormDialog } from './components/TeamFormDialog';
 import { AddMemberDialog } from './components/AddMemberDialog';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useTeamStatistics } from '@/api/statistics.api';
 import { formatDate } from '@/utils/date';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
@@ -48,7 +49,7 @@ export function TeamDetailPage() {
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
   const clubId = useAuthStore((s) => s.user?.clubId);
-  const { isClubAdmin } = usePermissions();
+  const { isClubAdmin, canViewStatistics } = usePermissions();
 
   const [editOpen, setEditOpen] = useState(false);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
@@ -62,6 +63,11 @@ export function TeamDetailPage() {
     clubId ?? null,
     teamId,
   );
+  const { data: teamStats } = useTeamStatistics(
+    canViewStatistics ? (clubId ?? null) : null,
+    canViewStatistics ? (teamId ?? null) : null,
+  );
+
   const { data: members, isLoading: membersLoading } = useTeamMembers(
     clubId ?? null,
     teamId,
@@ -170,6 +176,55 @@ export function TeamDetailPage() {
           </Stack>
         )}
       </Box>
+
+      {/* Team statistics */}
+      {canViewStatistics && teamStats && teamStats.totalTrainings > 0 && (
+        <Paper
+          variant="outlined"
+          sx={{
+            p: 2.5,
+            mb: 3,
+            display: 'flex',
+            gap: 4,
+            flexWrap: 'wrap',
+          }}
+        >
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              {t('statistics.totalTrainings')}
+            </Typography>
+            <Typography variant="h6" fontWeight={700}>
+              {teamStats.totalTrainings}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              {t('statistics.averageAttendance')}
+            </Typography>
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              color={
+                teamStats.averageAttendanceRate >= 75
+                  ? 'success.main'
+                  : teamStats.averageAttendanceRate >= 50
+                    ? 'warning.main'
+                    : 'error.main'
+              }
+            >
+              {teamStats.averageAttendanceRate}%
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              {t('statistics.memberCount')}
+            </Typography>
+            <Typography variant="h6" fontWeight={700}>
+              {teamStats.memberCount}
+            </Typography>
+          </Box>
+        </Paper>
+      )}
 
       {/* Members */}
       <Box

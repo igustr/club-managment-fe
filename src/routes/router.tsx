@@ -103,6 +103,11 @@ const ConversationPage = lazy(() =>
     default: m.ConversationPage,
   })),
 );
+const AnalyticsPage = lazy(() =>
+  import('@/features/statistics/AnalyticsPage').then((m) => ({
+    default: m.AnalyticsPage,
+  })),
+);
 
 // Layout components (not lazy — always needed)
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -321,7 +326,7 @@ export const router = createBrowserRouter([
                     path: '/statistics',
                     element: (
                       <SuspenseWrapper>
-                        <Box>Statistics (Phase 8)</Box>
+                        <AnalyticsPage />
                       </SuspenseWrapper>
                     ),
                   },
