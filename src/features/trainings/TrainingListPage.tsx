@@ -20,6 +20,8 @@ import {
   ToggleButtonGroup,
   MenuItem,
   Stack,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import {
   Add,
@@ -50,9 +52,10 @@ export function TrainingListPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const clubId = useClubId();
-  const { canCreateTraining } = usePermissions();
+  const { canCreateTraining, isClubAdmin } = usePermissions();
+  const [myTeamsOnly, setMyTeamsOnly] = useState(false);
 
-  const { data: trainings, isLoading } = useTrainings(clubId);
+  const { data: trainings, isLoading } = useTrainings(clubId, myTeamsOnly);
   const { data: teams } = useTeams(clubId);
 
   const [search, setSearch] = useState('');
@@ -183,6 +186,18 @@ export function TrainingListPage() {
             {t('trainings.statusCompleted')}
           </MenuItem>
         </TextField>
+        {isClubAdmin && (
+          <FormControlLabel
+            control={
+              <Switch
+                checked={myTeamsOnly}
+                onChange={(e) => setMyTeamsOnly(e.target.checked)}
+                size="small"
+              />
+            }
+            label={t('teams.myTeamsOnly')}
+          />
+        )}
         <Box sx={{ flexGrow: 1 }} />
         <ToggleButtonGroup
           value={viewMode}

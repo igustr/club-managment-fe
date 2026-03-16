@@ -224,7 +224,8 @@
     "removeMember": "Remove Member",
     "removeMemberConfirm": "Are you sure you want to remove \"{{name}}\" from this team?",
     "removeMemberSuccess": "Member removed from team",
-    "searchClubMembers": "Search club members..."
+    "searchClubMembers": "Search club members...",
+    "myTeamsOnly": "My teams only"
   },
   "pitches": {
     "title": "Pitches",

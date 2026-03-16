@@ -7,6 +7,8 @@ import {
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import { ChevronLeft, ChevronRight, ViewList, CalendarMonth } from '@mui/icons-material';
 import { useTrainings } from '@/api/training.api';
@@ -15,19 +17,22 @@ import { usePitches } from '@/api/pitch.api';
 import { MonthlyCalendar } from './components/MonthlyCalendar';
 import { CalendarFilters } from './components/CalendarFilters';
 import { useClubId } from '@/hooks/useClubId';
+import { usePermissions } from '@/hooks/usePermissions';
 import dayjs from 'dayjs';
 
 export function CalendarPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const clubId = useClubId();
+  const { isClubAdmin } = usePermissions();
 
   const [currentMonth, setCurrentMonth] = useState(dayjs().startOf('month'));
   const [teamFilter, setTeamFilter] = useState('');
   const [pitchFilter, setPitchFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [myTeamsOnly, setMyTeamsOnly] = useState(false);
 
-  const { data: trainings } = useTrainings(clubId);
+  const { data: trainings } = useTrainings(clubId, myTeamsOnly);
   const { data: teams } = useTeams(clubId);
   const { data: pitches } = usePitches(clubId);
 
@@ -95,16 +100,30 @@ export function CalendarPage() {
           </IconButton>
         </Box>
 
-        <CalendarFilters
-          teams={teams ?? []}
-          pitches={pitches ?? []}
-          teamFilter={teamFilter}
-          pitchFilter={pitchFilter}
-          statusFilter={statusFilter}
-          onTeamChange={setTeamFilter}
-          onPitchChange={setPitchFilter}
-          onStatusChange={setStatusFilter}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+          {isClubAdmin && (
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={myTeamsOnly}
+                  onChange={(e) => setMyTeamsOnly(e.target.checked)}
+                  size="small"
+                />
+              }
+              label={t('teams.myTeamsOnly')}
+            />
+          )}
+          <CalendarFilters
+            teams={teams ?? []}
+            pitches={pitches ?? []}
+            teamFilter={teamFilter}
+            pitchFilter={pitchFilter}
+            statusFilter={statusFilter}
+            onTeamChange={setTeamFilter}
+            onPitchChange={setPitchFilter}
+            onStatusChange={setStatusFilter}
+          />
+        </Box>
       </Box>
 
       {/* Calendar grid */}

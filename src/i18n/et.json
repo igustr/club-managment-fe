@@ -224,7 +224,8 @@
     "removeMember": "Eemalda liige",
     "removeMemberConfirm": "Kas oled kindel, et soovid liikme \"{{name}}\" meeskonnast eemaldada?",
     "removeMemberSuccess": "Liige eemaldatud meeskonnast",
-    "searchClubMembers": "Otsi klubi liikmeid..."
+    "searchClubMembers": "Otsi klubi liikmeid...",
+    "myTeamsOnly": "Ainult minu meeskonnad"
   },
   "pitches": {
     "title": "Väljakud",

@@ -22,8 +22,8 @@ export const teamKeys = {
 };
 
 // --- API functions ---
-export const getTeams = (clubId: string) =>
-  api.get<TeamDTO[]>(`/api/clubs/${clubId}/teams`).then((r) => r.data);
+export const getTeams = (clubId: string, myTeams?: boolean) =>
+  api.get<TeamDTO[]>(`/api/clubs/${clubId}/teams`, { params: myTeams ? { myTeams: true } : undefined }).then((r) => r.data);
 
 export const getTeam = (clubId: string, teamId: string) =>
   api
@@ -72,10 +72,10 @@ export const removeTeamMember = (
   api.delete(`/api/clubs/${clubId}/teams/${teamId}/members/${userId}`);
 
 // --- Query hooks ---
-export const useTeams = (clubId: string | null) =>
+export const useTeams = (clubId: string | null, myTeams?: boolean) =>
   useQuery({
-    queryKey: teamKeys.list(clubId!),
-    queryFn: () => getTeams(clubId!),
+    queryKey: [...teamKeys.list(clubId!), { myTeams: !!myTeams }],
+    queryFn: () => getTeams(clubId!, myTeams),
     enabled: !!clubId,
   });
 

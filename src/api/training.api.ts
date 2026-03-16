@@ -19,9 +19,9 @@ export const trainingKeys = {
 };
 
 // --- API functions ---
-export const getTrainings = (clubId: string) =>
+export const getTrainings = (clubId: string, myTeams?: boolean) =>
   api
-    .get<TrainingSessionDTO[]>(`/api/clubs/${clubId}/trainings`)
+    .get<TrainingSessionDTO[]>(`/api/clubs/${clubId}/trainings`, { params: myTeams ? { myTeams: true } : undefined })
     .then((r) => r.data);
 
 export const getTraining = (clubId: string, trainingId: string) =>
@@ -72,10 +72,10 @@ export const deleteTraining = (clubId: string, trainingId: string) =>
   api.delete(`/api/clubs/${clubId}/trainings/${trainingId}`);
 
 // --- Query hooks ---
-export const useTrainings = (clubId: string | null) =>
+export const useTrainings = (clubId: string | null, myTeams?: boolean) =>
   useQuery({
-    queryKey: trainingKeys.list(clubId!),
-    queryFn: () => getTrainings(clubId!),
+    queryKey: [...trainingKeys.list(clubId!), { myTeams: !!myTeams }],
+    queryFn: () => getTrainings(clubId!, myTeams),
     enabled: !!clubId,
   });
 

@@ -10,7 +10,7 @@ import {
   Stack,
   Avatar,
 } from '@mui/material';
-import { ArrowBack } from '@mui/icons-material';
+import { ArrowBack, Groups } from '@mui/icons-material';
 import {
   useConversation,
   useMessages,
@@ -18,6 +18,7 @@ import {
   useMarkAsRead,
 } from '@/api/chat.api';
 import { useClubId } from '@/hooks/useClubId';
+import { ConversationType } from '@/types/chat.types';
 import { MessageList } from './components/MessageList';
 import { SendMessageForm } from './components/SendMessageForm';
 import toast from 'react-hot-toast';
@@ -74,8 +75,19 @@ export function ConversationPage() {
         </IconButton>
         {conversation && (
           <Stack direction="row" alignItems="center" spacing={1.5}>
-            <Avatar sx={{ width: 32, height: 32, fontSize: 13, bgcolor: 'primary.main' }}>
-              {conversation.name.substring(0, 2).toUpperCase()}
+            <Avatar
+              sx={{
+                width: 32,
+                height: 32,
+                fontSize: 13,
+                bgcolor: conversation.type === ConversationType.TEAM ? 'primary.main' : 'secondary.main',
+              }}
+            >
+              {conversation.type === ConversationType.TEAM ? (
+                <Groups fontSize="small" />
+              ) : (
+                conversation.name.substring(0, 2).toUpperCase()
+              )}
             </Avatar>
             <Box>
               <Typography variant="subtitle2" fontWeight={600}>

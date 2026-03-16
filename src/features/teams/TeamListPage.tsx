@@ -10,8 +10,12 @@ import {
   CardActionArea,
   Chip,
   CircularProgress,
+  FormControlLabel,
+  Switch,
+  TextField,
+  InputAdornment,
 } from '@mui/material';
-import { Add, Groups } from '@mui/icons-material';
+import { Add, Groups, Search } from '@mui/icons-material';
 import { useTeams } from '@/api/team.api';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -23,8 +27,20 @@ export function TeamListPage() {
   const clubId = useAuthStore((s) => s.user?.clubId);
   const { isClubAdmin } = usePermissions();
   const [createOpen, setCreateOpen] = useState(false);
+  const [myTeamsOnly, setMyTeamsOnly] = useState(false);
+  const [search, setSearch] = useState('');
 
-  const { data: teams, isLoading } = useTeams(clubId ?? null);
+  const { data: teams, isLoading } = useTeams(clubId ?? null, myTeamsOnly);
+
+  const filtered = (teams ?? []).filter((team) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      team.name.toLowerCase().includes(q) ||
+      team.ageGroup?.toLowerCase().includes(q) ||
+      team.season?.toLowerCase().includes(q)
+    );
+  });
 
   if (isLoading) {
     return (
@@ -41,7 +57,7 @@ export function TeamListPage() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          mb: 3,
+          mb: 2,
         }}
       >
         <Typography variant="h5" fontWeight={700}>
@@ -58,7 +74,38 @@ export function TeamListPage() {
         )}
       </Box>
 
-      {!teams || teams.length === 0 ? (
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 3, flexWrap: 'wrap' }}>
+        <TextField
+          size="small"
+          placeholder={t('common.search')}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search fontSize="small" />
+                </InputAdornment>
+              ),
+            },
+          }}
+          sx={{ minWidth: 200 }}
+        />
+        {isClubAdmin && (
+          <FormControlLabel
+            control={
+              <Switch
+                checked={myTeamsOnly}
+                onChange={(e) => setMyTeamsOnly(e.target.checked)}
+                size="small"
+              />
+            }
+            label={t('teams.myTeamsOnly')}
+          />
+        )}
+      </Box>
+
+      {filtered.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Groups sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
           <Typography variant="body1" color="text.secondary">
@@ -77,7 +124,7 @@ export function TeamListPage() {
             gap: 2,
           }}
         >
-          {teams.map((team) => (
+          {filtered.map((team) => (
             <Card variant="outlined" key={team.id}>
               <CardActionArea
                 onClick={() => navigate(`/teams/${team.id}`)}
