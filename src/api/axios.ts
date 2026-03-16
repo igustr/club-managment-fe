@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/authStore';
 import i18n from '@/i18n/i18n';
 
@@ -71,6 +72,12 @@ api.interceptors.response.use(
 
       useAuthStore.getState().logout();
       window.location.href = '/login';
+    }
+
+    // Show toast for non-401 errors (401 is handled above with token refresh)
+    if (error.response?.status !== 401) {
+      const message = getApiErrorMessage(error);
+      toast.error(message);
     }
 
     return Promise.reject(error);

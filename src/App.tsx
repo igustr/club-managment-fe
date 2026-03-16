@@ -9,27 +9,30 @@ import 'dayjs/locale/et';
 import { theme } from './theme';
 import { queryClient } from './api/query-client';
 import { router } from './routes/router';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 export function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="et">
-          <CssBaseline />
-          <RouterProvider router={router} />
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                fontFamily: '"Inter", sans-serif',
-                fontSize: 14,
-              },
-            }}
-          />
-        </LocalizationProvider>
-      </ThemeProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="et">
+            <CssBaseline />
+            <RouterProvider router={router} />
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  fontFamily: '"Inter", sans-serif',
+                  fontSize: 14,
+                },
+              }}
+            />
+          </LocalizationProvider>
+        </ThemeProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }

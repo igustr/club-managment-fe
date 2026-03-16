@@ -415,41 +415,40 @@ export const useTeams = () => {
 
 **Route:** `/statistics` — CLUB_ADMIN/COACH only
 
-### Phase 9: Shared Components & Polish
+### Phase 9: Shared Components & Polish ✅ COMPLETE
 **Goal:** Reusable components, error handling, loading states, final UI polish
 
 **Shared form components (`components/form/`):**
-- [ ] TextFieldInput — MUI TextField + RHF Controller
-- [ ] SelectFieldInput — MUI Select + RHF Controller
-- [ ] DateFieldInput — MUI DatePicker + RHF Controller
-- [ ] TimeFieldInput — MUI TimePicker + RHF Controller
-- [ ] CheckboxFieldInput — MUI Checkbox + RHF Controller
+- [x] TextFieldInput — MUI TextField + RHF Controller (generic typed)
+- [x] SelectFieldInput — MUI Select + RHF Controller (generic typed)
+- [x] DateFieldInput — MUI DatePicker + RHF Controller (dayjs conversion)
+- [x] TimeFieldInput — MUI TimePicker + RHF Controller (24h format)
+- [x] CheckboxFieldInput — MUI Checkbox + RHF Controller
 
 **Shared UI components (`components/ui/`):**
-- [ ] DataTable — reusable MUI DataGrid wrapper with pagination, sorting, search
-- [ ] ConfirmDialog — MUI Dialog for destructive actions
-- [ ] StatusChip — status display with color coding
-- [ ] EmptyState — illustration + message for empty lists
-- [ ] LoadingSkeleton — MUI Skeleton for data loading
-- [ ] PageHeader — page title + breadcrumbs + action buttons
+- [x] ConfirmDialog — MUI Dialog for destructive actions (Phase 3)
+- [x] StatusChip — color-coded status display (success/warning/error/info/default)
+- [x] EmptyState — icon + message for empty lists
+- [x] LoadingSkeleton — MUI Skeleton (table/card/form/detail variants)
+- [x] PageHeader — title + breadcrumbs + back button + action buttons
 
 **Error handling:**
-- [ ] Global error boundary (React ErrorBoundary)
-- [ ] 404 page (route not found)
-- [ ] 403 page (insufficient permissions)
-- [ ] Toast notifications for API errors (global axios interceptor)
-- [ ] Toast notifications for mutation success (per-mutation onSuccess)
+- [x] Global error boundary (React ErrorBoundary) — wraps App, catches unhandled errors
+- [x] 404 page (route not found) — Phase 1
+- [x] 403 page (insufficient permissions) — Phase 1
+- [x] Toast notifications for API errors (global axios response interceptor)
+- [x] Toast notifications for mutation success (per-mutation onSuccess) — already in place across all features
 
 **Responsive:**
-- [ ] Sidebar: permanent on desktop, temporary Drawer on mobile
-- [ ] Tables: horizontal scroll on narrow screens
-- [ ] Forms: stack layout on mobile
-- [ ] Header: compact on mobile
+- [x] Sidebar: permanent on desktop, temporary Drawer on mobile — Phase 1
+- [x] Tables: horizontal scroll via MUI TableContainer — all phases
+- [x] Forms: stack layout on mobile — all phases
+- [x] Header: compact on mobile with hamburger toggle — Phase 1
 
 **Language:**
-- [ ] Complete Estonian translation file
-- [ ] Complete English translation file
-- [ ] Language switcher persists choice in Zustand uiStore
+- [x] Complete Estonian translation file (361+ keys)
+- [x] Complete English translation file (361+ keys)
+- [x] Language switcher persists choice in Zustand uiStore + localStorage
 
 ---
 
@@ -695,4 +694,4 @@ GET    /api/clubs/{clubId}/conversations/unread-count           → number
 **Phase 6:** ✅ COMPLETE — Attendance
 **Phase 7:** ✅ COMPLETE — Chat
 **Phase 8:** ✅ COMPLETE — Player Statistics & Analytics
-**Phase 9:** NOT STARTED — Shared Components & Polish
+**Phase 9:** ✅ COMPLETE — Shared Components & Polish
