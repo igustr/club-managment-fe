@@ -1,4 +1,4 @@
-import { AttendanceStatus, ClubRole } from './common.types';
+import { AttendanceStatus, ClubRole, PlayerPosition } from './common.types';
 
 export interface AttendanceDTO {
   id: string;
@@ -7,6 +7,7 @@ export interface AttendanceDTO {
   firstName: string;
   lastName: string;
   email: string;
+  position: PlayerPosition | null;
   role: ClubRole;
   status: AttendanceStatus;
 }

@@ -10,10 +10,15 @@ import {
   TextField,
   Button,
   Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { useCreatePitch, useUpdatePitch } from '@/api/pitch.api';
 import { pitchSchema, type PitchFormValues } from '@/features/pitches/schemas';
 import type { PitchDTO } from '@/types/pitch.types';
+import { SurfaceType } from '@/types/common.types';
 import { useClubId } from '@/hooks/useClubId';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
@@ -138,13 +143,21 @@ export function PitchFormDialog({ open, onClose, pitch }: PitchFormDialogProps) 
               name="surfaceType"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  label={t('pitches.surfaceType')}
-                  error={!!errors.surfaceType}
-                  helperText={errors.surfaceType?.message}
-                />
+                <FormControl fullWidth>
+                  <InputLabel>{t('pitches.surfaceType')}</InputLabel>
+                  <Select
+                    {...field}
+                    label={t('pitches.surfaceType')}
+                    error={!!errors.surfaceType}
+                  >
+                    <MenuItem value="">&nbsp;</MenuItem>
+                    {Object.values(SurfaceType).map((st) => (
+                      <MenuItem key={st} value={st}>
+                        {t(`pitches.surfaceTypes.${st}`)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               )}
             />
             <Controller

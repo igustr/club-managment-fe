@@ -36,7 +36,7 @@ import {
 import { useClubId } from '@/hooks/useClubId';
 import { usePermissions } from '@/hooks/usePermissions';
 import { clubRoleColors } from '@/utils/roles';
-import { ClubRole } from '@/types/common.types';
+import { ClubRole, PlayerPosition } from '@/types/common.types';
 import { updateUserSchema, type UpdateUserFormValues } from './schemas';
 import { LinkParentDialog } from './components/LinkParentDialog';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
@@ -77,6 +77,7 @@ export function UserDetailPage() {
       firstName: '',
       lastName: '',
       phone: '',
+      position: '',
       role: ClubRole.PLAYER,
       active: true,
     },
@@ -88,6 +89,7 @@ export function UserDetailPage() {
         firstName: user.firstName,
         lastName: user.lastName,
         phone: user.phone ?? '',
+        position: user.position ?? '',
         role: (user.role as ClubRole) ?? ClubRole.PLAYER,
         active: user.active,
       });
@@ -100,6 +102,7 @@ export function UserDetailPage() {
         firstName: values.firstName,
         lastName: values.lastName,
         phone: values.phone || undefined,
+        position: (values.position as PlayerPosition) || undefined,
         role: values.role,
         active: values.active,
       });
@@ -235,6 +238,26 @@ export function UserDetailPage() {
               </FormControl>
             )}
           />
+
+          {user.role === ClubRole.PLAYER && (
+            <Controller
+              name="position"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth>
+                  <InputLabel>{t('users.position')}</InputLabel>
+                  <Select {...field} label={t('users.position')}>
+                    <MenuItem value="">&nbsp;</MenuItem>
+                    {Object.values(PlayerPosition).map((p) => (
+                      <MenuItem key={p} value={p}>
+                        {t(`positions.${p}`)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            />
+          )}
 
           <Controller
             name="active"

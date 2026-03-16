@@ -257,6 +257,7 @@ export function TeamDetailPage() {
               <TableCell>{t('teams.memberName')}</TableCell>
               <TableCell>{t('teams.memberEmail')}</TableCell>
               <TableCell>{t('teams.memberRole')}</TableCell>
+              <TableCell>{t('teams.position')}</TableCell>
               <TableCell>{t('teams.joinedDate')}</TableCell>
               {isClubAdmin && (
                 <TableCell align="right" sx={{ width: 60 }} />
@@ -267,7 +268,7 @@ export function TeamDetailPage() {
             {membersLoading ? (
               <TableRow>
                 <TableCell
-                  colSpan={isClubAdmin ? 5 : 4}
+                  colSpan={isClubAdmin ? 6 : 5}
                   align="center"
                   sx={{ py: 6 }}
                 >
@@ -277,7 +278,7 @@ export function TeamDetailPage() {
             ) : !members || members.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={isClubAdmin ? 5 : 4}
+                  colSpan={isClubAdmin ? 6 : 5}
                   align="center"
                   sx={{ py: 6 }}
                 >
@@ -306,6 +307,9 @@ export function TeamDetailPage() {
                         fontWeight: 600,
                       }}
                     />
+                  </TableCell>
+                  <TableCell>
+                    {member.position ? t(`positions.${member.position}`) : '—'}
                   </TableCell>
                   <TableCell>{formatDate(member.joinedDate)}</TableCell>
                   {isClubAdmin && (

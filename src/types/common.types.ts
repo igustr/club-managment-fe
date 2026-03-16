@@ -21,6 +21,19 @@ export enum TrainingSessionStatus {
   COMPLETED = 'COMPLETED',
 }
 
+export enum PlayerPosition {
+  GOALKEEPER = 'GOALKEEPER',
+  DEFENDER = 'DEFENDER',
+  MIDFIELDER = 'MIDFIELDER',
+  STRIKER = 'STRIKER',
+}
+
+export enum SurfaceType {
+  NATURAL_GRASS = 'NATURAL_GRASS',
+  ARTIFICIAL_TURF = 'ARTIFICIAL_TURF',
+  INDOOR = 'INDOOR',
+}
+
 export interface Page<T> {
   content: T[];
   totalElements: number;

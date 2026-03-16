@@ -63,6 +63,7 @@ export function AttendanceList({
           <TableRow>
             <TableCell>{t('attendance.name')}</TableCell>
             <TableCell>{t('attendance.role')}</TableCell>
+            <TableCell>{t('attendance.position')}</TableCell>
             <TableCell>{t('attendance.status')}</TableCell>
             {canManage && <TableCell align="right">{t('attendance.actions')}</TableCell>}
           </TableRow>
@@ -83,6 +84,9 @@ export function AttendanceList({
                     size="small"
                     variant="outlined"
                   />
+                </TableCell>
+                <TableCell>
+                  {att.position ? t(`positions.${att.position}`) : '—'}
                 </TableCell>
                 <TableCell>
                   <Chip

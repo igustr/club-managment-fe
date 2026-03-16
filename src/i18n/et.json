@@ -89,6 +89,12 @@
     "PARENT": "Lapsevanem",
     "MASTER_ADMIN": "Peaadministraator"
   },
+  "positions": {
+    "GOALKEEPER": "Väravavaht",
+    "DEFENDER": "Kaitsja",
+    "MIDFIELDER": "Poolkaitsja",
+    "STRIKER": "Ründaja"
+  },
   "validation": {
     "required": "See väli on kohustuslik",
     "email": "Sisesta kehtiv e-posti aadress",
@@ -196,7 +202,8 @@
     "linkChildrenHint": "Valikuliselt seo see lapsevanem klubi lastega. Saad lapsi siduda ka hiljem kasutaja profiili lehelt.",
     "searchPlayers": "Otsi mängijaid klubis...",
     "noPlayersInClub": "Mängijaid klubis ei leitud. Lisa esmalt mängija, seejärel seo lapsevanem tema profiili lehelt.",
-    "linkChildrenPartialError": "Kasutaja lisatud, kuid mõned lapsevanema seosed ebaõnnestusid. Saad neid siduda kasutaja profiili lehelt."
+    "linkChildrenPartialError": "Kasutaja lisatud, kuid mõned lapsevanema seosed ebaõnnestusid. Saad neid siduda kasutaja profiili lehelt.",
+    "position": "Positsioon"
   },
   "teams": {
     "title": "Meeskonnad",
@@ -225,7 +232,8 @@
     "removeMemberConfirm": "Kas oled kindel, et soovid liikme \"{{name}}\" meeskonnast eemaldada?",
     "removeMemberSuccess": "Liige eemaldatud meeskonnast",
     "searchClubMembers": "Otsi klubi liikmeid...",
-    "myTeamsOnly": "Ainult minu meeskonnad"
+    "myTeamsOnly": "Ainult minu meeskonnad",
+    "position": "Positsioon"
   },
   "pitches": {
     "title": "Väljakud",
@@ -244,7 +252,12 @@
     "deleteConfirm": "Kas oled kindel, et soovid väljaku \"{{name}}\" kustutada?",
     "schedule": "Ajakava",
     "today": "Täna",
-    "noSessions": "Treeninguid pole"
+    "noSessions": "Treeninguid pole",
+    "surfaceTypes": {
+      "NATURAL_GRASS": "Loomulik muru",
+      "ARTIFICIAL_TURF": "Kunstmuru",
+      "INDOOR": "Siseruumid"
+    }
   },
   "trainings": {
     "title": "Treeningud",
@@ -309,7 +322,8 @@
     "noData": "Kohaloleku andmed puuduvad",
     "playerHint": "Kinnita või keeldu oma osalemisest sellel treeningul.",
     "parentHint": "Kinnita või keeldu oma laste osalemisest.",
-    "noChildren": "Seotud lapsi ei leitud."
+    "noChildren": "Seotud lapsi ei leitud.",
+    "position": "Positsioon"
   },
   "chat": {
     "title": "Sõnumid",

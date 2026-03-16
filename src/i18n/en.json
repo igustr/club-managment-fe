@@ -89,6 +89,12 @@
     "PARENT": "Parent",
     "MASTER_ADMIN": "Platform Admin"
   },
+  "positions": {
+    "GOALKEEPER": "Goalkeeper",
+    "DEFENDER": "Defender",
+    "MIDFIELDER": "Midfielder",
+    "STRIKER": "Striker"
+  },
   "validation": {
     "required": "This field is required",
     "email": "Enter a valid email address",
@@ -196,7 +202,8 @@
     "linkChildrenHint": "Optionally link this parent to children in the club. You can also link children later from the user detail page.",
     "searchPlayers": "Search players in club...",
     "noPlayersInClub": "No players found in the club. Add the player first, then link the parent from their profile.",
-    "linkChildrenPartialError": "User added but some parent-child links failed. You can link them from the user detail page."
+    "linkChildrenPartialError": "User added but some parent-child links failed. You can link them from the user detail page.",
+    "position": "Position"
   },
   "teams": {
     "title": "Teams",
@@ -225,7 +232,8 @@
     "removeMemberConfirm": "Are you sure you want to remove \"{{name}}\" from this team?",
     "removeMemberSuccess": "Member removed from team",
     "searchClubMembers": "Search club members...",
-    "myTeamsOnly": "My teams only"
+    "myTeamsOnly": "My teams only",
+    "position": "Position"
   },
   "pitches": {
     "title": "Pitches",
@@ -244,7 +252,12 @@
     "deleteConfirm": "Are you sure you want to delete the pitch \"{{name}}\"?",
     "schedule": "Schedule",
     "today": "Today",
-    "noSessions": "No sessions"
+    "noSessions": "No sessions",
+    "surfaceTypes": {
+      "NATURAL_GRASS": "Natural Grass",
+      "ARTIFICIAL_TURF": "Artificial Turf",
+      "INDOOR": "Indoor"
+    }
   },
   "trainings": {
     "title": "Trainings",
@@ -309,7 +322,8 @@
     "noData": "No attendance data available",
     "playerHint": "Confirm or decline your attendance for this training.",
     "parentHint": "Confirm or decline attendance for your children.",
-    "noChildren": "No linked children found."
+    "noChildren": "No linked children found.",
+    "position": "Position"
   },
   "chat": {
     "title": "Messages",

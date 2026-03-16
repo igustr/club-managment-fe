@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { TFunction } from 'i18next';
-import { ClubRole } from '@/types/common.types';
+import { ClubRole, PlayerPosition } from '@/types/common.types';
 
 export const addUserToClubSchema = (t: TFunction) =>
   z.object({
@@ -17,6 +17,7 @@ export const updateUserSchema = (t: TFunction) =>
     firstName: z.string().min(1, { message: t('validation.required') }).max(100),
     lastName: z.string().min(1, { message: t('validation.required') }).max(100),
     phone: z.string().max(50).optional().or(z.literal('')),
+    position: z.nativeEnum(PlayerPosition).optional().or(z.literal('')),
     role: z.nativeEnum(ClubRole, {
       errorMap: () => ({ message: t('validation.required') }),
     }),

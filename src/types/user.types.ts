@@ -1,4 +1,4 @@
-import { ClubRole } from './common.types';
+import { ClubRole, PlayerPosition } from './common.types';
 
 export interface AddUserToClubDTO {
   userId: string;
@@ -10,6 +10,7 @@ export interface UpdateUserDTO {
   lastName?: string;
   phone?: string;
   photoUrl?: string;
+  position?: PlayerPosition;
   role?: ClubRole;
   active?: boolean;
 }

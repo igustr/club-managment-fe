@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { TFunction } from 'i18next';
+import { SurfaceType } from '@/types/common.types';
 
 export const pitchSchema = (t: TFunction) =>
   z.object({
@@ -13,8 +14,7 @@ export const pitchSchema = (t: TFunction) =>
       .optional()
       .or(z.literal('')),
     surfaceType: z
-      .string()
-      .max(100, { message: t('validation.maxLength', { max: 100 }) })
+      .nativeEnum(SurfaceType)
       .optional()
       .or(z.literal('')),
     capacity: z

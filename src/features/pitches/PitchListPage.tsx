@@ -112,7 +112,7 @@ export function PitchListPage() {
                     {pitch.surfaceType && (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <Grass fontSize="small" color="action" />
-                        <Chip label={pitch.surfaceType} size="small" variant="outlined" />
+                        <Chip label={t(`pitches.surfaceTypes.${pitch.surfaceType}`)} size="small" variant="outlined" />
                       </Box>
                     )}
                     {pitch.capacity && (

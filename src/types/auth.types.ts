@@ -1,4 +1,4 @@
-import { ClubRole, SystemRole } from './common.types';
+import { ClubRole, PlayerPosition, SystemRole } from './common.types';
 
 export interface UserDTO {
   id: string;
@@ -8,6 +8,7 @@ export interface UserDTO {
   dateOfBirth: string;
   phone: string;
   photoUrl: string | null;
+  position: PlayerPosition | null;
   role: ClubRole | null;
   systemRole: SystemRole | null;
   clubId: string | null;
