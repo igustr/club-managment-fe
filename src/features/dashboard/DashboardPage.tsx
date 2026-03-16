@@ -30,6 +30,8 @@ import { useClubId } from '@/hooks/useClubId';
 import { usePermissions } from '@/hooks/usePermissions';
 import { TrainingSessionStatus } from '@/types/common.types';
 import { formatDate, formatTime } from '@/utils/date';
+import { PlayerDashboard } from './components/PlayerDashboard';
+import { CoachDashboard } from './components/CoachDashboard';
 import dayjs from 'dayjs';
 
 function StatCard({
@@ -91,11 +93,10 @@ const statusColors: Record<
   [TrainingSessionStatus.COMPLETED]: 'success',
 };
 
-export function DashboardPage() {
+function AdminDashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const clubId = useClubId();
-  const { isClubAdmin } = usePermissions();
   const { data: club } = useClub(clubId);
   const { data: usersPage } = useClubUsers(clubId, { page: 0, size: 1 });
   const { data: teams } = useTeams(clubId);
@@ -107,7 +108,6 @@ export function DashboardPage() {
   const pitchCount = pitches?.length ?? 0;
   const trainingCount = trainings?.length ?? 0;
 
-  // Upcoming trainings: scheduled, today or future, sorted by date+time, max 7
   const upcoming = useMemo(() => {
     if (!trainings) return [];
     const today = dayjs().format('YYYY-MM-DD');
@@ -140,7 +140,7 @@ export function DashboardPage() {
           title={t('dashboard.members')}
           value={memberCount}
           icon={<Person />}
-          onClick={isClubAdmin ? () => navigate('/users') : undefined}
+          onClick={() => navigate('/users')}
         />
         <StatCard
           title={t('dashboard.teams')}
@@ -162,7 +162,6 @@ export function DashboardPage() {
         />
       </Stack>
 
-      {/* Upcoming trainings */}
       <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
         {t('dashboard.upcomingTrainings')}
       </Typography>
@@ -225,4 +224,19 @@ export function DashboardPage() {
       )}
     </Box>
   );
+}
+
+export function DashboardPage() {
+  const { isPlayer, isParent, isCoach } = usePermissions();
+
+  if (isPlayer || isParent) {
+    return <PlayerDashboard />;
+  }
+
+  if (isCoach) {
+    return <CoachDashboard />;
+  }
+
+  // Club Admin — original view
+  return <AdminDashboard />;
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Typography, Paper, CircularProgress, Divider } from '@mui/material';
-import { useAttendanceSummary, useUpdateAttendance } from '@/api/attendance.api';
+import { useAttendanceList, useAttendanceSummary, useUpdateAttendance } from '@/api/attendance.api';
 import { useChildren } from '@/api/user.api';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -29,6 +29,12 @@ export function AttendanceSection({ trainingId }: AttendanceSectionProps) {
   const { data: summary, isLoading: summaryLoading } = useAttendanceSummary(
     canViewAttendanceSummary ? clubId : null,
     canViewAttendanceSummary ? trainingId : undefined,
+  );
+
+  // Player/Parent: fetch attendance list to find own/children's status
+  const { data: attendanceList } = useAttendanceList(
+    isPlayer || isParent ? clubId : null,
+    isPlayer || isParent ? trainingId : undefined,
   );
 
   // Parent: fetch children to show per-child attendance
@@ -93,7 +99,7 @@ export function AttendanceSection({ trainingId }: AttendanceSectionProps) {
 
   // Player view: own attendance confirm/decline
   if (isPlayer && user) {
-    const ownAttendance = summary?.attendances.find((a) => a.userId === user.id);
+    const ownAttendance = attendanceList?.find((a) => a.userId === user.id);
 
     return (
       <Paper variant="outlined" sx={{ p: 3 }}>
@@ -133,6 +139,7 @@ export function AttendanceSection({ trainingId }: AttendanceSectionProps) {
               <PlayerAttendanceCard
                 key={child.id}
                 label={`${child.firstName} ${child.lastName}`}
+                attendance={attendanceList?.find((a) => a.userId === child.id)}
                 onConfirm={() => handleUpdateStatus(child.id, AttendanceStatus.CONFIRMED)}
                 onDecline={() => handleUpdateStatus(child.id, AttendanceStatus.DECLINED)}
                 loading={updateMutation.isPending && updatingUserId === child.id}

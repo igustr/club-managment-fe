@@ -67,7 +67,7 @@ export function Sidebar({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const user = useAuthStore((s) => s.user);
-  const { isClubAdmin, canViewStatistics } = usePermissions();
+  const { isClubAdmin, canViewStatistics, canManagePitches } = usePermissions();
   const clubId = useClubId();
   const { data: unreadCount } = useUnreadCount(clubId);
 
@@ -75,7 +75,9 @@ export function Sidebar({
     { key: 'dashboard', path: '/dashboard', icon: <Dashboard />, labelKey: 'nav.dashboard' },
     { key: 'teams', path: '/teams', icon: <Groups />, labelKey: 'nav.teams' },
     { key: 'trainings', path: '/trainings', icon: <FitnessCenter />, labelKey: 'nav.trainings' },
-    { key: 'pitches', path: '/pitches', icon: <Stadium />, labelKey: 'nav.pitches' },
+    ...(canManagePitches
+      ? [{ key: 'pitches', path: '/pitches', icon: <Stadium />, labelKey: 'nav.pitches' }]
+      : []),
     { key: 'calendar', path: '/calendar', icon: <CalendarMonth />, labelKey: 'nav.calendar' },
     { key: 'chat', path: '/chat', icon: <Chat />, labelKey: 'nav.chat', badge: unreadCount },
   ];

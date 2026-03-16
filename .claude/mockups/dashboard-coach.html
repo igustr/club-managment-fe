@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coach Dashboard — Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #F1F5F9; color: #1E293B; }
+
+  .app { display: flex; height: 100vh; }
+
+  /* === SIDEBAR === */
+  .sidebar {
+    width: 260px; background: #0F172A; color: #94A3B8;
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .sidebar-header {
+    padding: 20px 20px 16px; border-bottom: 1px solid #1E293B;
+  }
+  .sidebar-header .club-name {
+    color: #FFFFFF; font-size: 16px; font-weight: 700;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-header .club-name .icon {
+    width: 32px; height: 32px; background: #0D9488; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: white;
+  }
+  .sidebar-nav { padding: 12px 10px; flex: 1; }
+  .sidebar-nav .section-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #475569; padding: 16px 12px 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 8px; font-size: 14px;
+    font-weight: 500; cursor: pointer; color: #94A3B8;
+    text-decoration: none; margin-bottom: 2px;
+  }
+  .nav-item:hover { background: #1E293B; color: #E2E8F0; }
+  .nav-item.active { background: rgba(13, 148, 136, 0.15); color: #FFFFFF; }
+  .nav-item.active .nav-icon { color: #0D9488; }
+  .nav-icon { font-size: 18px; width: 20px; text-align: center; }
+  .nav-badge {
+    margin-left: auto; background: #0D9488; color: white;
+    font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px;
+  }
+  .sidebar-divider { border: none; border-top: 1px solid #1E293B; margin: 4px 10px; }
+  .sidebar-footer {
+    padding: 16px 20px; border-top: 1px solid #1E293B;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 34px; height: 34px; background: #4F46E5; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 13px; font-weight: 600;
+  }
+  .user-info { flex: 1; }
+  .user-name { color: #E2E8F0; font-size: 13px; font-weight: 600; }
+  .user-role { color: #64748B; font-size: 11px; }
+
+  /* === MAIN === */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .header {
+    background: #FFFFFF; border-bottom: 1px solid #E2E8F0;
+    padding: 0 28px; height: 64px; display: flex;
+    align-items: center; justify-content: flex-end; flex-shrink: 0;
+  }
+  .header-actions { display: flex; gap: 12px; align-items: center; }
+  .lang-switch {
+    padding: 6px 12px; border: 1px solid #E2E8F0; border-radius: 6px;
+    font-size: 13px; background: white; color: #475569; cursor: pointer;
+  }
+  .content { flex: 1; padding: 28px; overflow-y: auto; }
+
+  /* === PAGE HEADER === */
+  .page-title { font-size: 22px; font-weight: 700; color: #0F172A; }
+  .page-subtitle { font-size: 14px; color: #64748B; margin-top: 2px; }
+
+  /* === QUICK ACTIONS === */
+  .quick-actions {
+    display: flex; gap: 12px; margin-top: 20px;
+  }
+  .qa-btn {
+    background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px;
+    padding: 14px 20px; font-size: 13px; font-weight: 600;
+    color: #334155; cursor: pointer; display: flex; align-items: center; gap: 8px;
+    transition: all 0.15s;
+  }
+  .qa-btn:hover { border-color: #0D9488; color: #0D9488; background: #F0FDFA; }
+  .qa-btn.primary {
+    background: #0D9488; color: white; border-color: #0D9488;
+  }
+  .qa-btn.primary:hover { background: #0F766E; }
+  .qa-icon { font-size: 18px; }
+
+  /* === TEAM CARDS === */
+  .section-title { font-size: 16px; font-weight: 600; color: #0F172A; margin: 28px 0 16px; }
+  .team-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .team-card {
+    background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0;
+    padding: 20px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .tc-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .tc-name { font-size: 16px; font-weight: 600; color: #0F172A; }
+  .tc-chips { display: flex; gap: 6px; margin-top: 4px; }
+  .chip {
+    display: inline-block; padding: 3px 10px; border-radius: 100px;
+    font-size: 12px; font-weight: 600;
+  }
+  .chip-teal { background: #CCFBF1; color: #0F766E; }
+  .chip-amber { background: #FEF3C7; color: #92400E; }
+  .chip-emerald { background: #D1FAE5; color: #065F46; }
+  .chip-rose { background: #FFE4E6; color: #BE123C; }
+  .chip-slate { background: #F1F5F9; color: #475569; }
+  .chip-indigo { background: #E0E7FF; color: #4338CA; }
+  .tc-members { font-size: 13px; color: #64748B; }
+  .tc-next-training {
+    background: #F8FAFC; border-radius: 8px; padding: 12px;
+    font-size: 13px; color: #334155;
+  }
+  .tc-next-training .tc-nt-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #64748B; margin-bottom: 6px;
+  }
+  .tc-attendance {
+    display: flex; gap: 16px; align-items: center; margin-top: 4px;
+  }
+  .tc-att-item { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+  .tc-att-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-green { background: #059669; }
+  .dot-red { background: #E11D48; }
+  .dot-yellow { background: #D97706; }
+
+  /* === ATTENDANCE OVERVIEW BAR === */
+  .att-bar-container { margin-top: 8px; }
+  .att-bar {
+    display: flex; height: 8px; border-radius: 4px; overflow: hidden; gap: 2px;
+  }
+  .att-bar .bar-seg { border-radius: 4px; }
+  .bar-confirmed { background: #059669; }
+  .bar-declined { background: #E11D48; }
+  .bar-pending { background: #FCD34D; }
+  .att-bar-label {
+    font-size: 12px; color: #64748B; margin-top: 6px;
+  }
+
+  /* === TRAININGS TABLE === */
+  .table-card {
+    background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0;
+    overflow: hidden; margin-top: 16px;
+  }
+  .table-header {
+    padding: 16px 20px; display: flex; justify-content: space-between;
+    align-items: center; border-bottom: 1px solid #E2E8F0;
+  }
+  .table-title { font-size: 16px; font-weight: 600; color: #0F172A; }
+  .btn-primary {
+    background: #0D9488; color: white; border: none;
+    padding: 8px 16px; border-radius: 8px; font-size: 13px;
+    font-weight: 600; cursor: pointer; display: flex;
+    align-items: center; gap: 6px;
+  }
+  .btn-primary:hover { background: #0F766E; }
+  .btn-secondary {
+    background: white; color: #475569; border: 1px solid #E2E8F0;
+    padding: 8px 16px; border-radius: 8px; font-size: 13px;
+    font-weight: 500; cursor: pointer;
+  }
+  .btn-secondary:hover { border-color: #CBD5E1; background: #F8FAFC; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left; padding: 12px 20px; font-size: 12px; font-weight: 600;
+    color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;
+    background: #F8FAFC; border-bottom: 1px solid #E2E8F0;
+  }
+  td {
+    padding: 14px 20px; font-size: 14px; color: #334155;
+    border-bottom: 1px solid #F1F5F9;
+  }
+  tr:hover td { background: #F8FAFC; cursor: pointer; }
+  tr:last-child td { border-bottom: none; }
+
+  /* === ATTENDANCE COMPACT INLINE BAR === */
+  .att-inline { display: flex; align-items: center; gap: 8px; }
+  .att-inline-bar {
+    display: flex; width: 80px; height: 6px; border-radius: 3px; overflow: hidden; gap: 1px;
+  }
+  .att-inline-label { font-size: 13px; font-weight: 600; color: #334155; min-width: 40px; }
+
+  /* === GRID LAYOUTS === */
+  .two-col { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-top: 28px; }
+
+  /* === ATTENDANCE OVERVIEW CARD === */
+  .overview-card {
+    background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0;
+    padding: 20px;
+  }
+  .overview-title {
+    font-size: 14px; font-weight: 600; color: #0F172A; margin-bottom: 16px;
+  }
+  .overview-row {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+  }
+  .overview-row:last-child { margin-bottom: 0; }
+  .overview-team { font-size: 13px; font-weight: 500; color: #334155; min-width: 100px; }
+  .overview-bar {
+    flex: 1; height: 10px; background: #F1F5F9; border-radius: 5px; overflow: hidden;
+  }
+  .overview-fill { height: 100%; border-radius: 5px; }
+  .fill-great { background: #059669; }
+  .fill-good { background: #0D9488; }
+  .fill-ok { background: #D97706; }
+  .overview-pct { font-size: 13px; font-weight: 700; min-width: 40px; text-align: right; }
+  .pct-great { color: #059669; }
+  .pct-good { color: #0D9488; }
+  .pct-ok { color: #D97706; }
+
+  /* === RECENT MESSAGES === */
+  .chat-item {
+    padding: 14px 20px; display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid #F1F5F9; cursor: pointer;
+  }
+  .chat-item:hover { background: #F8FAFC; }
+  .chat-item:last-child { border-bottom: none; }
+  .chat-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600; color: white; flex-shrink: 0;
+  }
+  .chat-info { flex: 1; min-width: 0; }
+  .chat-name { font-size: 13px; font-weight: 600; color: #0F172A; }
+  .chat-msg { font-size: 12px; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-time { font-size: 11px; color: #94A3B8; flex-shrink: 0; }
+  .unread-dot { width: 8px; height: 8px; background: #0D9488; border-radius: 50%; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR (Coach: no pitches, has statistics under HALDUS) -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="club-name">
+        <div class="icon">⚽</div>
+        Club Management
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="section-label">Põhileht</div>
+      <a class="nav-item active" href="#">
+        <span class="nav-icon">📊</span> Ülevaade
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">👥</span> Meeskonnad
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">🏋️</span> Treeningud
+      </a>
+      <!-- NO Väljakud for coach -->
+      <a class="nav-item" href="#">
+        <span class="nav-icon">📅</span> Kalender
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">💬</span> Sõnumid
+        <span class="nav-badge">1</span>
+      </a>
+
+      <hr class="sidebar-divider">
+      <div class="section-label">Haldus</div>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">📈</span> Statistika
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">VM</div>
+      <div class="user-info">
+        <div class="user-name">Viktor Mihhailov</div>
+        <div class="user-role">Treener</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="header">
+      <div class="header-actions">
+        <button class="lang-switch">ET</button>
+        <div class="avatar" style="width:32px;height:32px;font-size:12px;">VM</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-title">Ülevaade</div>
+      <div class="page-subtitle">FC Flora Tallinn</div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="quick-actions">
+        <button class="qa-btn primary">
+          <span class="qa-icon">➕</span> Lisa treening
+        </button>
+        <button class="qa-btn">
+          <span class="qa-icon">🔁</span> Lisa korduv treening
+        </button>
+        <button class="qa-btn">
+          <span class="qa-icon">📊</span> Vaata statistikat
+        </button>
+      </div>
+
+      <!-- MY TEAMS -->
+      <div class="section-title">Minu meeskonnad</div>
+      <div class="team-cards">
+        <div class="team-card">
+          <div class="tc-header">
+            <div>
+              <div class="tc-name">FC Flora U15</div>
+              <div class="tc-chips">
+                <span class="chip chip-slate">U15</span>
+                <span class="chip chip-slate">2025/2026</span>
+              </div>
+            </div>
+            <span class="chip chip-teal">12 liiget</span>
+          </div>
+          <div class="tc-next-training">
+            <div class="tc-nt-label">Järgmine treening</div>
+            <div>📅 18.03.2026 · 🕐 13:10 – 14:40 · 📍 Sportland Arena</div>
+            <div class="tc-attendance">
+              <div class="tc-att-item"><div class="tc-att-dot dot-green"></div> 8 kinnitanud</div>
+              <div class="tc-att-item"><div class="tc-att-dot dot-red"></div> 1 keeldunud</div>
+              <div class="tc-att-item"><div class="tc-att-dot dot-yellow"></div> 3 ootel</div>
+            </div>
+          </div>
+          <div class="att-bar-container">
+            <div class="att-bar">
+              <div class="bar-seg bar-confirmed" style="width: 67%;"></div>
+              <div class="bar-seg bar-declined" style="width: 8%;"></div>
+              <div class="bar-seg bar-pending" style="width: 25%;"></div>
+            </div>
+            <div class="att-bar-label">Viimase 4 nädala keskmine kohalolek: 78%</div>
+          </div>
+        </div>
+
+        <!-- If coach had a second team -->
+        <div class="team-card" style="border-style: dashed; opacity: 0.5;">
+          <div style="text-align: center; padding: 30px 0; color: #94A3B8;">
+            <div style="font-size: 32px; margin-bottom: 8px;">👥</div>
+            <div style="font-size: 14px; font-weight: 500;">Teine meeskond</div>
+            <div style="font-size: 12px; margin-top: 4px;">Kui treener juhendab mitut meeskonda</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TWO COLUMN: TRAININGS + SIDEBAR -->
+      <div class="two-col">
+        <!-- UPCOMING TRAININGS -->
+        <div>
+          <div class="table-card" style="margin-top: 0;">
+            <div class="table-header">
+              <div class="table-title">Lähimad treeningud</div>
+              <button class="btn-primary">+ Lisa treening</button>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Kuupäev</th>
+                  <th>Kellaaeg</th>
+                  <th>Meeskond</th>
+                  <th>Kohalolek</th>
+                  <th>Staatus</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 500;">18.03.2026</td>
+                  <td>13:10 – 14:40</td>
+                  <td><span class="chip chip-teal">U15</span></td>
+                  <td>
+                    <div class="att-inline">
+                      <span class="att-inline-label">8/12</span>
+                      <div class="att-inline-bar">
+                        <div class="bar-seg bar-confirmed" style="width: 67%;"></div>
+                        <div class="bar-seg bar-declined" style="width: 8%;"></div>
+                        <div class="bar-seg bar-pending" style="width: 25%;"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="chip chip-teal">Planeeritud</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">25.03.2026</td>
+                  <td>13:10 – 14:40</td>
+                  <td><span class="chip chip-teal">U15</span></td>
+                  <td>
+                    <div class="att-inline">
+                      <span class="att-inline-label">5/12</span>
+                      <div class="att-inline-bar">
+                        <div class="bar-seg bar-confirmed" style="width: 42%;"></div>
+                        <div class="bar-seg bar-pending" style="width: 58%;"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="chip chip-teal">Planeeritud</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">01.04.2026</td>
+                  <td>13:10 – 14:40</td>
+                  <td><span class="chip chip-teal">U15</span></td>
+                  <td>
+                    <div class="att-inline">
+                      <span class="att-inline-label">2/12</span>
+                      <div class="att-inline-bar">
+                        <div class="bar-seg bar-confirmed" style="width: 17%;"></div>
+                        <div class="bar-seg bar-pending" style="width: 83%;"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="chip chip-teal">Planeeritud</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">08.04.2026</td>
+                  <td>13:10 – 14:40</td>
+                  <td><span class="chip chip-teal">U15</span></td>
+                  <td>
+                    <div class="att-inline">
+                      <span class="att-inline-label">0/12</span>
+                      <div class="att-inline-bar">
+                        <div class="bar-seg bar-pending" style="width: 100%;"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="chip chip-teal">Planeeritud</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">15.04.2026</td>
+                  <td>13:10 – 14:40</td>
+                  <td><span class="chip chip-teal">U15</span></td>
+                  <td>
+                    <div class="att-inline">
+                      <span class="att-inline-label">0/12</span>
+                      <div class="att-inline-bar">
+                        <div class="bar-seg bar-pending" style="width: 100%;"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="chip chip-teal">Planeeritud</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div>
+          <!-- ATTENDANCE OVERVIEW -->
+          <div class="overview-card">
+            <div class="overview-title">Kohaloleku ülevaade (viimased 4 nädalat)</div>
+            <div class="overview-row">
+              <div class="overview-team">FC Flora U15</div>
+              <div class="overview-bar">
+                <div class="overview-fill fill-great" style="width: 78%;"></div>
+              </div>
+              <div class="overview-pct pct-great">78%</div>
+            </div>
+          </div>
+
+          <!-- RECENT MESSAGES -->
+          <div class="table-card" style="margin-top: 16px;">
+            <div class="table-header">
+              <div class="table-title">Viimased sõnumid</div>
+              <button class="btn-secondary">Vaata kõiki</button>
+            </div>
+            <div class="chat-item">
+              <div class="chat-avatar" style="background: #0D9488;">U15</div>
+              <div class="chat-info">
+                <div class="chat-name">U15 Team Chat</div>
+                <div class="chat-msg">Oliver: Kas homme treening toimub?</div>
+              </div>
+              <div style="text-align: right;">
+                <div class="chat-time">15 min</div>
+                <div class="unread-dot" style="margin-left: auto; margin-top: 4px;"></div>
+              </div>
+            </div>
+            <div class="chat-item">
+              <div class="chat-avatar" style="background: #64748B;">MT</div>
+              <div class="chat-info">
+                <div class="chat-name">Maria Tamm</div>
+                <div class="chat-msg">Lapse haiguslehest teavitamine</div>
+              </div>
+              <div style="text-align: right;">
+                <div class="chat-time">2h</div>
+              </div>
+            </div>
+            <div class="chat-item">
+              <div class="chat-avatar" style="background: #4F46E5;">AR</div>
+              <div class="chat-info">
+                <div class="chat-name">Andres Rebane</div>
+                <div class="chat-msg">Aitäh info eest!</div>
+              </div>
+              <div style="text-align: right;">
+                <div class="chat-time">Eile</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

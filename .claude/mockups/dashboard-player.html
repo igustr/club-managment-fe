@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player Dashboard — Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #F1F5F9; color: #1E293B; }
+
+  .app { display: flex; height: 100vh; }
+
+  /* === SIDEBAR === */
+  .sidebar {
+    width: 260px; background: #0F172A; color: #94A3B8;
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .sidebar-header {
+    padding: 20px 20px 16px; border-bottom: 1px solid #1E293B;
+  }
+  .sidebar-header .club-name {
+    color: #FFFFFF; font-size: 16px; font-weight: 700;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-header .club-name .icon {
+    width: 32px; height: 32px; background: #0D9488; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: white;
+  }
+  .sidebar-nav { padding: 12px 10px; flex: 1; }
+  .sidebar-nav .section-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #475569; padding: 16px 12px 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 8px; font-size: 14px;
+    font-weight: 500; cursor: pointer; color: #94A3B8;
+    text-decoration: none; margin-bottom: 2px;
+  }
+  .nav-item:hover { background: #1E293B; color: #E2E8F0; }
+  .nav-item.active { background: rgba(13, 148, 136, 0.15); color: #FFFFFF; }
+  .nav-item.active .nav-icon { color: #0D9488; }
+  .nav-icon { font-size: 18px; width: 20px; text-align: center; }
+  .nav-badge {
+    margin-left: auto; background: #0D9488; color: white;
+    font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px;
+  }
+  .sidebar-footer {
+    padding: 16px 20px; border-top: 1px solid #1E293B;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 34px; height: 34px; background: #0D9488; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 13px; font-weight: 600;
+  }
+  .user-info { flex: 1; }
+  .user-name { color: #E2E8F0; font-size: 13px; font-weight: 600; }
+  .user-role { color: #64748B; font-size: 11px; }
+
+  /* === MAIN === */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .header {
+    background: #FFFFFF; border-bottom: 1px solid #E2E8F0;
+    padding: 0 28px; height: 64px; display: flex;
+    align-items: center; justify-content: flex-end; flex-shrink: 0;
+  }
+  .header-actions { display: flex; gap: 12px; align-items: center; }
+  .lang-switch {
+    padding: 6px 12px; border: 1px solid #E2E8F0; border-radius: 6px;
+    font-size: 13px; background: white; color: #475569; cursor: pointer;
+  }
+  .content { flex: 1; padding: 28px; overflow-y: auto; }
+
+  /* === PAGE HEADER === */
+  .page-title { font-size: 22px; font-weight: 700; color: #0F172A; }
+  .page-subtitle { font-size: 14px; color: #64748B; margin-top: 2px; }
+
+  /* === NEXT TRAINING HERO === */
+  .hero-card {
+    background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0;
+    padding: 24px; margin-top: 20px;
+  }
+  .hero-card .hero-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #64748B; margin-bottom: 16px;
+  }
+  .hero-content { display: flex; gap: 32px; align-items: flex-start; }
+  .hero-date-block {
+    background: #F1F5F9; border-radius: 12px; padding: 16px 20px;
+    text-align: center; min-width: 90px;
+  }
+  .hero-date-block .day-name { font-size: 12px; color: #64748B; font-weight: 500; }
+  .hero-date-block .day-num { font-size: 28px; font-weight: 700; color: #0F172A; }
+  .hero-date-block .month { font-size: 12px; color: #64748B; font-weight: 500; }
+  .hero-details { flex: 1; }
+  .hero-details .detail-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; color: #334155; margin-bottom: 10px;
+  }
+  .hero-details .detail-row .detail-icon { color: #64748B; font-size: 16px; width: 20px; text-align: center; }
+  .hero-details .detail-row .detail-label { color: #64748B; font-weight: 500; min-width: 90px; }
+
+  .hero-actions { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 160px; }
+  .hero-status {
+    font-size: 13px; font-weight: 600; color: #D97706;
+    background: #FEF3C7; padding: 4px 12px; border-radius: 100px; margin-bottom: 4px;
+  }
+  .btn-confirm {
+    background: #059669; color: white; border: none;
+    padding: 10px 28px; border-radius: 8px; font-size: 14px;
+    font-weight: 600; cursor: pointer; width: 100%;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-confirm:hover { background: #047857; }
+  .btn-decline {
+    background: white; color: #E11D48; border: 1px solid #FECDD3;
+    padding: 10px 28px; border-radius: 8px; font-size: 14px;
+    font-weight: 600; cursor: pointer; width: 100%;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-decline:hover { background: #FFF1F2; }
+
+  /* === PENDING TRAININGS === */
+  .section-title { font-size: 16px; font-weight: 600; color: #0F172A; margin: 28px 0 16px; }
+  .pending-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .pending-card {
+    background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0;
+    padding: 20px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .pending-card .pc-date { font-size: 15px; font-weight: 600; color: #0F172A; }
+  .pending-card .pc-time { font-size: 13px; color: #64748B; }
+  .pending-card .pc-meta { font-size: 13px; color: #64748B; display: flex; align-items: center; gap: 6px; }
+  .pending-card .pc-actions { display: flex; gap: 8px; margin-top: 4px; }
+  .btn-sm-confirm {
+    flex: 1; background: #D1FAE5; color: #065F46; border: none;
+    padding: 7px 12px; border-radius: 6px; font-size: 12px;
+    font-weight: 600; cursor: pointer;
+  }
+  .btn-sm-confirm:hover { background: #A7F3D0; }
+  .btn-sm-decline {
+    flex: 1; background: #FFE4E6; color: #BE123C; border: none;
+    padding: 7px 12px; border-radius: 6px; font-size: 12px;
+    font-weight: 600; cursor: pointer;
+  }
+  .btn-sm-decline:hover { background: #FECDD3; }
+
+  /* === MY STATS === */
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; }
+  .mini-stat {
+    background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0;
+    padding: 20px; text-align: center;
+  }
+  .mini-stat .ms-value { font-size: 28px; font-weight: 700; }
+  .mini-stat .ms-label { font-size: 13px; color: #64748B; margin-top: 4px; }
+  .ms-confirmed .ms-value { color: #059669; }
+  .ms-declined .ms-value { color: #E11D48; }
+  .ms-pending .ms-value { color: #D97706; }
+
+  /* === UPCOMING LIST === */
+  .table-card {
+    background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0;
+    overflow: hidden; margin-top: 28px;
+  }
+  .table-header {
+    padding: 16px 20px; display: flex; justify-content: space-between;
+    align-items: center; border-bottom: 1px solid #E2E8F0;
+  }
+  .table-title { font-size: 16px; font-weight: 600; color: #0F172A; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left; padding: 12px 20px; font-size: 12px; font-weight: 600;
+    color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;
+    background: #F8FAFC; border-bottom: 1px solid #E2E8F0;
+  }
+  td {
+    padding: 14px 20px; font-size: 14px; color: #334155;
+    border-bottom: 1px solid #F1F5F9;
+  }
+  tr:hover td { background: #F8FAFC; cursor: pointer; }
+  tr:last-child td { border-bottom: none; }
+  .chip {
+    display: inline-block; padding: 3px 10px; border-radius: 100px;
+    font-size: 12px; font-weight: 600;
+  }
+  .chip-teal { background: #CCFBF1; color: #0F766E; }
+  .chip-amber { background: #FEF3C7; color: #92400E; }
+  .chip-emerald { background: #D1FAE5; color: #065F46; }
+  .chip-rose { background: #FFE4E6; color: #BE123C; }
+  .chip-slate { background: #F1F5F9; color: #475569; }
+
+  /* === GRID LAYOUT === */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR (Player: no pitches, no admin section) -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="club-name">
+        <div class="icon">⚽</div>
+        Club Management
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="section-label">Pohileht</div>
+      <a class="nav-item active" href="#">
+        <span class="nav-icon">📊</span> Ülevaade
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">👥</span> Meeskonnad
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">🏋️</span> Treeningud
+      </a>
+      <!-- NO Väljakud (pitches) for players -->
+      <a class="nav-item" href="#">
+        <span class="nav-icon">📅</span> Kalender
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">💬</span> Sõnumid
+        <span class="nav-badge">2</span>
+      </a>
+      <!-- NO HALDUS section for players -->
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">OT</div>
+      <div class="user-info">
+        <div class="user-name">Oliver Tamm</div>
+        <div class="user-role">Mängija</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="header">
+      <div class="header-actions">
+        <button class="lang-switch">ET</button>
+        <div class="avatar" style="width:32px;height:32px;font-size:12px;">OT</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="page-title">Ülevaade</div>
+      <div class="page-subtitle">FC Flora Tallinn</div>
+
+      <!-- NEXT TRAINING HERO -->
+      <div class="hero-card">
+        <div class="hero-label">Järgmine treening</div>
+        <div class="hero-content">
+          <div class="hero-date-block">
+            <div class="day-name">Kolmapäev</div>
+            <div class="day-num">18</div>
+            <div class="month">märts 2026</div>
+          </div>
+          <div class="hero-details">
+            <div class="detail-row">
+              <span class="detail-icon">🕐</span>
+              <span class="detail-label">Kellaaeg</span>
+              <span>13:10 – 14:40</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-icon">👥</span>
+              <span class="detail-label">Meeskond</span>
+              <span>FC Flora U15</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-icon">📍</span>
+              <span class="detail-label">Väljak</span>
+              <span>Sportland Arena</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-icon">📝</span>
+              <span class="detail-label">Märkmed</span>
+              <span style="color: #94A3B8; font-style: italic;">—</span>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <div class="hero-status">⏳ Otsus tegemata</div>
+            <button class="btn-confirm">✓ Kinnitan osaluse</button>
+            <button class="btn-decline">✕ Keeldun</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PENDING DECISIONS -->
+      <div class="section-title">Otsust ootavad treeningud (3)</div>
+      <div class="pending-grid">
+        <div class="pending-card">
+          <div class="pc-date">Kolmapäev, 25.03.2026</div>
+          <div class="pc-time">13:10 – 14:40</div>
+          <div class="pc-meta">👥 FC Flora U15</div>
+          <div class="pc-meta">📍 Sportland Arena</div>
+          <div class="pc-actions">
+            <button class="btn-sm-confirm">✓ Kinnitan</button>
+            <button class="btn-sm-decline">✕ Keeldun</button>
+          </div>
+        </div>
+        <div class="pending-card">
+          <div class="pc-date">Kolmapäev, 01.04.2026</div>
+          <div class="pc-time">13:10 – 14:40</div>
+          <div class="pc-meta">👥 FC Flora U15</div>
+          <div class="pc-meta">📍 Sportland Arena</div>
+          <div class="pc-actions">
+            <button class="btn-sm-confirm">✓ Kinnitan</button>
+            <button class="btn-sm-decline">✕ Keeldun</button>
+          </div>
+        </div>
+        <div class="pending-card">
+          <div class="pc-date">Kolmapäev, 08.04.2026</div>
+          <div class="pc-time">13:10 – 14:40</div>
+          <div class="pc-meta">👥 FC Flora U15</div>
+          <div class="pc-meta">📍 Sportland Arena</div>
+          <div class="pc-actions">
+            <button class="btn-sm-confirm">✓ Kinnitan</button>
+            <button class="btn-sm-decline">✕ Keeldun</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MY ATTENDANCE STATS + TEAM INFO -->
+      <div class="two-col">
+        <div>
+          <div class="section-title">Minu kohaloleku statistika</div>
+          <div class="stats-row" style="margin-top: 0;">
+            <div class="mini-stat ms-confirmed">
+              <div class="ms-value">8</div>
+              <div class="ms-label">Kinnitatud</div>
+            </div>
+            <div class="mini-stat ms-declined">
+              <div class="ms-value">2</div>
+              <div class="ms-label">Keeldutud</div>
+            </div>
+            <div class="mini-stat ms-pending">
+              <div class="ms-value">4</div>
+              <div class="ms-label">Ootel</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">Minu meeskond</div>
+          <div style="background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0; padding: 20px;">
+            <div style="font-size: 16px; font-weight: 600; color: #0F172A;">FC Flora U15</div>
+            <div style="display: flex; gap: 8px; margin: 10px 0;">
+              <span class="chip chip-slate">U15</span>
+              <span class="chip chip-slate">2025/2026</span>
+            </div>
+            <div style="font-size: 13px; color: #64748B; margin-top: 8px;">👥 12 liiget</div>
+            <div style="font-size: 13px; color: #64748B; margin-top: 4px;">🏋️ 12 treeningut planeeritud</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPCOMING TRAININGS (all, with my status) -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Kõik tulevased treeningud</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Kuupäev</th>
+              <th>Kellaaeg</th>
+              <th>Meeskond</th>
+              <th>Väljak</th>
+              <th>Minu staatus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight: 500;">18.03.2026</td>
+              <td>13:10 – 14:40</td>
+              <td><span class="chip chip-teal">FC Flora U15</span></td>
+              <td>Sportland Arena</td>
+              <td><span class="chip chip-amber">Ootel</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight: 500;">25.03.2026</td>
+              <td>13:10 – 14:40</td>
+              <td><span class="chip chip-teal">FC Flora U15</span></td>
+              <td>Sportland Arena</td>
+              <td><span class="chip chip-amber">Ootel</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight: 500;">01.04.2026</td>
+              <td>13:10 – 14:40</td>
+              <td><span class="chip chip-teal">FC Flora U15</span></td>
+              <td>Sportland Arena</td>
+              <td><span class="chip chip-amber">Ootel</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight: 500;">08.04.2026</td>
+              <td>13:10 – 14:40</td>
+              <td><span class="chip chip-teal">FC Flora U15</span></td>
+              <td>Sportland Arena</td>
+              <td><span class="chip chip-emerald">Kinnitatud</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight: 500;">15.04.2026</td>
+              <td>13:10 – 14:40</td>
+              <td><span class="chip chip-teal">FC Flora U15</span></td>
+              <td>Sportland Arena</td>
+              <td><span class="chip chip-rose">Keeldutud</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight: 500;">22.04.2026</td>
+              <td>13:10 – 14:40</td>
+              <td><span class="chip chip-teal">FC Flora U15</span></td>
+              <td>Sportland Arena</td>
+              <td><span class="chip chip-emerald">Kinnitatud</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
