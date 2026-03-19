@@ -1,6 +1,7 @@
 export enum ConversationType {
   DIRECT = 'DIRECT',
   TEAM = 'TEAM',
+  GROUP = 'GROUP',
 }
 
 export interface ParticipantDTO {
@@ -38,4 +39,9 @@ export interface SendMessageDTO {
 
 export interface CreateDirectConversationDTO {
   participantId: string;
+}
+
+export interface CreateGroupConversationDTO {
+  name: string;
+  participantIds: string[];
 }

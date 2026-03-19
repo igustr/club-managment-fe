@@ -20,6 +20,7 @@ interface AttendanceListProps {
   onUpdateStatus?: (userId: string, status: AttendanceStatus) => void;
   updatingUserId?: string | null;
   canManage: boolean;
+  onProfileClick?: (userId: string) => void;
 }
 
 const statusConfig: Record<
@@ -48,6 +49,7 @@ export function AttendanceList({
   onUpdateStatus,
   updatingUserId,
   canManage,
+  onProfileClick,
 }: AttendanceListProps) {
   const { t } = useTranslation();
 
@@ -75,7 +77,13 @@ export function AttendanceList({
 
             return (
               <TableRow key={att.id}>
-                <TableCell>
+                <TableCell
+                  sx={onProfileClick ? {
+                    cursor: 'pointer',
+                    '&:hover': { color: 'primary.main' },
+                  } : undefined}
+                  onClick={onProfileClick ? () => onProfileClick(att.userId) : undefined}
+                >
                   {att.firstName} {att.lastName}
                 </TableCell>
                 <TableCell>

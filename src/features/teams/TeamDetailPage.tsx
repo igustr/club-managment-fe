@@ -289,7 +289,12 @@ export function TeamDetailPage() {
               </TableRow>
             ) : (
               members.map((member) => (
-                <TableRow key={member.id}>
+                <TableRow
+                  key={member.id}
+                  hover
+                  sx={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/members/${member.userId}`)}
+                >
                   <TableCell>
                     <Typography fontWeight={500}>
                       {member.firstName} {member.lastName}
@@ -318,12 +323,13 @@ export function TeamDetailPage() {
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setRemoveMember({
                               userId: member.userId,
                               name: `${member.firstName} ${member.lastName}`,
-                            })
-                          }
+                            });
+                          }}
                         >
                           <PersonRemove fontSize="small" />
                         </IconButton>

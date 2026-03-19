@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Typography, Paper, CircularProgress, Divider } from '@mui/material';
+import { MemberProfileDialog } from '@/components/ui/MemberProfileDialog';
 import { useAttendanceList, useAttendanceSummary, useUpdateAttendance } from '@/api/attendance.api';
 import { useChildren } from '@/api/user.api';
 import { useAuthStore } from '@/stores/authStore';
@@ -24,6 +25,7 @@ export function AttendanceSection({ trainingId }: AttendanceSectionProps) {
   const { canViewAttendanceSummary, isPlayer, isParent } = usePermissions();
 
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
 
   // Admin/Coach: fetch full summary (includes attendance list)
   const { data: summary, isLoading: summaryLoading } = useAttendanceSummary(
@@ -57,6 +59,14 @@ export function AttendanceSection({ trainingId }: AttendanceSectionProps) {
     }
   };
 
+  const profileDialog = (
+    <MemberProfileDialog
+      open={!!profileUserId}
+      userId={profileUserId}
+      onClose={() => setProfileUserId(null)}
+    />
+  );
+
   // Admin/Coach view: full summary + list
   if (canViewAttendanceSummary) {
     if (summaryLoading) {
@@ -73,27 +83,31 @@ export function AttendanceSection({ trainingId }: AttendanceSectionProps) {
     }
 
     return (
-      <Paper variant="outlined" sx={{ p: 3 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-          {t('trainings.attendance')}
-        </Typography>
-        {summary ? (
-          <>
-            <AttendanceSummary summary={summary} />
-            <Divider sx={{ my: 2 }} />
-            <AttendanceList
-              attendances={summary.attendances}
-              onUpdateStatus={handleUpdateStatus}
-              updatingUserId={updatingUserId}
-              canManage
-            />
-          </>
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            {t('attendance.noData')}
+      <>
+        <Paper variant="outlined" sx={{ p: 3 }}>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+            {t('trainings.attendance')}
           </Typography>
-        )}
-      </Paper>
+          {summary ? (
+            <>
+              <AttendanceSummary summary={summary} />
+              <Divider sx={{ my: 2 }} />
+              <AttendanceList
+                attendances={summary.attendances}
+                onUpdateStatus={handleUpdateStatus}
+                updatingUserId={updatingUserId}
+                canManage
+                onProfileClick={(userId) => setProfileUserId(userId)}
+              />
+            </>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              {t('attendance.noData')}
+            </Typography>
+          )}
+        </Paper>
+        {profileDialog}
+      </>
     );
   }
 

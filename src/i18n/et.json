@@ -17,7 +17,8 @@
     "error": "Viga",
     "success": "Õnnestus",
     "logout": "Logi välja",
-    "language": "Keel"
+    "language": "Keel",
+    "all": "Kõik"
   },
   "auth": {
     "login": {
@@ -182,7 +183,8 @@
     "confirmedShort": "kinnitanud",
     "declinedShort": "keeldunud",
     "pendingShort": "ootel",
-    "planned": "planeeritud"
+    "planned": "planeeritud",
+    "teamChat": "Meeskonna vestlus"
   },
   "clubs": {
     "settings": {
@@ -351,13 +353,36 @@
     "noChildren": "Seotud lapsi ei leitud.",
     "position": "Positsioon"
   },
+  "profile": {
+    "title": "Profiil",
+    "personalInfo": "Isikuandmed",
+    "age": "Vanus",
+    "years_one": "{{count}} aasta",
+    "years_other": "{{count}} aastat",
+    "dateOfBirth": "Sünniaeg",
+    "email": "E-post",
+    "phone": "Telefon",
+    "parents": "Vanemad",
+    "sendMessage": "Saada sõnum",
+    "attendanceStats": "Kohaloleku statistika",
+    "totalTrainings": "Treeninguid",
+    "attended": "Osalenud",
+    "declined": "Keeldunud",
+    "pending": "Ootel",
+    "attendanceRate": "Kohaloleku määr"
+  },
   "chat": {
     "title": "Sõnumid",
     "newConversation": "Uus vestlus",
+    "directMessage": "Otsevestlus",
+    "newGroupChat": "Grupivestlus",
+    "groupName": "Grupi nimi",
     "noConversations": "Vestlused puuduvad",
     "noMessages": "Sõnumeid pole",
     "messagePlaceholder": "Kirjuta sõnum...",
     "searchUsers": "Otsi kasutajaid...",
+    "filterByTeam": "Filtreeri tiimi järgi",
+    "allUsers": "Kõik kasutajad",
     "participants": "osalejat",
     "sendSuccess": "Sõnum saadetud"
   },

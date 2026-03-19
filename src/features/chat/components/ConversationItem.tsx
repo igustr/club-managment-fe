@@ -26,8 +26,8 @@ export function ConversationItem({
 }: ConversationItemProps) {
   const { t } = useTranslation();
 
-  const isTeam = conversation.type === ConversationType.TEAM;
-  const initials = isTeam
+  const isGroup = conversation.type === ConversationType.TEAM || conversation.type === ConversationType.GROUP;
+  const initials = isGroup
     ? conversation.name.substring(0, 2).toUpperCase()
     : conversation.participants
         .slice(0, 2)
@@ -58,12 +58,12 @@ export function ConversationItem({
         >
           <Avatar
             sx={{
-              bgcolor: isTeam ? 'primary.main' : 'secondary.main',
+              bgcolor: isGroup ? 'primary.main' : 'secondary.main',
               width: 40,
               height: 40,
             }}
           >
-            {isTeam ? <Groups fontSize="small" /> : initials}
+            {isGroup ? <Groups fontSize="small" /> : initials}
           </Avatar>
         </Badge>
       </ListItemAvatar>

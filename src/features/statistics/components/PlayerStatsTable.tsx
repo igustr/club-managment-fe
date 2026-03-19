@@ -18,12 +18,13 @@ import type { PlayerStatisticsDTO } from '@/types/statistics.types';
 interface PlayerStatsTableProps {
   title: string;
   players: PlayerStatisticsDTO[];
+  onProfileClick?: (userId: string) => void;
 }
 
 type SortKey = 'name' | 'totalTrainings' | 'confirmedCount' | 'attendanceRate';
 type SortDir = 'asc' | 'desc';
 
-export function PlayerStatsTable({ title, players }: PlayerStatsTableProps) {
+export function PlayerStatsTable({ title, players, onProfileClick }: PlayerStatsTableProps) {
   const { t } = useTranslation();
   const [sortKey, setSortKey] = useState<SortKey>('attendanceRate');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
@@ -111,7 +112,13 @@ export function PlayerStatsTable({ title, players }: PlayerStatsTableProps) {
           <TableBody>
             {sorted.map((player) => (
               <TableRow key={player.userId}>
-                <TableCell>
+                <TableCell
+                  sx={onProfileClick ? {
+                    cursor: 'pointer',
+                    '&:hover': { color: 'primary.main' },
+                  } : undefined}
+                  onClick={onProfileClick ? () => onProfileClick(player.userId) : undefined}
+                >
                   <Typography variant="body2" fontWeight={500}>
                     {player.firstName} {player.lastName}
                   </Typography>

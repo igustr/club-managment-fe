@@ -17,7 +17,8 @@
     "error": "Error",
     "success": "Success",
     "logout": "Log out",
-    "language": "Language"
+    "language": "Language",
+    "all": "All"
   },
   "auth": {
     "login": {
@@ -182,7 +183,8 @@
     "confirmedShort": "confirmed",
     "declinedShort": "declined",
     "pendingShort": "pending",
-    "planned": "planned"
+    "planned": "planned",
+    "teamChat": "Team Chat"
   },
   "clubs": {
     "settings": {
@@ -351,13 +353,36 @@
     "noChildren": "No linked children found.",
     "position": "Position"
   },
+  "profile": {
+    "title": "Profile",
+    "personalInfo": "Personal Info",
+    "age": "Age",
+    "years_one": "{{count}} year",
+    "years_other": "{{count}} years",
+    "dateOfBirth": "Date of Birth",
+    "email": "Email",
+    "phone": "Phone",
+    "parents": "Parents",
+    "sendMessage": "Send message",
+    "attendanceStats": "Attendance Statistics",
+    "totalTrainings": "Trainings",
+    "attended": "Attended",
+    "declined": "Declined",
+    "pending": "Pending",
+    "attendanceRate": "Attendance Rate"
+  },
   "chat": {
     "title": "Messages",
     "newConversation": "New Conversation",
+    "directMessage": "Direct Message",
+    "newGroupChat": "Group Chat",
+    "groupName": "Group name",
     "noConversations": "No conversations yet",
     "noMessages": "No messages yet",
     "messagePlaceholder": "Type a message...",
     "searchUsers": "Search users...",
+    "filterByTeam": "Filter by team",
+    "allUsers": "All users",
     "participants": "participants",
     "sendSuccess": "Message sent"
   },

@@ -6,9 +6,10 @@ import dayjs from 'dayjs';
 
 interface MessageListProps {
   messages: MessageDTO[];
+  onProfileClick?: (userId: string) => void;
 }
 
-export function MessageList({ messages }: MessageListProps) {
+export function MessageList({ messages, onProfileClick }: MessageListProps) {
   const currentUserId = useAuthStore((s) => s.user?.id);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -60,14 +61,31 @@ export function MessageList({ messages }: MessageListProps) {
               }}
             >
               {!isOwn && (
-                <Avatar sx={{ width: 28, height: 28, fontSize: 12, mt: 0.5 }}>
+                <Avatar
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    fontSize: 12,
+                    mt: 0.5,
+                    ...(onProfileClick ? { cursor: 'pointer' } : {}),
+                  }}
+                  onClick={onProfileClick ? () => onProfileClick(msg.senderId) : undefined}
+                >
                   {msg.senderFirstName.charAt(0)}
                   {msg.senderLastName.charAt(0)}
                 </Avatar>
               )}
               <Box sx={{ maxWidth: '70%' }}>
                 {!isOwn && (
-                  <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{
+                      ml: 0.5,
+                      ...(onProfileClick ? { cursor: 'pointer', '&:hover': { color: 'primary.main' } } : {}),
+                    }}
+                    onClick={onProfileClick ? () => onProfileClick(msg.senderId) : undefined}
+                  >
                     {msg.senderFirstName} {msg.senderLastName}
                   </Typography>
                 )}

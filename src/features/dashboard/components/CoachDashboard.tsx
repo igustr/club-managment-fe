@@ -21,6 +21,7 @@ import {
   Repeat,
   BarChart,
   CalendarMonth,
+  Chat,
 } from '@mui/icons-material';
 import { useTrainings } from '@/api/training.api';
 import { useTeams } from '@/api/team.api';
@@ -29,6 +30,7 @@ import { useConversations } from '@/api/chat.api';
 import { useClub } from '@/api/club.api';
 import { useClubId } from '@/hooks/useClubId';
 import { TrainingSessionStatus } from '@/types/common.types';
+import { ConversationType } from '@/types/chat.types';
 import { formatDate, formatTime } from '@/utils/date';
 import dayjs from 'dayjs';
 
@@ -68,8 +70,16 @@ export function CoachDashboard() {
     return upcoming.find((tr) => tr.teamId === teamId);
   };
 
-  // Recent conversations (last 3)
-  const recentConversations = conversations?.slice(0, 3);
+  // Team conversations pinned at top
+  const teamConversations = useMemo(
+    () => (conversations ?? []).filter((c) => c.type === ConversationType.TEAM),
+    [conversations],
+  );
+
+  // Recent conversations (last 3, excluding team chats already shown)
+  const recentConversations = (conversations ?? [])
+    .filter((c) => c.type !== ConversationType.TEAM)
+    .slice(0, 3);
 
   return (
     <Box>
@@ -104,6 +114,52 @@ export function CoachDashboard() {
           {t('dashboard.viewStatistics')}
         </Button>
       </Stack>
+
+      {/* TEAM CHATS */}
+      {teamConversations.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
+            {t('dashboard.teamChat')}
+          </Typography>
+          <Stack direction="row" spacing={2}>
+            {teamConversations.map((conv) => (
+              <Paper
+                key={conv.id}
+                variant="outlined"
+                sx={{
+                  p: 2,
+                  cursor: 'pointer',
+                  flex: 1,
+                  '&:hover': { borderColor: 'primary.main' },
+                }}
+                onClick={() => navigate(`/chat/${conv.id}`)}
+              >
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <Chat color="primary" />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" fontWeight={600}>
+                      {conv.name}
+                    </Typography>
+                    {conv.lastMessageText && (
+                      <Typography variant="caption" color="text.secondary" noWrap>
+                        {conv.lastMessageText}
+                      </Typography>
+                    )}
+                  </Box>
+                  {conv.unreadCount > 0 && (
+                    <Chip
+                      label={conv.unreadCount}
+                      size="small"
+                      color="primary"
+                      sx={{ height: 20, fontSize: 11 }}
+                    />
+                  )}
+                </Stack>
+              </Paper>
+            ))}
+          </Stack>
+        </Box>
+      )}
 
       {/* MY TEAMS */}
       <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>

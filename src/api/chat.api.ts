@@ -6,6 +6,7 @@ import type {
   MessageDTO,
   SendMessageDTO,
   CreateDirectConversationDTO,
+  CreateGroupConversationDTO,
 } from '@/types/chat.types';
 import type { Page } from '@/types/common.types';
 
@@ -42,6 +43,14 @@ export const createDirectConversation = (
 ) =>
   api
     .post<ConversationDTO>(`/api/clubs/${clubId}/conversations`, data)
+    .then((r) => r.data);
+
+export const createGroupConversation = (
+  clubId: string,
+  data: CreateGroupConversationDTO,
+) =>
+  api
+    .post<ConversationDTO>(`/api/clubs/${clubId}/conversations/group`, data)
     .then((r) => r.data);
 
 export const getMessages = (
@@ -121,6 +130,17 @@ export const useCreateDirectConversation = (clubId: string) =>
   useMutation({
     mutationFn: (data: CreateDirectConversationDTO) =>
       createDirectConversation(clubId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: chatKeys.conversationList(clubId),
+      });
+    },
+  });
+
+export const useCreateGroupConversation = (clubId: string) =>
+  useMutation({
+    mutationFn: (data: CreateGroupConversationDTO) =>
+      createGroupConversation(clubId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: chatKeys.conversationList(clubId),

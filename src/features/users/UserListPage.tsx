@@ -19,6 +19,7 @@ import {
   CircularProgress,
   IconButton,
   Tooltip,
+  Stack,
 } from '@mui/material';
 import { Add, Search, Delete } from '@mui/icons-material';
 import { useClubUsers, useRemoveClubUser } from '@/api/user.api';
@@ -35,6 +36,7 @@ export function UserListPage() {
   const navigate = useNavigate();
   const clubId = useClubId();
   const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [addOpen, setAddOpen] = useState(false);
@@ -43,8 +45,11 @@ export function UserListPage() {
     name: string;
   } | null>(null);
 
+  const roleOptions = ['CLUB_ADMIN', 'COACH', 'PLAYER', 'PARENT'] as const;
+
   const { data, isLoading } = useClubUsers(clubId, {
     search: search || undefined,
+    role: roleFilter || undefined,
     page,
     size: rowsPerPage,
   });
@@ -87,25 +92,52 @@ export function UserListPage() {
         </Button>
       </Box>
 
-      <TextField
-        placeholder={t('common.search')}
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setPage(0);
-        }}
-        size="small"
-        sx={{ mb: 3, width: 320 }}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search fontSize="small" />
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
+      <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }} flexWrap="wrap">
+        <TextField
+          placeholder={t('common.search')}
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(0);
+          }}
+          size="small"
+          sx={{ width: 320 }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search fontSize="small" />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+        <Stack direction="row" spacing={0.5}>
+          <Chip
+            label={t('common.all')}
+            size="small"
+            variant={roleFilter === null ? 'filled' : 'outlined'}
+            color={roleFilter === null ? 'primary' : 'default'}
+            onClick={() => {
+              setRoleFilter(null);
+              setPage(0);
+            }}
+          />
+          {roleOptions.map((role) => (
+            <Chip
+              key={role}
+              label={t(`roles.${role}`)}
+              size="small"
+              variant={roleFilter === role ? 'filled' : 'outlined'}
+              color={roleFilter === role ? 'primary' : 'default'}
+              onClick={() => {
+                setRoleFilter(roleFilter === role ? null : role);
+                setPage(0);
+              }}
+            />
+          ))}
+        </Stack>
+      </Stack>
 
       <TableContainer component={Paper} variant="outlined">
         <Table>

@@ -10,12 +10,22 @@ import {
   CircularProgress,
   TextField,
   InputAdornment,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
-import { Add, Search } from '@mui/icons-material';
-import { useConversations, useCreateDirectConversation } from '@/api/chat.api';
+import { Add, Search, Person, GroupAdd } from '@mui/icons-material';
+import {
+  useConversations,
+  useCreateDirectConversation,
+  useCreateGroupConversation,
+} from '@/api/chat.api';
 import { useClubId } from '@/hooks/useClubId';
+import { usePermissions } from '@/hooks/usePermissions';
 import { ConversationItem } from './components/ConversationItem';
 import { NewDirectChatDialog } from './components/NewDirectChatDialog';
+import { NewGroupChatDialog } from './components/NewGroupChatDialog';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
 
@@ -24,16 +34,35 @@ export function ConversationListPage() {
   const navigate = useNavigate();
   const clubId = useClubId();
 
+  const { isClubAdmin, isCoach } = usePermissions();
+  const canCreateGroup = isClubAdmin || isCoach;
+
   const { data: conversations, isLoading } = useConversations(clubId);
   const createMutation = useCreateDirectConversation(clubId!);
+  const createGroupMutation = useCreateGroupConversation(clubId!);
 
   const [newChatOpen, setNewChatOpen] = useState(false);
+  const [newGroupOpen, setNewGroupOpen] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [search, setSearch] = useState('');
 
   const handleSelectUser = async (participantId: string) => {
     try {
       const conversation = await createMutation.mutateAsync({ participantId });
       setNewChatOpen(false);
+      navigate(`/chat/${conversation.id}`);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error));
+    }
+  };
+
+  const handleCreateGroup = async (name: string, participantIds: string[]) => {
+    try {
+      const conversation = await createGroupMutation.mutateAsync({
+        name,
+        participantIds,
+      });
+      setNewGroupOpen(false);
       navigate(`/chat/${conversation.id}`);
     } catch (error) {
       toast.error(getApiErrorMessage(error));
@@ -75,13 +104,53 @@ export function ConversationListPage() {
         <Typography variant="h5" fontWeight={700}>
           {t('chat.title')}
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => setNewChatOpen(true)}
-        >
-          {t('chat.newConversation')}
-        </Button>
+        {canCreateGroup ? (
+          <>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={(e) => setMenuAnchor(e.currentTarget)}
+            >
+              {t('chat.newConversation')}
+            </Button>
+            <Menu
+              anchorEl={menuAnchor}
+              open={!!menuAnchor}
+              onClose={() => setMenuAnchor(null)}
+            >
+              <MenuItem
+                onClick={() => {
+                  setMenuAnchor(null);
+                  setNewChatOpen(true);
+                }}
+              >
+                <ListItemIcon>
+                  <Person fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>{t('chat.directMessage')}</ListItemText>
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setMenuAnchor(null);
+                  setNewGroupOpen(true);
+                }}
+              >
+                <ListItemIcon>
+                  <GroupAdd fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>{t('chat.newGroupChat')}</ListItemText>
+              </MenuItem>
+            </Menu>
+          </>
+        ) : (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => setNewChatOpen(true)}
+          >
+            {t('chat.newConversation')}
+          </Button>
+        )}
       </Box>
 
       <TextField
@@ -131,6 +200,13 @@ export function ConversationListPage() {
         onClose={() => setNewChatOpen(false)}
         onSelect={handleSelectUser}
         loading={createMutation.isPending}
+      />
+
+      <NewGroupChatDialog
+        open={newGroupOpen}
+        onClose={() => setNewGroupOpen(false)}
+        onCreate={handleCreateGroup}
+        loading={createGroupMutation.isPending}
       />
     </Box>
   );

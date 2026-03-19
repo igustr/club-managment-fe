@@ -7,12 +7,14 @@ import {
   Paper,
   Stack,
   Chip,
+  Button,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  LinearProgress,
 } from '@mui/material';
 import {
   Groups,
@@ -20,12 +22,18 @@ import {
   FitnessCenter,
   SportsSoccer,
   CalendarMonth,
+  Add,
+  PersonAdd,
+  BarChart,
+  Settings,
 } from '@mui/icons-material';
 import { useClubUsers } from '@/api/user.api';
 import { useClub } from '@/api/club.api';
 import { useTeams } from '@/api/team.api';
 import { useTrainings } from '@/api/training.api';
 import { usePitches } from '@/api/pitch.api';
+import { useClubStatistics } from '@/api/statistics.api';
+import { useConversations } from '@/api/chat.api';
 import { useClubId } from '@/hooks/useClubId';
 import { usePermissions } from '@/hooks/usePermissions';
 import { TrainingSessionStatus } from '@/types/common.types';
@@ -102,6 +110,8 @@ function AdminDashboard() {
   const { data: teams } = useTeams(clubId);
   const { data: trainings } = useTrainings(clubId);
   const { data: pitches } = usePitches(clubId);
+  const { data: clubStats } = useClubStatistics(clubId);
+  const { data: conversations } = useConversations(clubId);
 
   const memberCount = usersPage?.totalElements ?? 0;
   const teamCount = teams?.length ?? 0;
@@ -124,17 +134,59 @@ function AdminDashboard() {
       .slice(0, 7);
   }, [trainings]);
 
+  const recentConversations = conversations?.slice(0, 3);
+
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} sx={{ mb: 1 }}>
+      <Typography variant="h5" fontWeight={700} sx={{ mb: 0.5 }}>
         {t('nav.dashboard')}
       </Typography>
       {club && (
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
           {club.name}
         </Typography>
       )}
 
+      {/* Quick actions */}
+      <Stack direction="row" spacing={1.5} sx={{ mb: 3 }} flexWrap="wrap">
+        <Button
+          variant="contained"
+          startIcon={<PersonAdd />}
+          onClick={() => navigate('/users')}
+        >
+          {t('users.addUser')}
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<Add />}
+          onClick={() => navigate('/teams')}
+        >
+          {t('teams.createTeam')}
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<FitnessCenter />}
+          onClick={() => navigate('/trainings/create')}
+        >
+          {t('trainings.createTraining')}
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<BarChart />}
+          onClick={() => navigate('/statistics')}
+        >
+          {t('nav.statistics')}
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<Settings />}
+          onClick={() => navigate('/settings')}
+        >
+          {t('nav.settings')}
+        </Button>
+      </Stack>
+
+      {/* Stat cards */}
       <Stack direction="row" flexWrap="wrap" gap={2} sx={{ mb: 4 }}>
         <StatCard
           title={t('dashboard.members')}
@@ -162,66 +214,203 @@ function AdminDashboard() {
         />
       </Stack>
 
-      <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-        {t('dashboard.upcomingTrainings')}
-      </Typography>
-      {upcoming.length === 0 ? (
-        <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
-          <CalendarMonth
-            sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }}
-          />
-          <Typography color="text.secondary">
-            {t('dashboard.noUpcoming')}
+      {/* Two-column: Upcoming trainings + right sidebar */}
+      <Stack direction={{ xs: 'column', lg: 'row' }} spacing={3}>
+        {/* Upcoming trainings */}
+        <Box sx={{ flex: 1.5 }}>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
+            {t('dashboard.upcomingTrainings')}
           </Typography>
-        </Paper>
-      ) : (
-        <TableContainer component={Paper} variant="outlined">
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>{t('trainings.date')}</TableCell>
-                <TableCell>{t('trainings.time')}</TableCell>
-                <TableCell>{t('trainings.team')}</TableCell>
-                <TableCell>{t('trainings.pitch')}</TableCell>
-                <TableCell>{t('trainings.status')}</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {upcoming.map((tr) => (
-                <TableRow
-                  key={tr.id}
-                  hover
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/trainings/${tr.id}`)}
+          {upcoming.length === 0 ? (
+            <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
+              <CalendarMonth
+                sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }}
+              />
+              <Typography color="text.secondary">
+                {t('dashboard.noUpcoming')}
+              </Typography>
+            </Paper>
+          ) : (
+            <TableContainer component={Paper} variant="outlined">
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{t('trainings.date')}</TableCell>
+                    <TableCell>{t('trainings.time')}</TableCell>
+                    <TableCell>{t('trainings.team')}</TableCell>
+                    <TableCell>{t('trainings.pitch')}</TableCell>
+                    <TableCell>{t('trainings.status')}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {upcoming.map((tr) => (
+                    <TableRow
+                      key={tr.id}
+                      hover
+                      sx={{ cursor: 'pointer' }}
+                      onClick={() => navigate(`/trainings/${tr.id}`)}
+                    >
+                      <TableCell>{formatDate(tr.date)}</TableCell>
+                      <TableCell>
+                        {formatTime(tr.startTime)} – {formatTime(tr.endTime)}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={tr.teamName}
+                          size="small"
+                          variant="outlined"
+                        />
+                      </TableCell>
+                      <TableCell>{tr.pitchName ?? '—'}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={t(
+                            `trainings.status${tr.status.charAt(0) + tr.status.slice(1).toLowerCase()}`,
+                          )}
+                          size="small"
+                          color={statusColors[tr.status]}
+                          variant="outlined"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </Box>
+
+        {/* Right column: Attendance + Messages */}
+        <Box sx={{ flex: 1, minWidth: 280 }}>
+          {/* Team attendance overview */}
+          {clubStats && clubStats.teamStatistics.length > 0 && (
+            <Paper variant="outlined" sx={{ p: 2.5, mb: 2 }}>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>
+                {t('dashboard.attendanceOverview')}
+              </Typography>
+              {clubStats.teamStatistics.map((ts) => (
+                <Stack
+                  key={ts.teamId}
+                  direction="row"
+                  alignItems="center"
+                  spacing={1.5}
+                  sx={{ mb: 1.5, '&:last-child': { mb: 0 } }}
                 >
-                  <TableCell>{formatDate(tr.date)}</TableCell>
-                  <TableCell>
-                    {formatTime(tr.startTime)} – {formatTime(tr.endTime)}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={tr.teamName}
-                      size="small"
-                      variant="outlined"
+                  <Typography
+                    variant="body2"
+                    fontWeight={500}
+                    sx={{ minWidth: 100 }}
+                    noWrap
+                  >
+                    {ts.teamName}
+                  </Typography>
+                  <Box sx={{ flex: 1 }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={ts.averageAttendanceRate}
+                      color={
+                        ts.averageAttendanceRate >= 75
+                          ? 'success'
+                          : ts.averageAttendanceRate >= 50
+                            ? 'warning'
+                            : 'error'
+                      }
+                      sx={{ height: 8, borderRadius: 4 }}
                     />
-                  </TableCell>
-                  <TableCell>{tr.pitchName ?? '—'}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={t(
-                        `trainings.status${tr.status.charAt(0) + tr.status.slice(1).toLowerCase()}`,
-                      )}
-                      size="small"
-                      color={statusColors[tr.status]}
-                      variant="outlined"
-                    />
-                  </TableCell>
-                </TableRow>
+                  </Box>
+                  <Typography
+                    variant="body2"
+                    fontWeight={700}
+                    sx={{ minWidth: 40, textAlign: 'right' }}
+                    color={
+                      ts.averageAttendanceRate >= 75
+                        ? 'success.main'
+                        : ts.averageAttendanceRate >= 50
+                          ? 'warning.main'
+                          : 'error.main'
+                    }
+                  >
+                    {Math.round(ts.averageAttendanceRate)}%
+                  </Typography>
+                </Stack>
               ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+            </Paper>
+          )}
+
+          {/* Recent messages */}
+          <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{
+                p: 2,
+                pb: 1.5,
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+              }}
+            >
+              <Typography variant="subtitle2" fontWeight={600}>
+                {t('dashboard.recentMessages')}
+              </Typography>
+              <Button size="small" onClick={() => navigate('/chat')}>
+                {t('dashboard.viewAll')}
+              </Button>
+            </Stack>
+            {!recentConversations || recentConversations.length === 0 ? (
+              <Box sx={{ p: 2, textAlign: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  {t('chat.noConversations')}
+                </Typography>
+              </Box>
+            ) : (
+              recentConversations.map((conv) => (
+                <Box
+                  key={conv.id}
+                  sx={{
+                    px: 2,
+                    py: 1.5,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    cursor: 'pointer',
+                    '&:hover': { bgcolor: 'action.hover' },
+                    '&:last-child': { borderBottom: 'none' },
+                  }}
+                  onClick={() => navigate(`/chat/${conv.id}`)}
+                >
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <Typography variant="body2" fontWeight={600}>
+                      {conv.name}
+                    </Typography>
+                    {conv.unreadCount > 0 && (
+                      <Chip
+                        label={conv.unreadCount}
+                        size="small"
+                        color="primary"
+                        sx={{ height: 20, fontSize: 11 }}
+                      />
+                    )}
+                  </Stack>
+                  {conv.lastMessageText && (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      noWrap
+                      sx={{ display: 'block', mt: 0.25 }}
+                    >
+                      {conv.lastMessageText}
+                    </Typography>
+                  )}
+                </Box>
+              ))
+            )}
+          </Paper>
+        </Box>
+      </Stack>
     </Box>
   );
 }
@@ -237,6 +426,5 @@ export function DashboardPage() {
     return <CoachDashboard />;
   }
 
-  // Club Admin — original view
   return <AdminDashboard />;
 }

@@ -25,7 +25,7 @@ export const userKeys = {
 // --- API functions ---
 export const getClubUsers = (
   clubId: string,
-  params?: { page?: number; size?: number; search?: string },
+  params?: { page?: number; size?: number; search?: string; role?: string },
 ) =>
   api
     .get<Page<UserDTO>>(`/api/clubs/${clubId}/users`, { params })
@@ -75,7 +75,7 @@ export const getChildren = (clubId: string, userId: string) =>
 // --- Query hooks ---
 export const useClubUsers = (
   clubId: string | null,
-  params?: { page?: number; size?: number; search?: string },
+  params?: { page?: number; size?: number; search?: string; role?: string },
 ) =>
   useQuery({
     queryKey: userKeys.list(clubId!, params),

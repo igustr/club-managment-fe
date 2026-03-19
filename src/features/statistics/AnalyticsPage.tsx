@@ -10,6 +10,7 @@ import {
   MenuItem,
   Stack,
 } from '@mui/material';
+import { MemberProfileDialog } from '@/components/ui/MemberProfileDialog';
 import {
   People,
   Groups,
@@ -28,6 +29,7 @@ export function AnalyticsPage() {
   const { t } = useTranslation();
   const clubId = useClubId();
   const [selectedTeamId, setSelectedTeamId] = useState<string>('');
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
 
   const { data: clubStats, isLoading } = useClubStatistics(clubId);
   const { data: teamStats } = useTeamStatistics(
@@ -155,8 +157,15 @@ export function AnalyticsPage() {
         <PlayerStatsTable
           title={`${teamStats.teamName} — ${t('statistics.playerStatistics')}`}
           players={teamStats.playerStatistics}
+          onProfileClick={(userId) => setProfileUserId(userId)}
         />
       )}
+
+      <MemberProfileDialog
+        open={!!profileUserId}
+        userId={profileUserId}
+        onClose={() => setProfileUserId(null)}
+      />
     </Box>
   );
 }

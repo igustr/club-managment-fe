@@ -108,6 +108,11 @@ const AnalyticsPage = lazy(() =>
     default: m.AnalyticsPage,
   })),
 );
+const MemberProfilePage = lazy(() =>
+  import('@/features/members/MemberProfilePage').then((m) => ({
+    default: m.MemberProfilePage,
+  })),
+);
 
 // Layout components (not lazy — always needed)
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -249,6 +254,14 @@ export const router = createBrowserRouter([
               },
 
               // All club roles
+              {
+                path: '/members/:userId',
+                element: (
+                  <SuspenseWrapper>
+                    <MemberProfilePage />
+                  </SuspenseWrapper>
+                ),
+              },
               {
                 path: '/teams',
                 element: (

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mängija profiil — Mockup (Desktop)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* Backdrop */
+    .backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    /* Modal — wide desktop */
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    /* Header — horizontal layout with avatar left, info right */
+    .profile-header {
+      background: linear-gradient(135deg, #1a3a5c 0%, #2d5f8a 100%);
+      padding: 28px 32px;
+      border-radius: 16px 16px 0 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .close-btn:hover { background: rgba(255,255,255,0.25); }
+
+    .avatar-placeholder {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .header-info {
+      flex: 1;
+    }
+    .profile-name {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .profile-role-badge {
+      display: inline-block;
+      padding: 3px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .role-player {
+      background: rgba(76, 175, 80, 0.2);
+      color: #81c784;
+    }
+    .position-badge-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.85);
+    }
+    .position-dot-sm {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #81c784;
+    }
+    .header-team {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+    }
+
+    /* Body — two-column */
+    .profile-body {
+      padding: 28px 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 36px;
+    }
+
+    /* Sections */
+    .info-section {
+      padding: 16px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .info-section:last-child {
+      border-bottom: none;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #8b95a5;
+      margin-bottom: 12px;
+    }
+
+    /* Left column */
+    .col-left {
+      display: flex;
+      flex-direction: column;
+    }
+    .col-right {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Info items */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .info-item-label {
+      font-size: 11px;
+      color: #8b95a5;
+      margin-bottom: 2px;
+    }
+    .info-item-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a2332;
+    }
+
+    /* Team chips */
+    .team-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .team-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: #f0f4ff;
+      color: #1a3a5c;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* Attendance */
+    .attendance-stat {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      background: #f8faf8;
+      border-radius: 10px;
+      border: 1px solid #e8efe8;
+    }
+    .attendance-ring {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: conic-gradient(#4caf50 0% 78%, #e0e0e0 78% 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .attendance-ring-inner {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: #f8faf8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #2e7d32;
+    }
+    .attendance-details { flex: 1; }
+    .attendance-label {
+      font-size: 12px;
+      color: #8b95a5;
+    }
+    .attendance-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a2332;
+    }
+
+    /* Parents */
+    .parent-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+    }
+    .parent-item + .parent-item {
+      border-top: 1px solid #f5f5f5;
+    }
+    .parent-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: #e8edf2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #5a6a7a;
+      flex-shrink: 0;
+    }
+    .parent-info { flex: 1; min-width: 0; }
+    .parent-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a2332;
+    }
+    .parent-contact {
+      font-size: 12px;
+      color: #8b95a5;
+    }
+    .parent-chat-btn {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #5a6a7a;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .parent-chat-btn:hover {
+      border-color: #1a3a5c;
+      color: #1a3a5c;
+      background: #f0f4ff;
+    }
+
+    /* Full-width section (spans both columns) */
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* Action bar */
+    .profile-actions {
+      padding: 20px 32px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .btn {
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #1a3a5c;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #244d73; }
+    .btn-secondary {
+      background: #f5f7fa;
+      color: #1a2332;
+      border: 1px solid #e0e4ea;
+    }
+    .btn-secondary:hover { background: #ebeef3; }
+    .btn-icon { font-size: 16px; }
+  </style>
+</head>
+<body>
+
+<div class="backdrop">
+  <div class="modal">
+
+    <!-- ========== HEADER — horizontal ========== -->
+    <div class="profile-header">
+      <button class="close-btn">&#x2715;</button>
+
+      <div class="avatar-placeholder">OT</div>
+
+      <div class="header-info">
+        <div class="profile-name">Oliver Tamm</div>
+        <div class="header-meta">
+          <span class="profile-role-badge role-player">Mängija</span>
+          <span class="position-badge-header">
+            <span class="position-dot-sm"></span>
+            Väravavaht
+          </span>
+          <span class="header-team">FC Flora U15</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== BODY — two columns ========== -->
+    <div class="profile-body">
+
+      <!-- LEFT COLUMN -->
+      <div class="col-left">
+
+        <!-- Personal info -->
+        <div class="info-section">
+          <div class="section-label">Isikuandmed</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-item-label">Vanus</div>
+              <div class="info-item-value">14 aastat</div>
+            </div>
+            <div class="info-item">
+              <div class="info-item-label">Sünniaeg</div>
+              <div class="info-item-value">12.05.2011</div>
+            </div>
+            <div class="info-item">
+              <div class="info-item-label">E-post</div>
+              <div class="info-item-value">oliver.tamm@test.ee</div>
+            </div>
+            <div class="info-item">
+              <div class="info-item-label">Telefon</div>
+              <div class="info-item-value">+372 5123 4567</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teams -->
+        <div class="info-section">
+          <div class="section-label">Meeskonnad</div>
+          <div class="team-chips">
+            <div class="team-chip">&#9917; FC Flora U15</div>
+            <div class="team-chip">&#9917; FC Flora U16</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="col-right">
+
+        <!-- Attendance -->
+        <div class="info-section">
+          <div class="section-label">Kohalolek</div>
+          <div class="attendance-stat">
+            <div class="attendance-ring">
+              <div class="attendance-ring-inner">78%</div>
+            </div>
+            <div class="attendance-details">
+              <div class="attendance-value">18 / 23 treeningut</div>
+              <div class="attendance-label">Viimased 30 päeva</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Parents -->
+        <div class="info-section">
+          <div class="section-label">Vanemad</div>
+
+          <div class="parent-item">
+            <div class="parent-avatar">MT</div>
+            <div class="parent-info">
+              <div class="parent-name">Maria Tamm</div>
+              <div class="parent-contact">maria.tamm@test.ee &middot; +372 5111 2222</div>
+            </div>
+            <button class="parent-chat-btn" title="Saada sõnum">&#x2709;</button>
+          </div>
+
+          <div class="parent-item">
+            <div class="parent-avatar">KT</div>
+            <div class="parent-info">
+              <div class="parent-name">Kristjan Tamm</div>
+              <div class="parent-contact">kristjan.tamm@test.ee &middot; +372 5333 4444</div>
+            </div>
+            <button class="parent-chat-btn" title="Saada sõnum">&#x2709;</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========== ACTIONS ========== -->
+    <div class="profile-actions">
+      <button class="btn btn-secondary">Sulge</button>
+      <button class="btn btn-primary">
+        <span class="btn-icon">&#x2709;</span>
+        Saada sõnum
+      </button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
