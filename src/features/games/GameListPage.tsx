@@ -17,20 +17,40 @@ import {
   CircularProgress,
   Chip,
   MenuItem,
+  Menu,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
-import { Add, Search, SportsSoccer } from '@mui/icons-material';
+import {
+  Add,
+  Search,
+  SportsSoccer,
+  EmojiEvents,
+  ArrowDropDown,
+} from '@mui/icons-material';
 import { useGames } from '@/api/game.api';
+import { useTournaments } from '@/api/tournament.api';
 import { useTeams } from '@/api/team.api';
 import { GameFormDialog } from './components/GameFormDialog';
+import { TournamentFormDialog } from '@/features/tournaments/components/TournamentFormDialog';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useClubId } from '@/hooks/useClubId';
 import { formatDate, formatTime } from '@/utils/date';
-import { GameStatus, VenueType } from '@/types/common.types';
+import { VenueType } from '@/types/common.types';
 
-const statusColors: Record<GameStatus, 'primary' | 'error'> = {
-  [GameStatus.SCHEDULED]: 'primary',
-  [GameStatus.CANCELLED]: 'error',
-};
+type EventType = 'all' | 'game' | 'tournament';
+
+interface UnifiedEvent {
+  id: string;
+  type: 'game' | 'tournament';
+  name: string;
+  date: string;
+  dateDisplay: string;
+  teamName: string;
+  teamId: string;
+  status: 'SCHEDULED' | 'CANCELLED';
+  venueType?: VenueType;
+}
 
 export function GameListPage() {
   const { t } = useTranslation();
@@ -38,38 +58,75 @@ export function GameListPage() {
   const clubId = useClubId();
   const { canCreateTraining } = usePermissions();
 
-  const { data: games, isLoading } = useGames(clubId);
+  const { data: games, isLoading: gamesLoading } = useGames(clubId);
+  const { data: tournaments, isLoading: tournamentsLoading } =
+    useTournaments(clubId);
   const { data: teams } = useTeams(clubId);
 
   const [search, setSearch] = useState('');
   const [teamFilter, setTeamFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [formOpen, setFormOpen] = useState(false);
+  const [eventType, setEventType] = useState<EventType>('all');
+  const [gameFormOpen, setGameFormOpen] = useState(false);
+  const [tournamentFormOpen, setTournamentFormOpen] = useState(false);
+  const [addMenuAnchor, setAddMenuAnchor] = useState<null | HTMLElement>(null);
+
+  const isLoading = gamesLoading || tournamentsLoading;
+
+  const unified = useMemo<UnifiedEvent[]>(() => {
+    const items: UnifiedEvent[] = [];
+
+    if (eventType !== 'tournament') {
+      for (const g of games ?? []) {
+        items.push({
+          id: g.id,
+          type: 'game',
+          name: g.opponent,
+          date: g.date,
+          dateDisplay: `${formatDate(g.date)} ${formatTime(g.startTime)} – ${formatTime(g.endTime)}`,
+          teamName: g.teamName,
+          teamId: g.teamId,
+          status: g.status,
+          venueType: g.venueType,
+        });
+      }
+    }
+
+    if (eventType !== 'game') {
+      for (const tr of tournaments ?? []) {
+        items.push({
+          id: tr.id,
+          type: 'tournament',
+          name: tr.name,
+          date: tr.startDate,
+          dateDisplay: `${formatDate(tr.startDate)} – ${formatDate(tr.endDate)}`,
+          teamName: tr.teamName,
+          teamId: tr.teamId,
+          status: tr.status,
+        });
+      }
+    }
+
+    return items;
+  }, [games, tournaments, eventType]);
 
   const filtered = useMemo(() => {
-    if (!games) return [];
-    return games.filter((g) => {
-      if (teamFilter && g.teamId !== teamFilter) return false;
-      if (statusFilter && g.status !== statusFilter) return false;
+    return unified.filter((e) => {
+      if (teamFilter && e.teamId !== teamFilter) return false;
+      if (statusFilter && e.status !== statusFilter) return false;
       if (search) {
         const q = search.toLowerCase();
         return (
-          g.opponent.toLowerCase().includes(q) ||
-          g.teamName.toLowerCase().includes(q) ||
-          (g.venueName?.toLowerCase().includes(q) ?? false)
+          e.name.toLowerCase().includes(q) ||
+          e.teamName.toLowerCase().includes(q)
         );
       }
       return true;
     });
-  }, [games, search, teamFilter, statusFilter]);
+  }, [unified, search, teamFilter, statusFilter]);
 
   const sorted = useMemo(
-    () =>
-      [...filtered].sort((a, b) => {
-        const dateCmp = b.date.localeCompare(a.date);
-        if (dateCmp !== 0) return dateCmp;
-        return a.startTime.localeCompare(b.startTime);
-      }),
+    () => [...filtered].sort((a, b) => b.date.localeCompare(a.date)),
     [filtered],
   );
 
@@ -87,13 +144,40 @@ export function GameListPage() {
           {t('games.title')}
         </Typography>
         {canCreateTraining && (
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => setFormOpen(true)}
-          >
-            {t('games.createGame')}
-          </Button>
+          <>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              endIcon={<ArrowDropDown />}
+              onClick={(e) => setAddMenuAnchor(e.currentTarget)}
+            >
+              {t('common.create')}
+            </Button>
+            <Menu
+              anchorEl={addMenuAnchor}
+              open={!!addMenuAnchor}
+              onClose={() => setAddMenuAnchor(null)}
+            >
+              <MenuItem
+                onClick={() => {
+                  setAddMenuAnchor(null);
+                  setGameFormOpen(true);
+                }}
+              >
+                <SportsSoccer fontSize="small" sx={{ mr: 1 }} />
+                {t('games.createGame')}
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setAddMenuAnchor(null);
+                  setTournamentFormOpen(true);
+                }}
+              >
+                <EmojiEvents fontSize="small" sx={{ mr: 1 }} />
+                {t('tournaments.createTournament')}
+              </MenuItem>
+            </Menu>
+          </>
         )}
       </Box>
 
@@ -122,6 +206,20 @@ export function GameListPage() {
             },
           }}
         />
+        <ToggleButtonGroup
+          value={eventType}
+          exclusive
+          onChange={(_, val) => {
+            if (val) setEventType(val);
+          }}
+          size="small"
+        >
+          <ToggleButton value="all">{t('games.allEvents')}</ToggleButton>
+          <ToggleButton value="game">{t('games.gamesOnly')}</ToggleButton>
+          <ToggleButton value="tournament">
+            {t('games.tournamentsOnly')}
+          </ToggleButton>
+        </ToggleButtonGroup>
         <TextField
           select
           size="small"
@@ -146,12 +244,8 @@ export function GameListPage() {
           sx={{ minWidth: 140 }}
         >
           <MenuItem value="">{t('trainings.allStatuses')}</MenuItem>
-          <MenuItem value={GameStatus.SCHEDULED}>
-            {t('games.scheduled')}
-          </MenuItem>
-          <MenuItem value={GameStatus.CANCELLED}>
-            {t('games.cancelled')}
-          </MenuItem>
+          <MenuItem value="SCHEDULED">{t('games.scheduled')}</MenuItem>
+          <MenuItem value="CANCELLED">{t('games.cancelled')}</MenuItem>
         </TextField>
       </Box>
 
@@ -173,63 +267,75 @@ export function GameListPage() {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell>{t('games.eventType')}</TableCell>
+                <TableCell>{t('games.nameOrOpponent')}</TableCell>
                 <TableCell>{t('trainings.date')}</TableCell>
-                <TableCell>{t('trainings.time')}</TableCell>
-                <TableCell>{t('games.opponent')}</TableCell>
                 <TableCell>{t('trainings.team')}</TableCell>
-                <TableCell>{t('games.venueType')}</TableCell>
                 <TableCell>{t('trainings.status')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {sorted.map((g) => (
+              {sorted.map((e) => (
                 <TableRow
-                  key={g.id}
+                  key={`${e.type}-${e.id}`}
                   hover
                   sx={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/games/${g.id}`)}
+                  onClick={() =>
+                    navigate(
+                      e.type === 'game'
+                        ? `/games/${e.id}`
+                        : `/tournaments/${e.id}`,
+                    )
+                  }
                 >
-                  <TableCell>{formatDate(g.date)}</TableCell>
                   <TableCell>
-                    {formatTime(g.startTime)} – {formatTime(g.endTime)}
+                    <Chip
+                      icon={
+                        e.type === 'game' ? (
+                          <SportsSoccer fontSize="small" />
+                        ) : (
+                          <EmojiEvents fontSize="small" />
+                        )
+                      }
+                      label={
+                        e.type === 'game'
+                          ? t('games.game')
+                          : t('games.tournament')
+                      }
+                      size="small"
+                      variant="outlined"
+                      color={e.type === 'game' ? 'warning' : 'secondary'}
+                    />
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" fontWeight={500}>
-                      {g.opponent}
+                      {e.name}
                     </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={g.teamName}
-                      size="small"
-                      variant="outlined"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={
-                        g.venueType === VenueType.HOME
+                    {e.type === 'game' && e.venueType && (
+                      <Typography variant="caption" color="text.secondary">
+                        {e.venueType === VenueType.HOME
                           ? t('games.home')
-                          : t('games.away')
-                      }
+                          : t('games.away')}
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell>{e.dateDisplay}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={e.teamName}
                       size="small"
-                      color={
-                        g.venueType === VenueType.HOME
-                          ? 'primary'
-                          : 'secondary'
-                      }
                       variant="outlined"
                     />
                   </TableCell>
                   <TableCell>
                     <Chip
                       label={
-                        g.status === GameStatus.SCHEDULED
+                        e.status === 'SCHEDULED'
                           ? t('games.scheduled')
                           : t('games.cancelled')
                       }
                       size="small"
-                      color={statusColors[g.status]}
+                      color={e.status === 'SCHEDULED' ? 'primary' : 'error'}
                       variant="outlined"
                     />
                   </TableCell>
@@ -241,8 +347,12 @@ export function GameListPage() {
       )}
 
       <GameFormDialog
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
+        open={gameFormOpen}
+        onClose={() => setGameFormOpen(false)}
+      />
+      <TournamentFormDialog
+        open={tournamentFormOpen}
+        onClose={() => setTournamentFormOpen(false)}
       />
     </Box>
   );

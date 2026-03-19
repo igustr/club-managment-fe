@@ -74,7 +74,6 @@
     "teams": "Meeskonnad",
     "trainings": "Treeningud",
     "games": "Mängud",
-    "tournaments": "Turniirid",
     "pitches": "Väljakud",
     "calendar": "Kalender",
     "chat": "Sõnumid",
@@ -412,8 +411,15 @@
     "memberCount": "Liikmeid"
   },
   "games": {
-    "title": "Mängud",
+    "title": "Mängud ja turniirid",
     "createGame": "Lisa mäng",
+    "allEvents": "Kõik",
+    "gamesOnly": "Mängud",
+    "tournamentsOnly": "Turniirid",
+    "eventType": "Tüüp",
+    "nameOrOpponent": "Nimi / Vastane",
+    "game": "Mäng",
+    "tournament": "Turniir",
     "editGame": "Muuda mängu",
     "cancelGame": "Tühista mäng",
     "deleteGame": "Kustuta mäng",
@@ -454,7 +460,8 @@
     "cancelSuccess": "Turniir tühistatud",
     "deleteSuccess": "Turniir kustutatud",
     "cancelConfirm": "Kas oled kindel, et soovid selle turniiri tühistada?",
-    "deleteConfirm": "Kas oled kindel, et soovid selle turniiri kustutada?"
+    "deleteConfirm": "Kas oled kindel, et soovid selle turniiri kustutada?",
+    "venue": "Toimumiskoht"
   },
   "squad": {
     "title": "Koosseis",

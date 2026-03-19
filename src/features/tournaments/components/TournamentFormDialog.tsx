@@ -18,6 +18,7 @@ import {
   useUpdateTournament,
 } from '@/api/tournament.api';
 import { useTeams } from '@/api/team.api';
+import { usePitches } from '@/api/pitch.api';
 import {
   tournamentSchema,
   type TournamentFormValues,
@@ -43,6 +44,7 @@ export function TournamentFormDialog({
   const isEdit = !!tournament;
 
   const { data: teams } = useTeams(clubId);
+  const { data: pitches } = usePitches(clubId);
 
   const createMutation = useCreateTournament(clubId!);
   const updateMutation = useUpdateTournament(
@@ -62,6 +64,9 @@ export function TournamentFormDialog({
       name: '',
       startDate: '',
       endDate: '',
+      pitchId: '',
+      venueName: '',
+      venueAddress: '',
       notes: '',
     },
   });
@@ -73,6 +78,9 @@ export function TournamentFormDialog({
         name: tournament.name,
         startDate: tournament.startDate,
         endDate: tournament.endDate,
+        pitchId: tournament.pitchId ?? '',
+        venueName: tournament.venueName ?? '',
+        venueAddress: tournament.venueAddress ?? '',
         notes: tournament.notes ?? '',
       });
     } else if (open) {
@@ -81,6 +89,9 @@ export function TournamentFormDialog({
         name: '',
         startDate: '',
         endDate: '',
+        pitchId: '',
+        venueName: '',
+        venueAddress: '',
         notes: '',
       });
     }
@@ -97,6 +108,9 @@ export function TournamentFormDialog({
         name: values.name,
         startDate: values.startDate,
         endDate: values.endDate,
+        pitchId: values.pitchId || undefined,
+        venueName: values.venueName || undefined,
+        venueAddress: values.venueAddress || undefined,
         notes: values.notes || undefined,
       };
 
@@ -187,6 +201,55 @@ export function TournamentFormDialog({
             />
           </Stack>
 
+          <Controller
+            name="pitchId"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                select
+                fullWidth
+                label={t('trainings.pitch')}
+                error={!!errors.pitchId}
+                helperText={errors.pitchId?.message}
+              >
+                <MenuItem value="">
+                  <em>{t('trainings.noPitch')}</em>
+                </MenuItem>
+                {(pitches ?? []).map((pitch) => (
+                  <MenuItem key={pitch.id} value={pitch.id}>
+                    {pitch.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
+          />
+          <Controller
+            name="venueName"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                fullWidth
+                label={t('games.venueName')}
+                error={!!errors.venueName}
+                helperText={errors.venueName?.message}
+              />
+            )}
+          />
+          <Controller
+            name="venueAddress"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                fullWidth
+                label={t('games.venueAddress')}
+                error={!!errors.venueAddress}
+                helperText={errors.venueAddress?.message}
+              />
+            )}
+          />
           <Controller
             name="notes"
             control={control}

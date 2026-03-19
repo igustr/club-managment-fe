@@ -20,6 +20,7 @@ import {
   Notes,
   CalendarMonth,
   EmojiEvents,
+  Place,
 } from '@mui/icons-material';
 import {
   useTournament,
@@ -186,6 +187,17 @@ export function TournamentDetailPage() {
             label={t('trainings.team')}
             value={tournament.teamName}
           />
+          {(tournament.pitchName || tournament.venueName || tournament.venueAddress) && (
+            <InfoRow
+              icon={<Place fontSize="small" color="action" />}
+              label={t('tournaments.venue')}
+              value={
+                [tournament.pitchName, tournament.venueName, tournament.venueAddress]
+                  .filter(Boolean)
+                  .join(', ')
+              }
+            />
+          )}
           {tournament.notes && (
             <InfoRow
               icon={<Notes fontSize="small" color="action" />}

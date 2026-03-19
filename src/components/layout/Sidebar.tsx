@@ -29,7 +29,6 @@ import {
   ChevronLeft,
   ChevronRight,
   SportsSoccer,
-  EmojiEvents,
 } from '@mui/icons-material';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -77,7 +76,6 @@ export function Sidebar({
     { key: 'teams', path: '/teams', icon: <Groups />, labelKey: 'nav.teams' },
     { key: 'trainings', path: '/trainings', icon: <FitnessCenter />, labelKey: 'nav.trainings' },
     { key: 'games', path: '/games', icon: <SportsSoccer />, labelKey: 'nav.games' },
-    { key: 'tournaments', path: '/tournaments', icon: <EmojiEvents />, labelKey: 'nav.tournaments' },
     ...(canManagePitches
       ? [{ key: 'pitches', path: '/pitches', icon: <Stadium />, labelKey: 'nav.pitches' }]
       : []),

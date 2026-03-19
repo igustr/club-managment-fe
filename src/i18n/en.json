@@ -74,7 +74,6 @@
     "teams": "Teams",
     "trainings": "Trainings",
     "games": "Games",
-    "tournaments": "Tournaments",
     "pitches": "Pitches",
     "calendar": "Calendar",
     "chat": "Messages",
@@ -412,8 +411,15 @@
     "memberCount": "Members"
   },
   "games": {
-    "title": "Games",
+    "title": "Games & Tournaments",
     "createGame": "Add Game",
+    "allEvents": "All",
+    "gamesOnly": "Games",
+    "tournamentsOnly": "Tournaments",
+    "eventType": "Type",
+    "nameOrOpponent": "Name / Opponent",
+    "game": "Game",
+    "tournament": "Tournament",
     "editGame": "Edit Game",
     "cancelGame": "Cancel Game",
     "deleteGame": "Delete Game",
@@ -454,7 +460,8 @@
     "cancelSuccess": "Tournament cancelled",
     "deleteSuccess": "Tournament deleted",
     "cancelConfirm": "Are you sure you want to cancel this tournament?",
-    "deleteConfirm": "Are you sure you want to delete this tournament?"
+    "deleteConfirm": "Are you sure you want to delete this tournament?",
+    "venue": "Venue"
   },
   "squad": {
     "title": "Squad",

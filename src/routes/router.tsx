@@ -98,11 +98,6 @@ const GameDetailPage = lazy(() =>
     default: m.GameDetailPage,
   })),
 );
-const TournamentListPage = lazy(() =>
-  import('@/features/tournaments/TournamentListPage').then((m) => ({
-    default: m.TournamentListPage,
-  })),
-);
 const TournamentDetailPage = lazy(() =>
   import('@/features/tournaments/TournamentDetailPage').then((m) => ({
     default: m.TournamentDetailPage,
@@ -327,14 +322,6 @@ export const router = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <GameDetailPage />
-                  </SuspenseWrapper>
-                ),
-              },
-              {
-                path: '/tournaments',
-                element: (
-                  <SuspenseWrapper>
-                    <TournamentListPage />
                   </SuspenseWrapper>
                 ),
               },
