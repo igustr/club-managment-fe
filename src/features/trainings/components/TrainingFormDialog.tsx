@@ -144,6 +144,7 @@ export function TrainingFormDialog({
                 {...field}
                 select
                 fullWidth
+                required
                 label={t('trainings.team')}
                 error={!!errors.teamId}
                 helperText={errors.teamId?.message}
@@ -162,17 +163,20 @@ export function TrainingFormDialog({
             control={control}
             label={t('trainings.date')}
             format="DD.MM.YYYY"
+            required
           />
           <Stack direction="row" spacing={2}>
             <TimeFieldInput
               name="startTime"
               control={control}
               label={t('trainings.startTime')}
+              required
             />
             <TimeFieldInput
               name="endTime"
               control={control}
               label={t('trainings.endTime')}
+              required
             />
           </Stack>
           <Controller

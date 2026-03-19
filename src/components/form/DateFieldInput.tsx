@@ -12,12 +12,14 @@ type DateFieldInputProps<T extends FieldValues> = {
   name: FieldPath<T>;
   control: Control<T>;
   label: string;
+  required?: boolean;
 } & Omit<DatePickerProps<Dayjs>, 'value' | 'onChange'>;
 
 export function DateFieldInput<T extends FieldValues>({
   name,
   control,
   label,
+  required,
   ...pickerProps
 }: DateFieldInputProps<T>) {
   const [open, setOpen] = useState(false);
@@ -40,6 +42,7 @@ export function DateFieldInput<T extends FieldValues>({
           slotProps={{
             textField: {
               fullWidth: true,
+              required,
               error: !!error,
               helperText: error?.message,
               onClick: () => setOpen(true),

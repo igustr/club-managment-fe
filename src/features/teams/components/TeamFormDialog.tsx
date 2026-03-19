@@ -100,6 +100,7 @@ export function TeamFormDialog({ open, clubId, onClose, team }: TeamFormDialogPr
               <TextField
                 {...field}
                 fullWidth
+                required
                 label={t('teams.name')}
                 error={!!errors.name}
                 helperText={errors.name?.message}

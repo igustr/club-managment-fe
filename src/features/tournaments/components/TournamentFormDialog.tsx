@@ -142,6 +142,7 @@ export function TournamentFormDialog({
                 {...field}
                 select
                 fullWidth
+                required
                 label={t('trainings.team')}
                 error={!!errors.teamId}
                 helperText={errors.teamId?.message}
@@ -162,6 +163,7 @@ export function TournamentFormDialog({
               <TextField
                 {...field}
                 fullWidth
+                required
                 label={t('tournaments.name')}
                 error={!!errors.name}
                 helperText={errors.name?.message}
@@ -174,12 +176,14 @@ export function TournamentFormDialog({
               control={control}
               label={t('tournaments.startDate')}
               format="DD.MM.YYYY"
+              required
             />
             <DateFieldInput
               name="endDate"
               control={control}
               label={t('tournaments.endDate')}
               format="DD.MM.YYYY"
+              required
             />
           </Stack>
 

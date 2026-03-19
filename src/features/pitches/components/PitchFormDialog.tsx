@@ -118,6 +118,7 @@ export function PitchFormDialog({ open, onClose, pitch }: PitchFormDialogProps) 
               <TextField
                 {...field}
                 fullWidth
+                required
                 label={t('pitches.name')}
                 error={!!errors.name}
                 helperText={errors.name?.message}

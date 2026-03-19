@@ -12,12 +12,14 @@ type TimeFieldInputProps<T extends FieldValues> = {
   name: FieldPath<T>;
   control: Control<T>;
   label: string;
+  required?: boolean;
 } & Omit<TimePickerProps<Dayjs>, 'value' | 'onChange'>;
 
 export function TimeFieldInput<T extends FieldValues>({
   name,
   control,
   label,
+  required,
   ...pickerProps
 }: TimeFieldInputProps<T>) {
   const [open, setOpen] = useState(false);
@@ -41,6 +43,7 @@ export function TimeFieldInput<T extends FieldValues>({
           slotProps={{
             textField: {
               fullWidth: true,
+              required,
               error: !!error,
               helperText: error?.message,
               onClick: () => setOpen(true),

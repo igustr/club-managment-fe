@@ -116,6 +116,7 @@ export function RecurringTrainingDialog({
                 {...field}
                 select
                 fullWidth
+                required
                 label={t('trainings.team')}
                 error={!!errors.teamId}
                 helperText={errors.teamId?.message}
@@ -136,6 +137,7 @@ export function RecurringTrainingDialog({
                 {...field}
                 select
                 fullWidth
+                required
                 label={t('trainings.dayOfWeek')}
                 error={!!errors.dayOfWeek}
                 helperText={errors.dayOfWeek?.message}
@@ -154,12 +156,14 @@ export function RecurringTrainingDialog({
               control={control}
               label={t('trainings.startDate')}
               format="DD.MM.YYYY"
+              required
             />
             <DateFieldInput
               name="endDate"
               control={control}
               label={t('trainings.endDate')}
               format="DD.MM.YYYY"
+              required
             />
           </Stack>
           <Stack direction="row" spacing={2}>
@@ -167,11 +171,13 @@ export function RecurringTrainingDialog({
               name="startTime"
               control={control}
               label={t('trainings.startTime')}
+              required
             />
             <TimeFieldInput
               name="endTime"
               control={control}
               label={t('trainings.endTime')}
+              required
             />
           </Stack>
           <Controller

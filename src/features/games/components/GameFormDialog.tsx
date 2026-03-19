@@ -170,6 +170,7 @@ export function GameFormDialog({
                 {...field}
                 select
                 fullWidth
+                required
                 label={t('trainings.team')}
                 error={!!errors.teamId}
                 helperText={errors.teamId?.message}
@@ -190,6 +191,7 @@ export function GameFormDialog({
               <TextField
                 {...field}
                 fullWidth
+                required
                 label={t('games.opponent')}
                 error={!!errors.opponent}
                 helperText={errors.opponent?.message}
@@ -201,17 +203,20 @@ export function GameFormDialog({
             control={control}
             label={t('trainings.date')}
             format="DD.MM.YYYY"
+            required
           />
           <Stack direction="row" spacing={2}>
             <TimeFieldInput
               name="startTime"
               control={control}
               label={t('trainings.startTime')}
+              required
             />
             <TimeFieldInput
               name="endTime"
               control={control}
               label={t('trainings.endTime')}
+              required
             />
           </Stack>
 
