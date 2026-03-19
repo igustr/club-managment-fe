@@ -11,8 +11,8 @@ import {
   Stack,
   MenuItem,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { DateFieldInput } from '@/components/form/DateFieldInput';
+import { TimeFieldInput } from '@/components/form/TimeFieldInput';
 import { useCreateRecurringTraining } from '@/api/training.api';
 import { useTeams } from '@/api/team.api';
 import { usePitches } from '@/api/pitch.api';
@@ -23,7 +23,6 @@ import {
 import { useClubId } from '@/hooks/useClubId';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
-import dayjs from 'dayjs';
 
 const DAYS_OF_WEEK = [
   'MONDAY',
@@ -150,99 +149,29 @@ export function RecurringTrainingDialog({
             )}
           />
           <Stack direction="row" spacing={2}>
-            <Controller
+            <DateFieldInput
               name="startDate"
               control={control}
-              render={({ field }) => (
-                <DatePicker
-                  label={t('trainings.startDate')}
-                  value={field.value ? dayjs(field.value) : null}
-                  onChange={(val) =>
-                    field.onChange(val ? val.format('YYYY-MM-DD') : '')
-                  }
-                  format="DD.MM.YYYY"
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      error: !!errors.startDate,
-                      helperText: errors.startDate?.message,
-                    },
-                  }}
-                />
-              )}
+              label={t('trainings.startDate')}
+              format="DD.MM.YYYY"
             />
-            <Controller
+            <DateFieldInput
               name="endDate"
               control={control}
-              render={({ field }) => (
-                <DatePicker
-                  label={t('trainings.endDate')}
-                  value={field.value ? dayjs(field.value) : null}
-                  onChange={(val) =>
-                    field.onChange(val ? val.format('YYYY-MM-DD') : '')
-                  }
-                  format="DD.MM.YYYY"
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      error: !!errors.endDate,
-                      helperText: errors.endDate?.message,
-                    },
-                  }}
-                />
-              )}
+              label={t('trainings.endDate')}
+              format="DD.MM.YYYY"
             />
           </Stack>
           <Stack direction="row" spacing={2}>
-            <Controller
+            <TimeFieldInput
               name="startTime"
               control={control}
-              render={({ field }) => (
-                <TimePicker
-                  label={t('trainings.startTime')}
-                  value={
-                    field.value
-                      ? dayjs(`2000-01-01T${field.value}`)
-                      : null
-                  }
-                  onChange={(val) =>
-                    field.onChange(val ? val.format('HH:mm') : '')
-                  }
-                  ampm={false}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      error: !!errors.startTime,
-                      helperText: errors.startTime?.message,
-                    },
-                  }}
-                />
-              )}
+              label={t('trainings.startTime')}
             />
-            <Controller
+            <TimeFieldInput
               name="endTime"
               control={control}
-              render={({ field }) => (
-                <TimePicker
-                  label={t('trainings.endTime')}
-                  value={
-                    field.value
-                      ? dayjs(`2000-01-01T${field.value}`)
-                      : null
-                  }
-                  onChange={(val) =>
-                    field.onChange(val ? val.format('HH:mm') : '')
-                  }
-                  ampm={false}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      error: !!errors.endTime,
-                      helperText: errors.endTime?.message,
-                    },
-                  }}
-                />
-              )}
+              label={t('trainings.endTime')}
             />
           </Stack>
           <Controller

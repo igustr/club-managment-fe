@@ -62,6 +62,16 @@ export const theme = createTheme({
         },
       },
     },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+        },
+        notchedOutline: {
+          borderRadius: 8,
+        },
+      },
+    },
     MuiDrawer: {
       styleOverrides: {
         paper: {

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { DatePicker, type DatePickerProps } from '@mui/x-date-pickers/DatePicker';
 import {
   Controller,
@@ -19,6 +20,8 @@ export function DateFieldInput<T extends FieldValues>({
   label,
   ...pickerProps
 }: DateFieldInputProps<T>) {
+  const [open, setOpen] = useState(false);
+
   return (
     <Controller
       name={name}
@@ -26,6 +29,9 @@ export function DateFieldInput<T extends FieldValues>({
       render={({ field, fieldState: { error } }) => (
         <DatePicker
           {...pickerProps}
+          open={open}
+          onOpen={() => setOpen(true)}
+          onClose={() => setOpen(false)}
           label={label}
           value={field.value ? dayjs(field.value) : null}
           onChange={(date) => {
@@ -36,6 +42,7 @@ export function DateFieldInput<T extends FieldValues>({
               fullWidth: true,
               error: !!error,
               helperText: error?.message,
+              onClick: () => setOpen(true),
             },
           }}
         />

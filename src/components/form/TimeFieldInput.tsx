@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { TimePicker, type TimePickerProps } from '@mui/x-date-pickers/TimePicker';
 import {
   Controller,
@@ -19,6 +20,8 @@ export function TimeFieldInput<T extends FieldValues>({
   label,
   ...pickerProps
 }: TimeFieldInputProps<T>) {
+  const [open, setOpen] = useState(false);
+
   return (
     <Controller
       name={name}
@@ -26,6 +29,9 @@ export function TimeFieldInput<T extends FieldValues>({
       render={({ field, fieldState: { error } }) => (
         <TimePicker
           {...pickerProps}
+          open={open}
+          onOpen={() => setOpen(true)}
+          onClose={() => setOpen(false)}
           label={label}
           value={field.value ? dayjs(field.value, 'HH:mm') : null}
           onChange={(time) => {
@@ -37,6 +43,7 @@ export function TimeFieldInput<T extends FieldValues>({
               fullWidth: true,
               error: !!error,
               helperText: error?.message,
+              onClick: () => setOpen(true),
             },
           }}
         />
