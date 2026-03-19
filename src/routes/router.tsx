@@ -88,6 +88,26 @@ const TrainingDetailPage = lazy(() =>
     default: m.TrainingDetailPage,
   })),
 );
+const GameListPage = lazy(() =>
+  import('@/features/games/GameListPage').then((m) => ({
+    default: m.GameListPage,
+  })),
+);
+const GameDetailPage = lazy(() =>
+  import('@/features/games/GameDetailPage').then((m) => ({
+    default: m.GameDetailPage,
+  })),
+);
+const TournamentListPage = lazy(() =>
+  import('@/features/tournaments/TournamentListPage').then((m) => ({
+    default: m.TournamentListPage,
+  })),
+);
+const TournamentDetailPage = lazy(() =>
+  import('@/features/tournaments/TournamentDetailPage').then((m) => ({
+    default: m.TournamentDetailPage,
+  })),
+);
 const CalendarPage = lazy(() =>
   import('@/features/calendar/CalendarPage').then((m) => ({
     default: m.CalendarPage,
@@ -291,6 +311,38 @@ export const router = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <TrainingDetailPage />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: '/games',
+                element: (
+                  <SuspenseWrapper>
+                    <GameListPage />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: '/games/:gameId',
+                element: (
+                  <SuspenseWrapper>
+                    <GameDetailPage />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: '/tournaments',
+                element: (
+                  <SuspenseWrapper>
+                    <TournamentListPage />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: '/tournaments/:tournamentId',
+                element: (
+                  <SuspenseWrapper>
+                    <TournamentDetailPage />
                   </SuspenseWrapper>
                 ),
               },

@@ -28,6 +28,21 @@ export enum PlayerPosition {
   STRIKER = 'STRIKER',
 }
 
+export enum VenueType {
+  HOME = 'HOME',
+  AWAY = 'AWAY',
+}
+
+export enum GameStatus {
+  SCHEDULED = 'SCHEDULED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum TournamentStatus {
+  SCHEDULED = 'SCHEDULED',
+  CANCELLED = 'CANCELLED',
+}
+
 export enum SurfaceType {
   NATURAL_GRASS = 'NATURAL_GRASS',
   ARTIFICIAL_TURF = 'ARTIFICIAL_TURF',

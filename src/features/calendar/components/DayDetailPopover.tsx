@@ -7,11 +7,16 @@ import {
   List,
   ListItemButton,
   ListItemText,
+  ListItemIcon,
   Chip,
   Divider,
 } from '@mui/material';
-import type { TrainingSessionDTO } from '@/types/training.types';
-import { TrainingSessionStatus } from '@/types/common.types';
+import {
+  FitnessCenter,
+  SportsSoccer,
+  EmojiEvents,
+} from '@mui/icons-material';
+import type { CalendarEvent } from './MonthlyCalendar';
 import { formatTime } from '@/utils/date';
 import dayjs from 'dayjs';
 
@@ -20,21 +25,27 @@ interface DayDetailPopoverProps {
   open: boolean;
   onClose: () => void;
   date: dayjs.Dayjs | null;
-  sessions: TrainingSessionDTO[];
+  events: CalendarEvent[];
 }
+
+const eventTypeIcon: Record<string, React.ReactNode> = {
+  training: <FitnessCenter fontSize="small" color="action" />,
+  game: <SportsSoccer fontSize="small" sx={{ color: '#C2410C' }} />,
+  tournament: <EmojiEvents fontSize="small" sx={{ color: '#6D28D9' }} />,
+};
 
 export function DayDetailPopover({
   anchorEl,
   open,
   onClose,
   date,
-  sessions,
+  events,
 }: DayDetailPopoverProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const sorted = [...sessions].sort((a, b) =>
-    a.startTime.localeCompare(b.startTime),
+  const sorted = [...events].sort((a, b) =>
+    (a.startTime ?? '').localeCompare(b.startTime ?? ''),
   );
 
   return (
@@ -55,16 +66,19 @@ export function DayDetailPopover({
           </Typography>
         ) : (
           <List dense disablePadding>
-            {sorted.map((session, i) => (
-              <Box key={session.id}>
+            {sorted.map((event, i) => (
+              <Box key={event.id}>
                 {i > 0 && <Divider />}
                 <ListItemButton
                   onClick={() => {
                     onClose();
-                    navigate(`/trainings/${session.id}`);
+                    navigate(event.navigateTo);
                   }}
                   sx={{ borderRadius: 1 }}
                 >
+                  <ListItemIcon sx={{ minWidth: 32 }}>
+                    {eventTypeIcon[event.eventType]}
+                  </ListItemIcon>
                   <ListItemText
                     primary={
                       <Box
@@ -75,13 +89,14 @@ export function DayDetailPopover({
                         }}
                       >
                         <Typography variant="body2" fontWeight={500}>
-                          {formatTime(session.startTime)} –{' '}
-                          {formatTime(session.endTime)}
+                          {event.startTime
+                            ? `${formatTime(event.startTime)} `
+                            : ''}
+                          {event.label}
                         </Typography>
-                        {session.status ===
-                          TrainingSessionStatus.CANCELLED && (
+                        {event.status === 'CANCELLED' && (
                           <Chip
-                            label={t('trainings.statusCancelled')}
+                            label={t('games.cancelled')}
                             size="small"
                             color="error"
                             variant="outlined"
@@ -91,17 +106,9 @@ export function DayDetailPopover({
                       </Box>
                     }
                     secondary={
-                      <Box>
-                        <Typography variant="caption">
-                          {session.teamName}
-                        </Typography>
-                        {session.pitchName && (
-                          <Typography variant="caption" color="text.disabled">
-                            {' '}
-                            — {session.pitchName}
-                          </Typography>
-                        )}
-                      </Box>
+                      <Typography variant="caption">
+                        {event.teamName}
+                      </Typography>
                     }
                   />
                 </ListItemButton>

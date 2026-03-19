@@ -9,15 +9,29 @@ import {
   ToggleButtonGroup,
   FormControlLabel,
   Switch,
+  Stack,
+  Chip,
 } from '@mui/material';
-import { ChevronLeft, ChevronRight, ViewList, CalendarMonth } from '@mui/icons-material';
+import {
+  ChevronLeft,
+  ChevronRight,
+  ViewList,
+  CalendarMonth,
+  FitnessCenter,
+  SportsSoccer,
+  EmojiEvents,
+} from '@mui/icons-material';
 import { useTrainings } from '@/api/training.api';
+import { useGames } from '@/api/game.api';
+import { useTournaments } from '@/api/tournament.api';
 import { useTeams } from '@/api/team.api';
 import { usePitches } from '@/api/pitch.api';
 import { MonthlyCalendar } from './components/MonthlyCalendar';
 import { CalendarFilters } from './components/CalendarFilters';
 import { useClubId } from '@/hooks/useClubId';
 import { usePermissions } from '@/hooks/usePermissions';
+import { eventTypeColors } from '@/theme';
+import type { CalendarEvent } from './components/MonthlyCalendar';
 import dayjs from 'dayjs';
 
 export function CalendarPage() {
@@ -31,20 +45,107 @@ export function CalendarPage() {
   const [pitchFilter, setPitchFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [myTeamsOnly, setMyTeamsOnly] = useState(false);
+  const [showTrainings, setShowTrainings] = useState(true);
+  const [showGames, setShowGames] = useState(true);
+  const [showTournaments, setShowTournaments] = useState(true);
 
   const { data: trainings } = useTrainings(clubId, myTeamsOnly);
+  const { data: games } = useGames(clubId);
+  const { data: tournaments } = useTournaments(clubId);
   const { data: teams } = useTeams(clubId);
   const { data: pitches } = usePitches(clubId);
 
-  const filtered = useMemo(() => {
-    if (!trainings) return [];
-    return trainings.filter((tr) => {
-      if (teamFilter && tr.teamId !== teamFilter) return false;
-      if (pitchFilter && tr.pitchId !== pitchFilter) return false;
-      if (statusFilter && tr.status !== statusFilter) return false;
-      return true;
-    });
-  }, [trainings, teamFilter, pitchFilter, statusFilter]);
+  const calendarEvents: CalendarEvent[] = useMemo(() => {
+    const events: CalendarEvent[] = [];
+
+    // Trainings
+    if (showTrainings && trainings) {
+      trainings
+        .filter((tr) => {
+          if (teamFilter && tr.teamId !== teamFilter) return false;
+          if (pitchFilter && tr.pitchId !== pitchFilter) return false;
+          if (statusFilter && tr.status !== statusFilter) return false;
+          return true;
+        })
+        .forEach((tr) => {
+          events.push({
+            id: tr.id,
+            date: tr.date,
+            startTime: tr.startTime,
+            label: `${tr.teamName}`,
+            teamId: tr.teamId,
+            teamName: tr.teamName,
+            eventType: 'training',
+            status: tr.status,
+            navigateTo: `/trainings/${tr.id}`,
+          });
+        });
+    }
+
+    // Games
+    if (showGames && games) {
+      games
+        .filter((g) => {
+          if (teamFilter && g.teamId !== teamFilter) return false;
+          if (statusFilter && g.status !== statusFilter) return false;
+          return true;
+        })
+        .forEach((g) => {
+          events.push({
+            id: g.id,
+            date: g.date,
+            startTime: g.startTime,
+            label: `vs ${g.opponent}`,
+            teamId: g.teamId,
+            teamName: g.teamName,
+            eventType: 'game',
+            status: g.status,
+            navigateTo: `/games/${g.id}`,
+          });
+        });
+    }
+
+    // Tournaments — expand multi-day into per-day entries
+    if (showTournaments && tournaments) {
+      tournaments
+        .filter((tr) => {
+          if (teamFilter && tr.teamId !== teamFilter) return false;
+          if (statusFilter && tr.status !== statusFilter) return false;
+          return true;
+        })
+        .forEach((tr) => {
+          let day = dayjs(tr.startDate);
+          const end = dayjs(tr.endDate);
+          while (day.isBefore(end) || day.isSame(end, 'day')) {
+            events.push({
+              id: `${tr.id}-${day.format('YYYY-MM-DD')}`,
+              originalId: tr.id,
+              date: day.format('YYYY-MM-DD'),
+              startTime: null,
+              label: tr.name,
+              teamId: tr.teamId,
+              teamName: tr.teamName,
+              eventType: 'tournament',
+              status: tr.status,
+              navigateTo: `/tournaments/${tr.id}`,
+            });
+            day = day.add(1, 'day');
+          }
+        });
+    }
+
+    return events;
+  }, [
+    trainings,
+    games,
+    tournaments,
+    teamFilter,
+    pitchFilter,
+    statusFilter,
+    showTrainings,
+    showGames,
+    showTournaments,
+  ]);
 
   return (
     <Box>
@@ -89,18 +190,37 @@ export function CalendarPage() {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <IconButton onClick={() => setCurrentMonth((m) => m.subtract(1, 'month'))}>
+          <IconButton
+            onClick={() =>
+              setCurrentMonth((m) => m.subtract(1, 'month'))
+            }
+          >
             <ChevronLeft />
           </IconButton>
-          <Typography variant="h6" fontWeight={600} sx={{ minWidth: 180, textAlign: 'center' }}>
+          <Typography
+            variant="h6"
+            fontWeight={600}
+            sx={{ minWidth: 180, textAlign: 'center' }}
+          >
             {currentMonth.format('MMMM YYYY')}
           </Typography>
-          <IconButton onClick={() => setCurrentMonth((m) => m.add(1, 'month'))}>
+          <IconButton
+            onClick={() =>
+              setCurrentMonth((m) => m.add(1, 'month'))
+            }
+          >
             <ChevronRight />
           </IconButton>
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            flexWrap: 'wrap',
+          }}
+        >
           {isClubAdmin && (
             <FormControlLabel
               control={
@@ -126,8 +246,58 @@ export function CalendarPage() {
         </Box>
       </Box>
 
+      {/* Event type toggles + legend */}
+      <Stack direction="row" spacing={1} sx={{ mb: 2 }} flexWrap="wrap">
+        <Chip
+          icon={<FitnessCenter sx={{ fontSize: 16 }} />}
+          label={t('calendar.trainings')}
+          variant={showTrainings ? 'filled' : 'outlined'}
+          color="primary"
+          onClick={() => setShowTrainings(!showTrainings)}
+          size="small"
+        />
+        <Chip
+          icon={<SportsSoccer sx={{ fontSize: 16 }} />}
+          label={t('calendar.games')}
+          variant={showGames ? 'filled' : 'outlined'}
+          onClick={() => setShowGames(!showGames)}
+          size="small"
+          sx={{
+            bgcolor: showGames ? eventTypeColors.game.border : undefined,
+            color: showGames ? 'white' : eventTypeColors.game.text,
+            borderColor: eventTypeColors.game.border,
+            '&:hover': {
+              bgcolor: showGames
+                ? eventTypeColors.game.text
+                : eventTypeColors.game.bg,
+            },
+          }}
+        />
+        <Chip
+          icon={<EmojiEvents sx={{ fontSize: 16 }} />}
+          label={t('calendar.tournaments')}
+          variant={showTournaments ? 'filled' : 'outlined'}
+          onClick={() => setShowTournaments(!showTournaments)}
+          size="small"
+          sx={{
+            bgcolor: showTournaments
+              ? eventTypeColors.tournament.border
+              : undefined,
+            color: showTournaments
+              ? 'white'
+              : eventTypeColors.tournament.text,
+            borderColor: eventTypeColors.tournament.border,
+            '&:hover': {
+              bgcolor: showTournaments
+                ? eventTypeColors.tournament.text
+                : eventTypeColors.tournament.bg,
+            },
+          }}
+        />
+      </Stack>
+
       {/* Calendar grid */}
-      <MonthlyCalendar month={currentMonth} sessions={filtered} />
+      <MonthlyCalendar month={currentMonth} events={calendarEvents} />
     </Box>
   );
 }

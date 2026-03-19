@@ -83,6 +83,13 @@ export const theme = createTheme({
   },
 });
 
+/** Event type colors for calendar */
+export const eventTypeColors = {
+  training: { bg: '', text: '' }, // Uses team colors directly
+  game: { bg: '#FFF7ED', text: '#C2410C', border: '#FB923C' },
+  tournament: { bg: '#F5F3FF', text: '#6D28D9', border: '#A78BFA' },
+} as const;
+
 /** Sidebar colors (used in layout components) */
 export const sidebarColors = {
   background: '#0F172A',

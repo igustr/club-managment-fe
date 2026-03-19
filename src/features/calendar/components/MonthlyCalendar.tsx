@@ -2,9 +2,8 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Box, Typography, Paper, Chip } from '@mui/material';
-import type { TrainingSessionDTO } from '@/types/training.types';
-import { TrainingSessionStatus } from '@/types/common.types';
 import { DayDetailPopover } from './DayDetailPopover';
+import { eventTypeColors } from '@/theme';
 import { formatTime } from '@/utils/date';
 import dayjs from 'dayjs';
 
@@ -20,12 +19,25 @@ const TEAM_COLORS = [
   '#2563EB',
 ];
 
-interface MonthlyCalendarProps {
-  month: dayjs.Dayjs;
-  sessions: TrainingSessionDTO[];
+export interface CalendarEvent {
+  id: string;
+  originalId?: string;
+  date: string;
+  startTime: string | null;
+  label: string;
+  teamId: string;
+  teamName: string;
+  eventType: 'training' | 'game' | 'tournament';
+  status: string;
+  navigateTo: string;
 }
 
-export function MonthlyCalendar({ month, sessions }: MonthlyCalendarProps) {
+interface MonthlyCalendarProps {
+  month: dayjs.Dayjs;
+  events: CalendarEvent[];
+}
+
+export function MonthlyCalendar({ month, events }: MonthlyCalendarProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -34,24 +46,24 @@ export function MonthlyCalendar({ month, sessions }: MonthlyCalendarProps) {
 
   // Build team color map
   const teamColorMap = useMemo(() => {
-    const uniqueTeams = [...new Set(sessions.map((s) => s.teamId))];
+    const uniqueTeams = [...new Set(events.map((e) => e.teamId))];
     const map = new Map<string, string>();
     uniqueTeams.forEach((teamId, i) => {
       map.set(teamId, TEAM_COLORS[i % TEAM_COLORS.length] ?? '#0D9488');
     });
     return map;
-  }, [sessions]);
+  }, [events]);
 
-  // Build session map by date
-  const sessionsByDate = useMemo(() => {
-    const map = new Map<string, TrainingSessionDTO[]>();
-    sessions.forEach((s) => {
-      const key = s.date;
+  // Build event map by date
+  const eventsByDate = useMemo(() => {
+    const map = new Map<string, CalendarEvent[]>();
+    events.forEach((e) => {
+      const key = e.date;
       if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(s);
+      map.get(key)!.push(e);
     });
     return map;
-  }, [sessions]);
+  }, [events]);
 
   // Calendar grid: 6 rows x 7 cols
   const startOfMonth = month.startOf('month');
@@ -82,9 +94,47 @@ export function MonthlyCalendar({ month, sessions }: MonthlyCalendarProps) {
     setSelectedDate(day);
   };
 
-  const selectedSessions = selectedDate
-    ? sessionsByDate.get(selectedDate.format('YYYY-MM-DD')) ?? []
+  const selectedEvents = selectedDate
+    ? eventsByDate.get(selectedDate.format('YYYY-MM-DD')) ?? []
     : [];
+
+  const isCancelled = (status: string) =>
+    status === 'CANCELLED';
+
+  const getChipStyles = (event: CalendarEvent) => {
+    const teamColor = teamColorMap.get(event.teamId) ?? '#0D9488';
+    const cancelled = isCancelled(event.status);
+
+    if (cancelled) {
+      return {
+        bgcolor: 'error.100',
+        color: 'error.main',
+        textDecoration: 'line-through',
+        borderLeft: 'none',
+      };
+    }
+
+    switch (event.eventType) {
+      case 'game':
+        return {
+          bgcolor: eventTypeColors.game.bg,
+          color: eventTypeColors.game.text,
+          borderLeft: `3px solid ${teamColor}`,
+        };
+      case 'tournament':
+        return {
+          bgcolor: eventTypeColors.tournament.bg,
+          color: eventTypeColors.tournament.text,
+          borderLeft: `3px solid ${teamColor}`,
+        };
+      default:
+        return {
+          bgcolor: teamColor + '1A',
+          color: teamColor,
+          borderLeft: 'none',
+        };
+    }
+  };
 
   return (
     <>
@@ -125,7 +175,7 @@ export function MonthlyCalendar({ month, sessions }: MonthlyCalendarProps) {
           >
             {week.map((day) => {
               const dayStr = day.format('YYYY-MM-DD');
-              const daySessions = sessionsByDate.get(dayStr) ?? [];
+              const dayEvents = eventsByDate.get(dayStr) ?? [];
               const isCurrentMonth = day.month() === month.month();
               const isToday = day.isSame(today, 'day');
 
@@ -174,46 +224,60 @@ export function MonthlyCalendar({ month, sessions }: MonthlyCalendarProps) {
                   >
                     {day.date()}
                   </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, mt: 0.25 }}>
-                    {daySessions
-                      .sort((a, b) => a.startTime.localeCompare(b.startTime))
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 0.25,
+                      mt: 0.25,
+                    }}
+                  >
+                    {dayEvents
+                      .sort((a, b) =>
+                        (a.startTime ?? '').localeCompare(
+                          b.startTime ?? '',
+                        ),
+                      )
                       .slice(0, 3)
-                      .map((session) => (
-                        <Chip
-                          key={session.id}
-                          label={`${formatTime(session.startTime)} ${session.teamName}`}
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/trainings/${session.id}`);
-                          }}
-                          sx={{
-                            height: 18,
-                            fontSize: '0.65rem',
-                            bgcolor:
-                              session.status === TrainingSessionStatus.CANCELLED
-                                ? 'error.100'
-                                : teamColorMap.get(session.teamId) + '1A',
-                            color:
-                              session.status === TrainingSessionStatus.CANCELLED
-                                ? 'error.main'
-                                : teamColorMap.get(session.teamId),
-                            fontWeight: 500,
-                            textDecoration:
-                              session.status === TrainingSessionStatus.CANCELLED
-                                ? 'line-through'
-                                : 'none',
-                            '& .MuiChip-label': { px: 0.5 },
-                          }}
-                        />
-                      ))}
-                    {daySessions.length > 3 && (
+                      .map((event) => {
+                        const styles = getChipStyles(event);
+                        const timeStr = event.startTime
+                          ? `${formatTime(event.startTime)} `
+                          : '';
+
+                        return (
+                          <Chip
+                            key={event.id}
+                            label={`${timeStr}${event.label}`}
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(event.navigateTo);
+                            }}
+                            sx={{
+                              height: 18,
+                              fontSize: '0.65rem',
+                              fontWeight: 500,
+                              textDecoration:
+                                styles.textDecoration ?? 'none',
+                              bgcolor: styles.bgcolor,
+                              color: styles.color,
+                              borderLeft: styles.borderLeft,
+                              borderRadius: styles.borderLeft
+                                ? '2px'
+                                : undefined,
+                              '& .MuiChip-label': { px: 0.5 },
+                            }}
+                          />
+                        );
+                      })}
+                    {dayEvents.length > 3 && (
                       <Typography
                         variant="caption"
                         color="text.secondary"
                         sx={{ pl: 0.5, fontSize: '0.6rem' }}
                       >
-                        +{daySessions.length - 3} {t('calendar.more')}
+                        +{dayEvents.length - 3} {t('calendar.more')}
                       </Typography>
                     )}
                   </Box>
@@ -232,7 +296,7 @@ export function MonthlyCalendar({ month, sessions }: MonthlyCalendarProps) {
           setSelectedDate(null);
         }}
         date={selectedDate}
-        sessions={selectedSessions}
+        events={selectedEvents}
       />
     </>
   );

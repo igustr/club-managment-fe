@@ -24,5 +24,9 @@ export function usePermissions() {
       clubRole === ClubRole.CLUB_ADMIN || clubRole === ClubRole.COACH,
     canViewStatistics:
       clubRole === ClubRole.CLUB_ADMIN || clubRole === ClubRole.COACH,
+    canCreateGame:
+      clubRole === ClubRole.CLUB_ADMIN || clubRole === ClubRole.COACH,
+    canManageSquad:
+      clubRole === ClubRole.CLUB_ADMIN || clubRole === ClubRole.COACH,
   };
 }
