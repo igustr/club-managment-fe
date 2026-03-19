@@ -32,12 +32,14 @@ interface TournamentFormDialogProps {
   open: boolean;
   onClose: () => void;
   tournament?: TournamentDTO | null;
+  defaultDate?: string;
 }
 
 export function TournamentFormDialog({
   open,
   onClose,
   tournament,
+  defaultDate,
 }: TournamentFormDialogProps) {
   const { t } = useTranslation();
   const clubId = useClubId();
@@ -87,15 +89,15 @@ export function TournamentFormDialog({
       reset({
         teamId: '',
         name: '',
-        startDate: '',
-        endDate: '',
+        startDate: defaultDate ?? '',
+        endDate: defaultDate ?? '',
         pitchId: '',
         venueName: '',
         venueAddress: '',
         notes: '',
       });
     }
-  }, [open, tournament, reset]);
+  }, [open, tournament, defaultDate, reset]);
 
   const handleClose = () => {
     reset();

@@ -10,6 +10,8 @@ import {
   ListItemIcon,
   Chip,
   Divider,
+  Button,
+  Stack,
 } from '@mui/material';
 import {
   FitnessCenter,
@@ -26,6 +28,9 @@ interface DayDetailPopoverProps {
   onClose: () => void;
   date: dayjs.Dayjs | null;
   events: CalendarEvent[];
+  canCreate?: boolean;
+  onCreateTraining?: (date: string) => void;
+  onCreateGame?: (date: string) => void;
 }
 
 const eventTypeIcon: Record<string, React.ReactNode> = {
@@ -40,6 +45,9 @@ export function DayDetailPopover({
   onClose,
   date,
   events,
+  canCreate,
+  onCreateTraining,
+  onCreateGame,
 }: DayDetailPopoverProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -47,6 +55,8 @@ export function DayDetailPopover({
   const sorted = [...events].sort((a, b) =>
     (a.startTime ?? '').localeCompare(b.startTime ?? ''),
   );
+
+  const dateStr = date?.format('YYYY-MM-DD') ?? '';
 
   return (
     <Popover
@@ -61,7 +71,7 @@ export function DayDetailPopover({
           {date?.format('dddd, DD.MM.YYYY')}
         </Typography>
         {sorted.length === 0 ? (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ mb: canCreate ? 1.5 : 0 }}>
             {t('calendar.noSessions')}
           </Typography>
         ) : (
@@ -115,6 +125,33 @@ export function DayDetailPopover({
               </Box>
             ))}
           </List>
+        )}
+        {canCreate && (
+          <>
+            <Divider sx={{ my: 1 }} />
+            <Stack direction="row" spacing={1}>
+              <Button
+                size="small"
+                startIcon={<FitnessCenter fontSize="small" />}
+                onClick={() => {
+                  onClose();
+                  onCreateTraining?.(dateStr);
+                }}
+              >
+                {t('trainings.createTraining')}
+              </Button>
+              <Button
+                size="small"
+                startIcon={<SportsSoccer fontSize="small" />}
+                onClick={() => {
+                  onClose();
+                  onCreateGame?.(dateStr);
+                }}
+              >
+                {t('games.createGame')}
+              </Button>
+            </Stack>
+          </>
         )}
       </Box>
     </Popover>

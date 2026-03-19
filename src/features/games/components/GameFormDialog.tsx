@@ -32,12 +32,14 @@ interface GameFormDialogProps {
   open: boolean;
   onClose: () => void;
   game?: GameDTO | null;
+  defaultDate?: string;
 }
 
 export function GameFormDialog({
   open,
   onClose,
   game,
+  defaultDate,
 }: GameFormDialogProps) {
   const { t } = useTranslation();
   const clubId = useClubId();
@@ -90,7 +92,7 @@ export function GameFormDialog({
     } else if (open) {
       reset({
         teamId: '',
-        date: '',
+        date: defaultDate ?? '',
         startTime: '',
         endTime: '',
         opponent: '',
@@ -101,7 +103,7 @@ export function GameFormDialog({
         notes: '',
       });
     }
-  }, [open, game, reset]);
+  }, [open, game, defaultDate, reset]);
 
   const handleClose = () => {
     reset();

@@ -28,6 +28,8 @@ import { useTeams } from '@/api/team.api';
 import { usePitches } from '@/api/pitch.api';
 import { MonthlyCalendar } from './components/MonthlyCalendar';
 import { CalendarFilters } from './components/CalendarFilters';
+import { TrainingFormDialog } from '@/features/trainings/components/TrainingFormDialog';
+import { GameFormDialog } from '@/features/games/components/GameFormDialog';
 import { useClubId } from '@/hooks/useClubId';
 import { usePermissions } from '@/hooks/usePermissions';
 import { eventTypeColors } from '@/theme';
@@ -38,7 +40,7 @@ export function CalendarPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const clubId = useClubId();
-  const { isClubAdmin } = usePermissions();
+  const { isClubAdmin, canCreateTraining } = usePermissions();
 
   const [currentMonth, setCurrentMonth] = useState(dayjs().startOf('month'));
   const [teamFilter, setTeamFilter] = useState('');
@@ -48,6 +50,9 @@ export function CalendarPage() {
   const [showTrainings, setShowTrainings] = useState(true);
   const [showGames, setShowGames] = useState(true);
   const [showTournaments, setShowTournaments] = useState(true);
+  const [trainingFormOpen, setTrainingFormOpen] = useState(false);
+  const [gameFormOpen, setGameFormOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState('');
 
   const { data: trainings } = useTrainings(clubId, myTeamsOnly);
   const { data: games } = useGames(clubId);
@@ -297,7 +302,30 @@ export function CalendarPage() {
       </Stack>
 
       {/* Calendar grid */}
-      <MonthlyCalendar month={currentMonth} events={calendarEvents} />
+      <MonthlyCalendar
+        month={currentMonth}
+        events={calendarEvents}
+        canCreate={canCreateTraining}
+        onCreateTraining={(date) => {
+          setSelectedDate(date);
+          setTrainingFormOpen(true);
+        }}
+        onCreateGame={(date) => {
+          setSelectedDate(date);
+          setGameFormOpen(true);
+        }}
+      />
+
+      <TrainingFormDialog
+        open={trainingFormOpen}
+        onClose={() => setTrainingFormOpen(false)}
+        defaultDate={selectedDate}
+      />
+      <GameFormDialog
+        open={gameFormOpen}
+        onClose={() => setGameFormOpen(false)}
+        defaultDate={selectedDate}
+      />
     </Box>
   );
 }

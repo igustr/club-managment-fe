@@ -35,9 +35,12 @@ export interface CalendarEvent {
 interface MonthlyCalendarProps {
   month: dayjs.Dayjs;
   events: CalendarEvent[];
+  canCreate?: boolean;
+  onCreateTraining?: (date: string) => void;
+  onCreateGame?: (date: string) => void;
 }
 
-export function MonthlyCalendar({ month, events }: MonthlyCalendarProps) {
+export function MonthlyCalendar({ month, events, canCreate, onCreateTraining, onCreateGame }: MonthlyCalendarProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -297,6 +300,9 @@ export function MonthlyCalendar({ month, events }: MonthlyCalendarProps) {
         }}
         date={selectedDate}
         events={selectedEvents}
+        canCreate={canCreate}
+        onCreateTraining={onCreateTraining}
+        onCreateGame={onCreateGame}
       />
     </>
   );

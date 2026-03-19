@@ -30,12 +30,14 @@ interface TrainingFormDialogProps {
   open: boolean;
   onClose: () => void;
   training?: TrainingSessionDTO | null;
+  defaultDate?: string;
 }
 
 export function TrainingFormDialog({
   open,
   onClose,
   training,
+  defaultDate,
 }: TrainingFormDialogProps) {
   const { t } = useTranslation();
   const clubId = useClubId();
@@ -77,14 +79,14 @@ export function TrainingFormDialog({
     } else if (open) {
       reset({
         teamId: '',
-        date: '',
+        date: defaultDate ?? '',
         startTime: '',
         endTime: '',
         pitchId: '',
         notes: '',
       });
     }
-  }, [open, training, reset]);
+  }, [open, training, defaultDate, reset]);
 
   const handleClose = () => {
     reset();
