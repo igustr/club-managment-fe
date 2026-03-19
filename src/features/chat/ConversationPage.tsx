@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -11,7 +11,6 @@ import {
   Avatar,
 } from '@mui/material';
 import { ArrowBack, Groups } from '@mui/icons-material';
-import { MemberProfileDialog } from '@/components/ui/MemberProfileDialog';
 import {
   useConversation,
   useMessages,
@@ -30,8 +29,6 @@ export function ConversationPage() {
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
   const clubId = useClubId();
-
-  const [profileUserId, setProfileUserId] = useState<string | null>(null);
 
   const { data: conversation } = useConversation(clubId, conversationId);
   const { data: messagesPage, isLoading: messagesLoading } = useMessages(
@@ -127,7 +124,7 @@ export function ConversationPage() {
         ) : (
           <MessageList
             messages={messages}
-            onProfileClick={(userId) => setProfileUserId(userId)}
+            onProfileClick={(userId) => navigate(`/members/${userId}`)}
           />
         )}
 
@@ -136,11 +133,6 @@ export function ConversationPage() {
           disabled={sendMutation.isPending}
         />
       </Paper>
-      <MemberProfileDialog
-        open={!!profileUserId}
-        userId={profileUserId}
-        onClose={() => setProfileUserId(null)}
-      />
     </Box>
   );
 }

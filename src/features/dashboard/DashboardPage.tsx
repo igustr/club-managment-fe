@@ -26,6 +26,7 @@ import {
   PersonAdd,
   BarChart,
   Settings,
+  Chat,
 } from '@mui/icons-material';
 import { useClubUsers } from '@/api/user.api';
 import { useClub } from '@/api/club.api';
@@ -37,6 +38,7 @@ import { useConversations } from '@/api/chat.api';
 import { useClubId } from '@/hooks/useClubId';
 import { usePermissions } from '@/hooks/usePermissions';
 import { TrainingSessionStatus } from '@/types/common.types';
+import { ConversationType } from '@/types/chat.types';
 import { formatDate, formatTime } from '@/utils/date';
 import { PlayerDashboard } from './components/PlayerDashboard';
 import { CoachDashboard } from './components/CoachDashboard';
@@ -134,7 +136,16 @@ function AdminDashboard() {
       .slice(0, 7);
   }, [trainings]);
 
-  const recentConversations = conversations?.slice(0, 3);
+  const teamConversations = useMemo(
+    () => (conversations ?? []).filter((c) => c.type === ConversationType.TEAM),
+    [conversations],
+  );
+  const directConversations = useMemo(
+    () => (conversations ?? []).filter((c) => c.type !== ConversationType.TEAM).slice(0, 3),
+    [conversations],
+  );
+  const hasAnyConversations =
+    teamConversations.length > 0 || directConversations.length > 0;
 
   return (
     <Box>
@@ -337,7 +348,7 @@ function AdminDashboard() {
             </Paper>
           )}
 
-          {/* Recent messages */}
+          {/* Combined messages card */}
           <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
             <Stack
               direction="row"
@@ -351,62 +362,128 @@ function AdminDashboard() {
               }}
             >
               <Typography variant="subtitle2" fontWeight={600}>
-                {t('dashboard.recentMessages')}
+                {t('dashboard.messages')}
               </Typography>
               <Button size="small" onClick={() => navigate('/chat')}>
                 {t('dashboard.viewAll')}
               </Button>
             </Stack>
-            {!recentConversations || recentConversations.length === 0 ? (
+            {!hasAnyConversations ? (
               <Box sx={{ p: 2, textAlign: 'center' }}>
                 <Typography variant="body2" color="text.secondary">
                   {t('chat.noConversations')}
                 </Typography>
               </Box>
             ) : (
-              recentConversations.map((conv) => (
-                <Box
-                  key={conv.id}
-                  sx={{
-                    px: 2,
-                    py: 1.5,
-                    borderBottom: '1px solid',
-                    borderColor: 'divider',
-                    cursor: 'pointer',
-                    '&:hover': { bgcolor: 'action.hover' },
-                    '&:last-child': { borderBottom: 'none' },
-                  }}
-                  onClick={() => navigate(`/chat/${conv.id}`)}
-                >
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
+              <>
+                {teamConversations.map((conv) => (
+                  <Box
+                    key={conv.id}
+                    sx={{
+                      px: 2,
+                      py: 1.5,
+                      borderBottom: '1px solid',
+                      borderColor: 'divider',
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'action.hover' },
+                    }}
+                    onClick={() => navigate(`/chat/${conv.id}`)}
                   >
-                    <Typography variant="body2" fontWeight={600}>
-                      {conv.name}
-                    </Typography>
-                    {conv.unreadCount > 0 && (
-                      <Chip
-                        label={conv.unreadCount}
-                        size="small"
-                        color="primary"
-                        sx={{ height: 20, fontSize: 11 }}
-                      />
-                    )}
-                  </Stack>
-                  {conv.lastMessageText && (
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      noWrap
-                      sx={{ display: 'block', mt: 0.25 }}
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                      <Groups sx={{ fontSize: 20, color: 'primary.main' }} />
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="body2" fontWeight={600}>
+                          {conv.name}
+                        </Typography>
+                        {conv.lastMessageText && (
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            noWrap
+                            sx={{ display: 'block' }}
+                          >
+                            {conv.lastMessageText}
+                          </Typography>
+                        )}
+                      </Box>
+                      {conv.unreadCount > 0 && (
+                        <Chip
+                          label={conv.unreadCount}
+                          size="small"
+                          color="primary"
+                          sx={{ height: 20, fontSize: 11 }}
+                        />
+                      )}
+                    </Stack>
+                  </Box>
+                ))}
+                {teamConversations.length > 0 &&
+                  directConversations.length > 0 && (
+                    <Box
+                      sx={{
+                        px: 2,
+                        py: 0.75,
+                        bgcolor: 'action.hover',
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                      }}
                     >
-                      {conv.lastMessageText}
-                    </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          textTransform: 'uppercase',
+                          letterSpacing: 0.5,
+                          fontSize: 11,
+                        }}
+                      >
+                        {t('dashboard.directMessages')}
+                      </Typography>
+                    </Box>
                   )}
-                </Box>
-              ))
+                {directConversations.map((conv) => (
+                  <Box
+                    key={conv.id}
+                    sx={{
+                      px: 2,
+                      py: 1.5,
+                      borderBottom: '1px solid',
+                      borderColor: 'divider',
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'action.hover' },
+                      '&:last-child': { borderBottom: 'none' },
+                    }}
+                    onClick={() => navigate(`/chat/${conv.id}`)}
+                  >
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                      <Chat sx={{ fontSize: 20, color: 'secondary.main' }} />
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="body2" fontWeight={600}>
+                          {conv.name}
+                        </Typography>
+                        {conv.lastMessageText && (
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            noWrap
+                            sx={{ display: 'block' }}
+                          >
+                            {conv.lastMessageText}
+                          </Typography>
+                        )}
+                      </Box>
+                      {conv.unreadCount > 0 && (
+                        <Chip
+                          label={conv.unreadCount}
+                          size="small"
+                          color="primary"
+                          sx={{ height: 20, fontSize: 11 }}
+                        />
+                      )}
+                    </Stack>
+                  </Box>
+                ))}
+              </>
             )}
           </Paper>
         </Box>

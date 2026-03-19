@@ -184,7 +184,9 @@
     "declinedShort": "declined",
     "pendingShort": "pending",
     "planned": "planned",
-    "teamChat": "Team Chat"
+    "teamChat": "Team Chat",
+    "messages": "Messages",
+    "directMessages": "Direct messages"
   },
   "clubs": {
     "settings": {

@@ -184,7 +184,9 @@
     "declinedShort": "keeldunud",
     "pendingShort": "ootel",
     "planned": "planeeritud",
-    "teamChat": "Meeskonna vestlus"
+    "teamChat": "Meeskonna vestlus",
+    "messages": "Sõnumid",
+    "directMessages": "Otsesõnumid"
   },
   "clubs": {
     "settings": {

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -10,7 +11,6 @@ import {
   MenuItem,
   Stack,
 } from '@mui/material';
-import { MemberProfileDialog } from '@/components/ui/MemberProfileDialog';
 import {
   People,
   Groups,
@@ -28,8 +28,8 @@ import { MonthlyAttendanceChart } from './components/MonthlyAttendanceChart';
 export function AnalyticsPage() {
   const { t } = useTranslation();
   const clubId = useClubId();
+  const navigate = useNavigate();
   const [selectedTeamId, setSelectedTeamId] = useState<string>('');
-  const [profileUserId, setProfileUserId] = useState<string | null>(null);
 
   const { data: clubStats, isLoading } = useClubStatistics(clubId);
   const { data: teamStats } = useTeamStatistics(
@@ -157,15 +157,9 @@ export function AnalyticsPage() {
         <PlayerStatsTable
           title={`${teamStats.teamName} — ${t('statistics.playerStatistics')}`}
           players={teamStats.playerStatistics}
-          onProfileClick={(userId) => setProfileUserId(userId)}
+          onProfileClick={(userId) => navigate(`/members/${userId}`)}
         />
       )}
-
-      <MemberProfileDialog
-        open={!!profileUserId}
-        userId={profileUserId}
-        onClose={() => setProfileUserId(null)}
-      />
     </Box>
   );
 }
