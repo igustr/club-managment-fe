@@ -19,6 +19,8 @@ import {
 } from '@mui/icons-material';
 import type { SquadMemberDTO } from '@/types/squad.types';
 import { AttendanceStatus } from '@/types/common.types';
+import type { PlayerPosition } from '@/types/common.types';
+import { positionColors } from '@/utils/roles';
 
 interface SquadListProps {
   members: SquadMemberDTO[];
@@ -115,9 +117,21 @@ export function SquadList({
                   />
                 </TableCell>
                 <TableCell>
-                  {member.position
-                    ? t(`positions.${member.position}`)
-                    : '—'}
+                  {member.position ? (
+                    <Chip
+                      label={t(`positions.${member.position}`)}
+                      size="small"
+                      sx={{
+                        bgcolor:
+                          positionColors[member.position as PlayerPosition] + '1A',
+                        color:
+                          positionColors[member.position as PlayerPosition],
+                        fontWeight: 600,
+                      }}
+                    />
+                  ) : (
+                    '—'
+                  )}
                 </TableCell>
                 <TableCell>
                   <Chip

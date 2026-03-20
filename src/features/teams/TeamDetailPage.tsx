@@ -33,8 +33,8 @@ import {
 } from '@/api/team.api';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissions } from '@/hooks/usePermissions';
-import { clubRoleColors } from '@/utils/roles';
-import type { ClubRole } from '@/types/common.types';
+import { clubRoleColors, positionColors } from '@/utils/roles';
+import type { ClubRole, PlayerPosition } from '@/types/common.types';
 import type { TeamDTO } from '@/types/team.types';
 import { TeamFormDialog } from './components/TeamFormDialog';
 import { AddMemberDialog } from './components/AddMemberDialog';
@@ -314,7 +314,21 @@ export function TeamDetailPage() {
                     />
                   </TableCell>
                   <TableCell>
-                    {member.position ? t(`positions.${member.position}`) : '—'}
+                    {member.position ? (
+                      <Chip
+                        label={t(`positions.${member.position}`)}
+                        size="small"
+                        sx={{
+                          bgcolor:
+                            positionColors[member.position as PlayerPosition] + '1A',
+                          color:
+                            positionColors[member.position as PlayerPosition],
+                          fontWeight: 600,
+                        }}
+                      />
+                    ) : (
+                      '—'
+                    )}
                   </TableCell>
                   <TableCell>{formatDate(member.joinedDate)}</TableCell>
                   {isClubAdmin && (

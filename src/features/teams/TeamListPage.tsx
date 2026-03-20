@@ -30,8 +30,9 @@ import { useAuthStore } from '@/stores/authStore';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useClubId } from '@/hooks/useClubId';
 import { TeamFormDialog } from './components/TeamFormDialog';
-import { clubRoleColors } from '@/utils/roles';
+import { clubRoleColors, positionColors } from '@/utils/roles';
 import { TrainingSessionStatus } from '@/types/common.types';
+import type { PlayerPosition } from '@/types/common.types';
 import type { ClubRole } from '@/types/common.types';
 import type { TeamDTO } from '@/types/team.types';
 import { formatDate, formatTime } from '@/utils/date';
@@ -178,9 +179,21 @@ function ExpandedTeamCard({ team }: { team: TeamDTO }) {
                       </TableCell>
                       {members.some((m) => m.position) && (
                         <TableCell>
-                          {member.position
-                            ? t(`positions.${member.position}`)
-                            : '—'}
+                          {member.position ? (
+                            <Chip
+                              label={t(`positions.${member.position}`)}
+                              size="small"
+                              sx={{
+                                bgcolor:
+                                  positionColors[member.position as PlayerPosition] + '1A',
+                                color:
+                                  positionColors[member.position as PlayerPosition],
+                                fontWeight: 600,
+                              }}
+                            />
+                          ) : (
+                            '—'
+                          )}
                         </TableCell>
                       )}
                     </TableRow>

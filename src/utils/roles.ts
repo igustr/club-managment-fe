@@ -1,4 +1,4 @@
-import { ClubRole, SystemRole } from '@/types/common.types';
+import { ClubRole, PlayerPosition, SystemRole } from '@/types/common.types';
 
 export const clubRoleDisplayNames: Record<ClubRole, { et: string; en: string }> = {
   [ClubRole.CLUB_ADMIN]: { et: 'Klubi administraator', en: 'Club Admin' },
@@ -16,4 +16,11 @@ export const clubRoleColors: Record<ClubRole, string> = {
   [ClubRole.COACH]: '#0D9488',
   [ClubRole.PLAYER]: '#3B82F6',
   [ClubRole.PARENT]: '#F59E0B',
+};
+
+export const positionColors: Record<PlayerPosition, string> = {
+  [PlayerPosition.GOALKEEPER]: '#D97706',
+  [PlayerPosition.DEFENDER]: '#2563EB',
+  [PlayerPosition.MIDFIELDER]: '#059669',
+  [PlayerPosition.STRIKER]: '#DC2626',
 };

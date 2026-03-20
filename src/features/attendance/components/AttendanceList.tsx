@@ -13,6 +13,8 @@ import {
 } from '@mui/material';
 import { CheckCircle, Cancel, HourglassEmpty } from '@mui/icons-material';
 import type { AttendanceDTO } from '@/types/attendance.types';
+import type { PlayerPosition } from '@/types/common.types';
+import { positionColors } from '@/utils/roles';
 import { AttendanceStatus } from '@/types/common.types';
 
 interface AttendanceListProps {
@@ -94,7 +96,21 @@ export function AttendanceList({
                   />
                 </TableCell>
                 <TableCell>
-                  {att.position ? t(`positions.${att.position}`) : '—'}
+                  {att.position ? (
+                    <Chip
+                      label={t(`positions.${att.position}`)}
+                      size="small"
+                      sx={{
+                        bgcolor:
+                          positionColors[att.position as PlayerPosition] + '1A',
+                        color:
+                          positionColors[att.position as PlayerPosition],
+                        fontWeight: 600,
+                      }}
+                    />
+                  ) : (
+                    '—'
+                  )}
                 </TableCell>
                 <TableCell>
                   <Chip
