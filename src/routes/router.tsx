@@ -128,6 +128,11 @@ const MemberProfilePage = lazy(() =>
     default: m.MemberProfilePage,
   })),
 );
+const ChildrenPage = lazy(() =>
+  import('@/features/children/ChildrenPage').then((m) => ({
+    default: m.ChildrenPage,
+  })),
+);
 
 // Layout components (not lazy — always needed)
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -274,6 +279,14 @@ export const router = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <MemberProfilePage />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: '/children',
+                element: (
+                  <SuspenseWrapper>
+                    <ChildrenPage />
                   </SuspenseWrapper>
                 ),
               },

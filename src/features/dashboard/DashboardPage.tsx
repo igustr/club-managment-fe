@@ -42,6 +42,7 @@ import { ConversationType } from '@/types/chat.types';
 import { formatDate, formatTime } from '@/utils/date';
 import { PlayerDashboard } from './components/PlayerDashboard';
 import { CoachDashboard } from './components/CoachDashboard';
+import { ParentDashboard } from './components/ParentDashboard';
 import dayjs from 'dayjs';
 
 function StatCard({
@@ -495,7 +496,11 @@ function AdminDashboard() {
 export function DashboardPage() {
   const { isPlayer, isParent, isCoach } = usePermissions();
 
-  if (isPlayer || isParent) {
+  if (isParent) {
+    return <ParentDashboard />;
+  }
+
+  if (isPlayer) {
     return <PlayerDashboard />;
   }
 

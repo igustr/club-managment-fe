@@ -29,6 +29,7 @@ import {
   ChevronLeft,
   ChevronRight,
   SportsSoccer,
+  ChildCare,
 } from '@mui/icons-material';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -67,13 +68,18 @@ export function Sidebar({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const user = useAuthStore((s) => s.user);
-  const { isClubAdmin, canViewStatistics, canManagePitches } = usePermissions();
+  const { isClubAdmin, isParent, canViewStatistics, canManagePitches } = usePermissions();
   const clubId = useClubId();
   const { data: unreadCount } = useUnreadCount(clubId);
 
   const mainItems: NavItem[] = [
     { key: 'dashboard', path: '/dashboard', icon: <Dashboard />, labelKey: 'nav.dashboard' },
-    { key: 'teams', path: '/teams', icon: <Groups />, labelKey: 'nav.teams' },
+    ...(!isParent
+      ? [{ key: 'teams', path: '/teams', icon: <Groups />, labelKey: 'nav.teams' }]
+      : []),
+    ...(isParent
+      ? [{ key: 'children', path: '/children', icon: <ChildCare />, labelKey: 'nav.children' }]
+      : []),
     { key: 'trainings', path: '/trainings', icon: <FitnessCenter />, labelKey: 'nav.trainings' },
     { key: 'games', path: '/games', icon: <SportsSoccer />, labelKey: 'nav.games' },
     ...(canManagePitches

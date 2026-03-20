@@ -12,10 +12,36 @@ import {
   Avatar,
   Box,
   Divider,
+  Badge,
+  Popover,
+  Stack,
+  Chip,
+  CircularProgress,
 } from '@mui/material';
-import { Menu as MenuIcon, Logout } from '@mui/icons-material';
+import {
+  Menu as MenuIcon,
+  Logout,
+  Notifications,
+  FitnessCenter,
+  Cancel,
+  Delete,
+  Chat,
+  DoneAll,
+} from '@mui/icons-material';
 import { useAuthStore } from '@/stores/authStore';
 import { useUiStore } from '@/stores/uiStore';
+import { useClubId } from '@/hooks/useClubId';
+import {
+  useNotifications,
+  useNotificationUnreadCount,
+  useMarkNotificationAsRead,
+  useMarkAllNotificationsAsRead,
+} from '@/api/notification.api';
+import { NotificationType } from '@/types/notification.types';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
 
 interface HeaderProps {
   title?: string;
@@ -23,14 +49,41 @@ interface HeaderProps {
   drawerWidth: number;
 }
 
+const notificationIcons: Record<NotificationType, React.ReactNode> = {
+  [NotificationType.TRAINING_UPDATED]: (
+    <FitnessCenter sx={{ fontSize: 18, color: 'info.main' }} />
+  ),
+  [NotificationType.TRAINING_CANCELLED]: (
+    <Cancel sx={{ fontSize: 18, color: 'error.main' }} />
+  ),
+  [NotificationType.TRAINING_DELETED]: (
+    <Delete sx={{ fontSize: 18, color: 'error.main' }} />
+  ),
+  [NotificationType.MESSAGE]: (
+    <Chat sx={{ fontSize: 18, color: 'primary.main' }} />
+  ),
+};
+
 export function Header({ title, onToggleSidebar, drawerWidth }: HeaderProps) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const setLanguage = useUiStore((s) => s.setLanguage);
+  const clubId = useClubId();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [langAnchorEl, setLangAnchorEl] = useState<null | HTMLElement>(null);
+  const [notifAnchorEl, setNotifAnchorEl] = useState<null | HTMLElement>(null);
+
+  const { data: unreadCount } = useNotificationUnreadCount(clubId);
+  const { data: notificationsPage, isLoading: notifLoading } = useNotifications(
+    notifAnchorEl ? clubId : null,
+    { page: 0, size: 15 },
+  );
+  const markAsRead = useMarkNotificationAsRead(clubId ?? '');
+  const markAllAsRead = useMarkAllNotificationsAsRead(clubId ?? '');
+
+  const notifications = notificationsPage?.content ?? [];
 
   const handleLanguageChange = (lang: string) => {
     i18n.changeLanguage(lang);
@@ -44,9 +97,34 @@ export function Header({ title, onToggleSidebar, drawerWidth }: HeaderProps) {
     navigate('/login', { replace: true });
   };
 
-  const displayName = user
-    ? `${user.firstName} ${user.lastName}`
-    : '';
+  const handleNotificationClick = (
+    notifId: string,
+    type: NotificationType,
+    referenceId: string | null,
+    isRead: boolean,
+  ) => {
+    if (!isRead) {
+      markAsRead.mutate(notifId);
+    }
+    setNotifAnchorEl(null);
+
+    if (type === NotificationType.MESSAGE && referenceId) {
+      navigate(`/chat/${referenceId}`);
+    } else if (
+      type === NotificationType.TRAINING_UPDATED &&
+      referenceId
+    ) {
+      navigate(`/trainings/${referenceId}`);
+    } else if (type === NotificationType.TRAINING_CANCELLED && referenceId) {
+      navigate(`/trainings/${referenceId}`);
+    }
+  };
+
+  const handleMarkAllRead = () => {
+    markAllAsRead.mutate();
+  };
+
+  const displayName = user ? `${user.firstName} ${user.lastName}` : '';
 
   const initials = user
     ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
@@ -77,6 +155,145 @@ export function Header({ title, onToggleSidebar, drawerWidth }: HeaderProps) {
         <Typography variant="h6" fontWeight={600} sx={{ flexGrow: 1 }}>
           {title}
         </Typography>
+
+        {/* Notification bell */}
+        <IconButton
+          onClick={(e) => setNotifAnchorEl(e.currentTarget)}
+          size="small"
+          sx={{ mr: 0.5 }}
+        >
+          <Badge
+            badgeContent={unreadCount ?? 0}
+            color="error"
+            max={99}
+          >
+            <Notifications />
+          </Badge>
+        </IconButton>
+
+        <Popover
+          open={!!notifAnchorEl}
+          anchorEl={notifAnchorEl}
+          onClose={() => setNotifAnchorEl(null)}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          slotProps={{
+            paper: {
+              sx: { width: 360, maxHeight: 480, overflow: 'hidden', display: 'flex', flexDirection: 'column' },
+            },
+          }}
+        >
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}
+          >
+            <Typography variant="subtitle2" fontWeight={700}>
+              {t('notifications.title')}
+            </Typography>
+            {(unreadCount ?? 0) > 0 && (
+              <Button
+                size="small"
+                startIcon={<DoneAll sx={{ fontSize: 16 }} />}
+                onClick={handleMarkAllRead}
+                sx={{ fontSize: 12 }}
+              >
+                {t('notifications.markAllRead')}
+              </Button>
+            )}
+          </Stack>
+
+          <Box sx={{ overflow: 'auto', flex: 1 }}>
+            {notifLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress size={24} />
+              </Box>
+            ) : notifications.length === 0 ? (
+              <Box sx={{ py: 4, textAlign: 'center' }}>
+                <Notifications sx={{ fontSize: 32, color: 'text.disabled', mb: 0.5 }} />
+                <Typography variant="body2" color="text.secondary">
+                  {t('notifications.empty')}
+                </Typography>
+              </Box>
+            ) : (
+              notifications.map((notif) => (
+                <Box
+                  key={notif.id}
+                  onClick={() =>
+                    handleNotificationClick(
+                      notif.id,
+                      notif.type,
+                      notif.referenceId,
+                      notif.read,
+                    )
+                  }
+                  sx={{
+                    px: 2,
+                    py: 1.5,
+                    cursor: 'pointer',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    bgcolor: notif.read ? 'transparent' : 'action.hover',
+                    '&:hover': { bgcolor: 'action.selected' },
+                    '&:last-child': { borderBottom: 'none' },
+                  }}
+                >
+                  <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                    <Box sx={{ pt: 0.3 }}>
+                      {notificationIcons[notif.type]}
+                    </Box>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Stack direction="row" spacing={0.5} alignItems="center">
+                        <Chip
+                          label={t(`notifications.type.${notif.type}`)}
+                          size="small"
+                          variant="outlined"
+                          sx={{ height: 18, fontSize: 10 }}
+                        />
+                        {!notif.read && (
+                          <Box
+                            sx={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: '50%',
+                              bgcolor: 'primary.main',
+                            }}
+                          />
+                        )}
+                      </Stack>
+                      <Typography
+                        variant="body2"
+                        fontWeight={notif.read ? 400 : 600}
+                        sx={{ mt: 0.3 }}
+                        noWrap
+                      >
+                        {notif.title}
+                      </Typography>
+                      {notif.message && (
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          noWrap
+                          sx={{ display: 'block' }}
+                        >
+                          {notif.message}
+                        </Typography>
+                      )}
+                      <Typography
+                        variant="caption"
+                        color="text.disabled"
+                        sx={{ mt: 0.3, display: 'block' }}
+                      >
+                        {dayjs(notif.createdAt).fromNow()}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Box>
+              ))
+            )}
+          </Box>
+        </Popover>
 
         {/* Language switcher */}
         <Button

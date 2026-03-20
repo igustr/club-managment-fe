@@ -138,7 +138,7 @@ export function TrainingDetailPage() {
             </Button>
             <Button
               variant="outlined"
-              color="warning"
+              color="error"
               startIcon={<Cancel />}
               onClick={() => setCancelOpen(true)}
             >

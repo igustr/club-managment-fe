@@ -81,6 +81,7 @@
     "users": "Kasutajad",
     "statistics": "Statistika",
     "settings": "Seaded",
+    "children": "Lapsed",
     "platform": "Platvorm",
     "clubs": "Klubid"
   },
@@ -188,7 +189,13 @@
     "teamChat": "Meeskonna vestlus",
     "messages": "Sõnumid",
     "directMessages": "Otsesõnumid",
-    "teamChats": "Meeskondade vestlused"
+    "teamChats": "Meeskondade vestlused",
+    "parentSubtitle": "Lapse kohaloleku haldamine",
+    "noChildren": "Ühtegi last pole veel seotud. Võtke ühendust klubi administraatoriga.",
+    "viewProfile": "Vaata profiili"
+  },
+  "children": {
+    "subtitle": "Laste kohaloleku statistika ülevaade"
   },
   "clubs": {
     "settings": {
@@ -493,6 +500,17 @@
     "trainings": "Treeningud",
     "games": "Mängud",
     "tournaments": "Turniirid"
+  },
+  "notifications": {
+    "title": "Teavitused",
+    "empty": "Teavitusi pole",
+    "markAllRead": "Märgi loetuks",
+    "type": {
+      "TRAINING_UPDATED": "Treening muudetud",
+      "TRAINING_CANCELLED": "Treening tühistatud",
+      "TRAINING_DELETED": "Treening kustutatud",
+      "MESSAGE": "Uus sõnum"
+    }
   },
   "error": {
     "generic": "Midagi läks valesti. Palun proovi uuesti.",

@@ -49,7 +49,8 @@ export function TeamDetailPage() {
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
   const clubId = useAuthStore((s) => s.user?.clubId);
-  const { isClubAdmin, canViewStatistics } = usePermissions();
+  const { isClubAdmin, canViewStatistics, isCoach } = usePermissions();
+  const canManage = isClubAdmin || isCoach;
 
   const [editOpen, setEditOpen] = useState(false);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
@@ -255,10 +256,10 @@ export function TeamDetailPage() {
           <TableHead>
             <TableRow>
               <TableCell>{t('teams.memberName')}</TableCell>
-              <TableCell>{t('teams.memberEmail')}</TableCell>
+              {canManage && <TableCell>{t('teams.memberEmail')}</TableCell>}
               <TableCell>{t('teams.memberRole')}</TableCell>
               <TableCell>{t('teams.position')}</TableCell>
-              <TableCell>{t('teams.joinedDate')}</TableCell>
+              {canManage && <TableCell>{t('teams.joinedDate')}</TableCell>}
               {isClubAdmin && (
                 <TableCell align="right" sx={{ width: 60 }} />
               )}
@@ -268,7 +269,7 @@ export function TeamDetailPage() {
             {membersLoading ? (
               <TableRow>
                 <TableCell
-                  colSpan={isClubAdmin ? 6 : 5}
+                  colSpan={isClubAdmin ? 6 : canManage ? 5 : 3}
                   align="center"
                   sx={{ py: 6 }}
                 >
@@ -278,7 +279,7 @@ export function TeamDetailPage() {
             ) : !members || members.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={isClubAdmin ? 6 : 5}
+                  colSpan={isClubAdmin ? 6 : canManage ? 5 : 3}
                   align="center"
                   sx={{ py: 6 }}
                 >
@@ -300,7 +301,7 @@ export function TeamDetailPage() {
                       {member.firstName} {member.lastName}
                     </Typography>
                   </TableCell>
-                  <TableCell>{member.email}</TableCell>
+                  {canManage && <TableCell>{member.email}</TableCell>}
                   <TableCell>
                     <Chip
                       label={t(`roles.${member.role}`)}
@@ -330,7 +331,7 @@ export function TeamDetailPage() {
                       '—'
                     )}
                   </TableCell>
-                  <TableCell>{formatDate(member.joinedDate)}</TableCell>
+                  {canManage && <TableCell>{formatDate(member.joinedDate)}</TableCell>}
                   {isClubAdmin && (
                     <TableCell align="right">
                       <Tooltip title={t('teams.removeMember')}>

@@ -34,13 +34,14 @@ export function MemberProfilePage() {
   const navigate = useNavigate();
   const clubId = useClubId();
   const currentUserId = useAuthStore((s) => s.user?.id);
-  const { canViewStatistics } = usePermissions();
+  const { canViewStatistics, isClubAdmin, isCoach } = usePermissions();
+  const canViewParents = isClubAdmin || isCoach;
   const isOwnProfile = userId === currentUserId;
 
   const { data: user, isLoading } = useClubUser(clubId, userId);
   const { data: parents } = useParents(
     clubId,
-    user?.role === 'PLAYER' ? userId : undefined,
+    canViewParents && user?.role === 'PLAYER' ? userId : undefined,
   );
 
   const isPlayer = user?.role === 'PLAYER';

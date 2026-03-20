@@ -81,6 +81,7 @@
     "users": "Users",
     "statistics": "Statistics",
     "settings": "Settings",
+    "children": "Children",
     "platform": "Platform",
     "clubs": "Clubs"
   },
@@ -188,7 +189,13 @@
     "teamChat": "Team Chat",
     "messages": "Messages",
     "directMessages": "Direct messages",
-    "teamChats": "Team chats"
+    "teamChats": "Team chats",
+    "parentSubtitle": "Manage your child's attendance",
+    "noChildren": "No children linked yet. Contact the club administrator.",
+    "viewProfile": "View profile"
+  },
+  "children": {
+    "subtitle": "Overview of your children's attendance statistics"
   },
   "clubs": {
     "settings": {
@@ -493,6 +500,17 @@
     "trainings": "Trainings",
     "games": "Games",
     "tournaments": "Tournaments"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "markAllRead": "Mark all read",
+    "type": {
+      "TRAINING_UPDATED": "Training updated",
+      "TRAINING_CANCELLED": "Training cancelled",
+      "TRAINING_DELETED": "Training deleted",
+      "MESSAGE": "New message"
+    }
   },
   "error": {
     "generic": "Something went wrong. Please try again.",
