@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -24,11 +24,12 @@ import {
   LocationOn,
   Notes,
   Chat,
+  HourglassEmpty,
 } from '@mui/icons-material';
 import { useTrainings } from '@/api/training.api';
 import { useTeams } from '@/api/team.api';
-import { usePlayerStatistics } from '@/api/statistics.api';
-import { useAttendanceList, useUpdateAttendance } from '@/api/attendance.api';
+import { updateAttendance, useMyAttendances, attendanceKeys } from '@/api/attendance.api';
+import { queryClient } from '@/api/query-client';
 import { useConversations } from '@/api/chat.api';
 import { useClubId } from '@/hooks/useClubId';
 import { ConversationType } from '@/types/chat.types';
@@ -36,7 +37,6 @@ import { useAuthStore } from '@/stores/authStore';
 import { TrainingSessionStatus, AttendanceStatus } from '@/types/common.types';
 import { formatDate, formatTime } from '@/utils/date';
 import toast from 'react-hot-toast';
-import { getApiErrorMessage } from '@/api/axios';
 import dayjs from 'dayjs';
 
 export function PlayerDashboard() {
@@ -47,13 +47,28 @@ export function PlayerDashboard() {
 
   const { data: trainings } = useTrainings(clubId, true);
   const { data: teams } = useTeams(clubId, true);
-  const { data: playerStats } = usePlayerStatistics(clubId, user?.id);
   const { data: conversations } = useConversations(clubId);
+  const { data: myAttendances } = useMyAttendances(clubId);
+  const [updatingTrainingId, setUpdatingTrainingId] = useState<string | null>(null);
+
+  // Build a map of trainingSessionId -> AttendanceStatus from server data
+  const attendanceStatuses = useMemo(() => {
+    const map: Record<string, AttendanceStatus> = {};
+    myAttendances?.forEach((a) => {
+      map[a.trainingSessionId] = a.status;
+    });
+    return map;
+  }, [myAttendances]);
 
   const teamConversations = useMemo(
     () => (conversations ?? []).filter((c) => c.type === ConversationType.TEAM),
     [conversations],
   );
+  const directConversations = useMemo(
+    () => (conversations ?? []).filter((c) => c.type !== ConversationType.TEAM).slice(0, 3),
+    [conversations],
+  );
+  const hasAnyConversations = teamConversations.length > 0 || directConversations.length > 0;
 
   // Upcoming scheduled trainings
   const upcoming = useMemo(() => {
@@ -73,35 +88,30 @@ export function PlayerDashboard() {
 
   const nextTraining = upcoming[0];
 
-  // Fetch attendance for the next training to show status + actions
-  const { data: nextAttendanceList } = useAttendanceList(
-    nextTraining ? clubId : null,
-    nextTraining?.id,
+  // Pending trainings = upcoming where player hasn't confirmed/declined yet
+  const pendingTrainings = useMemo(
+    () => upcoming.filter((tr) => {
+      const status = attendanceStatuses[tr.id];
+      return !status || status === AttendanceStatus.PENDING;
+    }).slice(1), // skip next (shown in hero)
+    [upcoming, attendanceStatuses],
   );
-  const updateMutation = useUpdateAttendance(
-    clubId!,
-    nextTraining?.id ?? '',
-  );
-
-  const myAttendance = nextAttendanceList?.find(
-    (a) => a.userId === user?.id,
-  );
-  const myStatus = myAttendance?.status ?? AttendanceStatus.PENDING;
-
-  const handleUpdateStatus = async (status: AttendanceStatus) => {
-    if (!user || !nextTraining) return;
-    try {
-      await updateMutation.mutateAsync({
-        userId: user.id,
-        data: { status },
-      });
-      toast.success(t('attendance.updateSuccess'));
-    } catch (error) {
-      toast.error(getApiErrorMessage(error));
-    }
-  };
 
   const myTeam = teams?.[0];
+
+  const handleUpdateStatus = async (trainingId: string, status: AttendanceStatus) => {
+    if (!user || !clubId) return;
+    setUpdatingTrainingId(trainingId);
+    try {
+      await updateAttendance(clubId, trainingId, user.id, { status });
+      queryClient.invalidateQueries({ queryKey: attendanceKeys.myAll(clubId) });
+      toast.success(t('attendance.updateSuccess'));
+    } catch {
+      // Error toast is already shown by the axios interceptor
+    } finally {
+      setUpdatingTrainingId(null);
+    }
+  };
 
   // Day name from date
   const getDayName = (dateStr: string) => {
@@ -109,6 +119,43 @@ export function PlayerDashboard() {
     const dayKey = day.format('dddd').toUpperCase();
     return t(`trainings.days.${dayKey}`, dayKey);
   };
+
+  const getStatusChip = (trainingId: string) => {
+    const status = attendanceStatuses[trainingId];
+    if (!status || status === AttendanceStatus.PENDING) {
+      return (
+        <Chip
+          icon={<HourglassEmpty />}
+          label={t('dashboard.decisionPending')}
+          size="small"
+          color="warning"
+          variant="outlined"
+        />
+      );
+    }
+    if (status === AttendanceStatus.CONFIRMED) {
+      return (
+        <Chip
+          icon={<CheckCircle />}
+          label={t('attendance.confirmed')}
+          size="small"
+          color="success"
+          variant="outlined"
+        />
+      );
+    }
+    return (
+      <Chip
+        icon={<Cancel />}
+        label={t('attendance.declined')}
+        size="small"
+        color="error"
+        variant="outlined"
+      />
+    );
+  };
+
+  const nextTrainingStatus = nextTraining ? attendanceStatuses[nextTraining.id] : undefined;
 
   return (
     <Box>
@@ -119,7 +166,9 @@ export function PlayerDashboard() {
         {myTeam?.name ?? ''}
       </Typography>
 
-      {/* NEXT TRAINING HERO */}
+      {/* ======================== */}
+      {/* NEXT TRAINING HERO CARD */}
+      {/* ======================== */}
       {nextTraining ? (
         <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
           <Typography
@@ -197,8 +246,8 @@ export function PlayerDashboard() {
             </Box>
 
             {/* Status + Actions */}
-            <Stack spacing={1.5} alignItems="center" sx={{ minWidth: 160 }}>
-              {myStatus === AttendanceStatus.CONFIRMED ? (
+            <Stack spacing={1.5} alignItems="center" sx={{ minWidth: 180 }}>
+              {nextTrainingStatus === AttendanceStatus.CONFIRMED ? (
                 <>
                   <Chip
                     icon={<CheckCircle />}
@@ -211,13 +260,14 @@ export function PlayerDashboard() {
                     color="error"
                     variant="outlined"
                     fullWidth
-                    onClick={() => handleUpdateStatus(AttendanceStatus.DECLINED)}
-                    disabled={updateMutation.isPending}
+                    startIcon={<Cancel />}
+                    onClick={() => handleUpdateStatus(nextTraining.id, AttendanceStatus.DECLINED)}
+                    disabled={updatingTrainingId === nextTraining.id}
                   >
                     {t('attendance.decline')}
                   </Button>
                 </>
-              ) : myStatus === AttendanceStatus.DECLINED ? (
+              ) : nextTrainingStatus === AttendanceStatus.DECLINED ? (
                 <>
                   <Chip
                     icon={<Cancel />}
@@ -230,8 +280,9 @@ export function PlayerDashboard() {
                     color="success"
                     variant="outlined"
                     fullWidth
-                    onClick={() => handleUpdateStatus(AttendanceStatus.CONFIRMED)}
-                    disabled={updateMutation.isPending}
+                    startIcon={<CheckCircle />}
+                    onClick={() => handleUpdateStatus(nextTraining.id, AttendanceStatus.CONFIRMED)}
+                    disabled={updatingTrainingId === nextTraining.id}
                   >
                     {t('attendance.confirm')}
                   </Button>
@@ -248,8 +299,8 @@ export function PlayerDashboard() {
                     color="success"
                     fullWidth
                     startIcon={<CheckCircle />}
-                    onClick={() => handleUpdateStatus(AttendanceStatus.CONFIRMED)}
-                    disabled={updateMutation.isPending}
+                    onClick={() => handleUpdateStatus(nextTraining.id, AttendanceStatus.CONFIRMED)}
+                    disabled={updatingTrainingId === nextTraining.id}
                   >
                     {t('attendance.confirm')}
                   </Button>
@@ -258,8 +309,8 @@ export function PlayerDashboard() {
                     color="error"
                     fullWidth
                     startIcon={<Cancel />}
-                    onClick={() => handleUpdateStatus(AttendanceStatus.DECLINED)}
-                    disabled={updateMutation.isPending}
+                    onClick={() => handleUpdateStatus(nextTraining.id, AttendanceStatus.DECLINED)}
+                    disabled={updatingTrainingId === nextTraining.id}
                   >
                     {t('attendance.decline')}
                   </Button>
@@ -277,50 +328,78 @@ export function PlayerDashboard() {
         </Paper>
       )}
 
-      {/* STATS + TEAM INFO */}
-      <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ mb: 3 }}>
-        {/* Attendance stats */}
-        <Box sx={{ flex: 1 }}>
+      {/* ============================ */}
+      {/* PENDING DECISIONS — batch     */}
+      {/* ============================ */}
+      {pendingTrainings.length > 0 && (
+        <Box sx={{ mb: 3 }}>
           <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
-            {t('dashboard.myAttendanceStats')}
+            {t('dashboard.pendingDecisions')} ({pendingTrainings.length})
           </Typography>
-          <Stack direction="row" spacing={2}>
-            <Paper
-              variant="outlined"
-              sx={{ flex: 1, p: 2.5, textAlign: 'center' }}
-            >
-              <Typography variant="h4" fontWeight={700} color="success.main">
-                {playerStats?.confirmedCount ?? 0}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {t('attendance.confirmed')}
-              </Typography>
-            </Paper>
-            <Paper
-              variant="outlined"
-              sx={{ flex: 1, p: 2.5, textAlign: 'center' }}
-            >
-              <Typography variant="h4" fontWeight={700} color="error.main">
-                {playerStats?.declinedCount ?? 0}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {t('attendance.declined')}
-              </Typography>
-            </Paper>
-            <Paper
-              variant="outlined"
-              sx={{ flex: 1, p: 2.5, textAlign: 'center' }}
-            >
-              <Typography variant="h4" fontWeight={700} color="warning.main">
-                {playerStats?.pendingCount ?? 0}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {t('attendance.pending')}
-              </Typography>
-            </Paper>
+          <Stack
+            direction="row"
+            sx={{
+              gap: 2,
+              flexWrap: 'wrap',
+            }}
+          >
+            {pendingTrainings.slice(0, 6).map((tr) => (
+              <Paper
+                key={tr.id}
+                variant="outlined"
+                sx={{
+                  p: 2.5,
+                  flex: '1 1 280px',
+                  maxWidth: { md: 'calc(33.333% - 11px)' },
+                }}
+              >
+                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
+                  {getDayName(tr.date)}, {formatDate(tr.date)}
+                </Typography>
+                <Stack spacing={0.5} sx={{ mb: 1.5 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    <AccessTime sx={{ fontSize: 14, verticalAlign: 'text-bottom', mr: 0.5 }} />
+                    {formatTime(tr.startTime)} – {formatTime(tr.endTime)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <LocationOn sx={{ fontSize: 14, verticalAlign: 'text-bottom', mr: 0.5 }} />
+                    {tr.pitchName ?? '—'}
+                  </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="success"
+                    fullWidth
+                    sx={{ fontSize: 12 }}
+                    onClick={() => handleUpdateStatus(tr.id, AttendanceStatus.CONFIRMED)}
+                    disabled={updatingTrainingId === tr.id}
+                  >
+                    {t('attendance.confirm')}
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="error"
+                    fullWidth
+                    sx={{ fontSize: 12 }}
+                    onClick={() => handleUpdateStatus(tr.id, AttendanceStatus.DECLINED)}
+                    disabled={updatingTrainingId === tr.id}
+                  >
+                    {t('attendance.decline')}
+                  </Button>
+                </Stack>
+              </Paper>
+            ))}
           </Stack>
         </Box>
+      )}
 
+      {/* ========================== */}
+      {/* TWO COLUMNS: Team + Chat   */}
+      {/* ========================== */}
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ mb: 3 }}>
         {/* My team card */}
         {myTeam && (
           <Box sx={{ flex: 1 }}>
@@ -332,75 +411,168 @@ export function PlayerDashboard() {
               sx={{ p: 2.5, cursor: 'pointer', '&:hover': { borderColor: 'primary.main' } }}
               onClick={() => navigate(`/teams/${myTeam.id}`)}
             >
-              <Typography variant="subtitle1" fontWeight={600}>
-                {myTeam.name}
-              </Typography>
-              <Stack direction="row" spacing={1} sx={{ my: 1 }}>
-                {myTeam.ageGroup && (
-                  <Chip label={myTeam.ageGroup} size="small" variant="outlined" />
-                )}
-                {myTeam.season && (
-                  <Chip label={myTeam.season} size="small" variant="outlined" />
-                )}
+              <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    {myTeam.name}
+                  </Typography>
+                  <Stack direction="row" spacing={1} sx={{ my: 1 }}>
+                    {myTeam.ageGroup && (
+                      <Chip label={myTeam.ageGroup} size="small" variant="outlined" />
+                    )}
+                    {myTeam.season && (
+                      <Chip label={myTeam.season} size="small" variant="outlined" />
+                    )}
+                  </Stack>
+                </Box>
+                <Chip
+                  label={t('teams.memberCount', { count: myTeam.memberCount })}
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                />
               </Stack>
-              <Typography variant="body2" color="text.secondary">
-                {t('teams.memberCount', { count: myTeam.memberCount })}
-              </Typography>
               <Typography variant="body2" color="text.secondary">
                 {upcoming.length} {t('dashboard.planned')}
               </Typography>
             </Paper>
           </Box>
         )}
+
+        {/* Messages — same style as coach dashboard */}
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
+            {t('dashboard.messages')}
+          </Typography>
+          <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ p: 2, pb: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}
+            >
+              <Typography variant="subtitle2" fontWeight={600}>
+                {t('dashboard.messages')}
+              </Typography>
+              <Button size="small" onClick={() => navigate('/chat')}>
+                {t('dashboard.viewAll')}
+              </Button>
+            </Stack>
+
+            {!hasAnyConversations ? (
+              <Box sx={{ p: 2, textAlign: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  {t('chat.noConversations')}
+                </Typography>
+              </Box>
+            ) : (
+              <>
+                {/* Team conversations */}
+                {teamConversations.map((conv) => (
+                  <Box
+                    key={conv.id}
+                    sx={{
+                      px: 2,
+                      py: 1.5,
+                      borderBottom: '1px solid',
+                      borderColor: 'divider',
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'action.hover' },
+                    }}
+                    onClick={() => navigate(`/chat/${conv.id}`)}
+                  >
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                      <Groups sx={{ fontSize: 20, color: 'primary.main' }} />
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="body2" fontWeight={600}>
+                          {conv.name}
+                        </Typography>
+                        {conv.lastMessageText && (
+                          <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
+                            {conv.lastMessageText}
+                          </Typography>
+                        )}
+                      </Box>
+                      {conv.unreadCount > 0 && (
+                        <Chip
+                          label={conv.unreadCount}
+                          size="small"
+                          color="primary"
+                          sx={{ height: 20, fontSize: 11 }}
+                        />
+                      )}
+                    </Stack>
+                  </Box>
+                ))}
+
+                {/* Separator */}
+                {teamConversations.length > 0 && directConversations.length > 0 && (
+                  <Box
+                    sx={{
+                      px: 2,
+                      py: 0.75,
+                      bgcolor: 'action.hover',
+                      borderBottom: '1px solid',
+                      borderColor: 'divider',
+                    }}
+                  >
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ textTransform: 'uppercase', letterSpacing: 0.5, fontSize: 11 }}
+                    >
+                      {t('dashboard.directMessages')}
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* Direct conversations */}
+                {directConversations.map((conv) => (
+                  <Box
+                    key={conv.id}
+                    sx={{
+                      px: 2,
+                      py: 1.5,
+                      borderBottom: '1px solid',
+                      borderColor: 'divider',
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'action.hover' },
+                      '&:last-child': { borderBottom: 'none' },
+                    }}
+                    onClick={() => navigate(`/chat/${conv.id}`)}
+                  >
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                      <Chat sx={{ fontSize: 20, color: 'secondary.main' }} />
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="body2" fontWeight={600}>
+                          {conv.name}
+                        </Typography>
+                        {conv.lastMessageText && (
+                          <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
+                            {conv.lastMessageText}
+                          </Typography>
+                        )}
+                      </Box>
+                      {conv.unreadCount > 0 && (
+                        <Chip
+                          label={conv.unreadCount}
+                          size="small"
+                          color="primary"
+                          sx={{ height: 20, fontSize: 11 }}
+                        />
+                      )}
+                    </Stack>
+                  </Box>
+                ))}
+              </>
+            )}
+          </Paper>
+        </Box>
       </Stack>
 
-      {/* TEAM CHAT */}
-      {teamConversations.length > 0 && (
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
-            {t('dashboard.teamChat')}
-          </Typography>
-          <Stack direction="row" spacing={2}>
-            {teamConversations.map((conv) => (
-              <Paper
-                key={conv.id}
-                variant="outlined"
-                sx={{
-                  p: 2,
-                  cursor: 'pointer',
-                  flex: 1,
-                  '&:hover': { borderColor: 'primary.main' },
-                }}
-                onClick={() => navigate(`/chat/${conv.id}`)}
-              >
-                <Stack direction="row" spacing={1.5} alignItems="center">
-                  <Chat color="primary" />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" fontWeight={600}>
-                      {conv.name}
-                    </Typography>
-                    {conv.lastMessageText && (
-                      <Typography variant="caption" color="text.secondary" noWrap>
-                        {conv.lastMessageText}
-                      </Typography>
-                    )}
-                  </Box>
-                  {conv.unreadCount > 0 && (
-                    <Chip
-                      label={conv.unreadCount}
-                      size="small"
-                      color="primary"
-                      sx={{ height: 20, fontSize: 11 }}
-                    />
-                  )}
-                </Stack>
-              </Paper>
-            ))}
-          </Stack>
-        </Box>
-      )}
-
-      {/* UPCOMING TRAININGS TABLE */}
+      {/* ========================= */}
+      {/* UPCOMING TRAININGS TABLE  */}
+      {/* ========================= */}
       <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
         {t('dashboard.allUpcoming')}
       </Typography>
@@ -420,7 +592,7 @@ export function PlayerDashboard() {
                 <TableCell>{t('trainings.time')}</TableCell>
                 <TableCell>{t('trainings.team')}</TableCell>
                 <TableCell>{t('trainings.pitch')}</TableCell>
-                <TableCell>{t('trainings.status')}</TableCell>
+                <TableCell>{t('dashboard.myStatus')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -441,14 +613,7 @@ export function PlayerDashboard() {
                     <Chip label={tr.teamName} size="small" variant="outlined" />
                   </TableCell>
                   <TableCell>{tr.pitchName ?? '—'}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={t('trainings.statusScheduled')}
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                    />
-                  </TableCell>
+                  <TableCell>{getStatusChip(tr.id)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

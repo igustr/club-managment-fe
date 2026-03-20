@@ -16,6 +16,10 @@ export const attendanceKeys = {
   summaries: () => [...attendanceKeys.all, 'summary'] as const,
   summary: (clubId: string, trainingId: string) =>
     [...attendanceKeys.summaries(), clubId, trainingId] as const,
+  mine: (clubId: string, trainingId: string) =>
+    [...attendanceKeys.all, 'mine', clubId, trainingId] as const,
+  myAll: (clubId: string) =>
+    [...attendanceKeys.all, 'myAll', clubId] as const,
 };
 
 // --- API functions ---
@@ -31,6 +35,23 @@ export const getAttendanceSummary = (clubId: string, trainingId: string) =>
     .get<AttendanceSummaryDTO>(
       `/api/clubs/${clubId}/trainings/${trainingId}/attendance/summary`,
     )
+    .then((r) => r.data);
+
+export const getMyAttendance = (
+  clubId: string,
+  trainingId: string,
+  userId?: string,
+) =>
+  api
+    .get<AttendanceDTO>(
+      `/api/clubs/${clubId}/trainings/${trainingId}/attendance/mine`,
+      { params: userId ? { userId } : undefined },
+    )
+    .then((r) => r.data);
+
+export const getMyAttendances = (clubId: string) =>
+  api
+    .get<AttendanceDTO[]>(`/api/clubs/${clubId}/attendance/mine`)
     .then((r) => r.data);
 
 export const updateAttendance = (
@@ -67,6 +88,25 @@ export const useAttendanceSummary = (
     enabled: !!clubId && !!trainingId,
   });
 
+export const useMyAttendances = (clubId: string | null) =>
+  useQuery({
+    queryKey: attendanceKeys.myAll(clubId!),
+    queryFn: () => getMyAttendances(clubId!),
+    enabled: !!clubId,
+  });
+
+export const useMyAttendance = (
+  clubId: string | null,
+  trainingId: string | undefined,
+  userId?: string,
+) =>
+  useQuery({
+    queryKey: [...attendanceKeys.mine(clubId!, trainingId!), userId ?? 'self'],
+    queryFn: () => getMyAttendance(clubId!, trainingId!, userId),
+    enabled: !!clubId && !!trainingId,
+    retry: false,
+  });
+
 // --- Mutation hooks ---
 export const useUpdateAttendance = (clubId: string, trainingId: string) =>
   useMutation({
@@ -83,6 +123,9 @@ export const useUpdateAttendance = (clubId: string, trainingId: string) =>
       });
       queryClient.invalidateQueries({
         queryKey: attendanceKeys.summary(clubId, trainingId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: attendanceKeys.mine(clubId, trainingId),
       });
     },
   });

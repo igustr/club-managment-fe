@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Box, Typography, Paper, CircularProgress, Divider } from '@mui/material';
-import { useAttendanceList, useAttendanceSummary, useUpdateAttendance } from '@/api/attendance.api';
+import { useMyAttendance, useAttendanceSummary, useUpdateAttendance } from '@/api/attendance.api';
 import { useChildren } from '@/api/user.api';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -11,8 +11,35 @@ import { AttendanceSummary } from './AttendanceSummary';
 import { AttendanceList } from './AttendanceList';
 import { PlayerAttendanceCard } from './PlayerAttendanceCard';
 import { AttendanceStatus } from '@/types/common.types';
+import type { UserDTO } from '@/types/auth.types';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
+
+// Wrapper to call useMyAttendance hook per child
+function ChildAttendanceRow({
+  child,
+  clubId,
+  trainingId,
+  onUpdateStatus,
+  loading,
+}: {
+  child: UserDTO;
+  clubId: string;
+  trainingId: string;
+  onUpdateStatus: (userId: string, status: AttendanceStatus) => void;
+  loading: boolean;
+}) {
+  const { data: childAttendance } = useMyAttendance(clubId, trainingId, child.id);
+  return (
+    <PlayerAttendanceCard
+      label={`${child.firstName} ${child.lastName}`}
+      attendance={childAttendance ?? undefined}
+      onConfirm={() => onUpdateStatus(child.id, AttendanceStatus.CONFIRMED)}
+      onDecline={() => onUpdateStatus(child.id, AttendanceStatus.DECLINED)}
+      loading={loading}
+    />
+  );
+}
 
 interface AttendanceSectionProps {
   trainingId: string;
@@ -33,10 +60,10 @@ export function AttendanceSection({ trainingId }: AttendanceSectionProps) {
     canViewAttendanceSummary ? trainingId : undefined,
   );
 
-  // Player/Parent: fetch attendance list to find own/children's status
-  const { data: attendanceList } = useAttendanceList(
-    isPlayer || isParent ? clubId : null,
-    isPlayer || isParent ? trainingId : undefined,
+  // Player: fetch own attendance status
+  const { data: myAttendance } = useMyAttendance(
+    isPlayer ? clubId : null,
+    isPlayer ? trainingId : undefined,
   );
 
   // Parent: fetch children to show per-child attendance
@@ -102,8 +129,6 @@ export function AttendanceSection({ trainingId }: AttendanceSectionProps) {
 
   // Player view: own attendance confirm/decline
   if (isPlayer && user) {
-    const ownAttendance = attendanceList?.find((a) => a.userId === user.id);
-
     return (
       <Paper variant="outlined" sx={{ p: 3 }}>
         <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
@@ -113,7 +138,7 @@ export function AttendanceSection({ trainingId }: AttendanceSectionProps) {
           {t('attendance.playerHint')}
         </Typography>
         <PlayerAttendanceCard
-          attendance={ownAttendance}
+          attendance={myAttendance ?? undefined}
           onConfirm={() => handleUpdateStatus(user.id, AttendanceStatus.CONFIRMED)}
           onDecline={() => handleUpdateStatus(user.id, AttendanceStatus.DECLINED)}
           loading={updateMutation.isPending}
@@ -139,12 +164,12 @@ export function AttendanceSection({ trainingId }: AttendanceSectionProps) {
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {children.map((child) => (
-              <PlayerAttendanceCard
+              <ChildAttendanceRow
                 key={child.id}
-                label={`${child.firstName} ${child.lastName}`}
-                attendance={attendanceList?.find((a) => a.userId === child.id)}
-                onConfirm={() => handleUpdateStatus(child.id, AttendanceStatus.CONFIRMED)}
-                onDecline={() => handleUpdateStatus(child.id, AttendanceStatus.DECLINED)}
+                child={child}
+                clubId={clubId!}
+                trainingId={trainingId}
+                onUpdateStatus={handleUpdateStatus}
                 loading={updateMutation.isPending && updatingUserId === child.id}
               />
             ))}

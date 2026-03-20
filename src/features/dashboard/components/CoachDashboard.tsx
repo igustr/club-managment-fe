@@ -27,6 +27,7 @@ import {
 import { useTrainings } from '@/api/training.api';
 import { useTeams } from '@/api/team.api';
 import { useTeamStatistics } from '@/api/statistics.api';
+import { useAttendanceSummary } from '@/api/attendance.api';
 import { useConversations } from '@/api/chat.api';
 import { useClub } from '@/api/club.api';
 import { useClubId } from '@/hooks/useClubId';
@@ -70,6 +71,18 @@ export function CoachDashboard() {
   const nextTrainingForTeam = (teamId: string) => {
     return upcoming.find((tr) => tr.teamId === teamId);
   };
+
+  // Attendance summaries for next training of each team
+  const firstTeamNext = firstTeam ? nextTrainingForTeam(firstTeam.id) : undefined;
+  const secondTeamNext = secondTeam ? nextTrainingForTeam(secondTeam.id) : undefined;
+  const { data: firstNextAttendance } = useAttendanceSummary(
+    firstTeamNext ? clubId : null,
+    firstTeamNext?.id,
+  );
+  const { data: secondNextAttendance } = useAttendanceSummary(
+    secondTeamNext ? clubId : null,
+    secondTeamNext?.id,
+  );
 
   // Team conversations
   const teamConversations = useMemo(
@@ -141,6 +154,8 @@ export function CoachDashboard() {
             const next = nextTrainingForTeam(team.id);
             const stats =
               team.id === firstTeam?.id ? firstTeamStats : secondTeamStats;
+            const nextAttendance =
+              team.id === firstTeam?.id ? firstNextAttendance : secondNextAttendance;
             return (
               <Paper
                 key={team.id}
@@ -188,7 +203,7 @@ export function CoachDashboard() {
                   />
                 </Stack>
 
-                {/* Next training info */}
+                {/* Next training info + attendance */}
                 {next && (
                   <Box
                     sx={{
@@ -209,6 +224,30 @@ export function CoachDashboard() {
                       {formatDate(next.date)} · {formatTime(next.startTime)} –{' '}
                       {formatTime(next.endTime)} · {next.pitchName ?? '—'}
                     </Typography>
+
+                    {/* Attendance counts for next training */}
+                    {nextAttendance && (
+                      <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'success.main' }} />
+                          <Typography variant="caption" color="text.secondary">
+                            {nextAttendance.confirmed} {t('dashboard.confirmedShort')}
+                          </Typography>
+                        </Stack>
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'error.main' }} />
+                          <Typography variant="caption" color="text.secondary">
+                            {nextAttendance.declined} {t('dashboard.declinedShort')}
+                          </Typography>
+                        </Stack>
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'warning.main' }} />
+                          <Typography variant="caption" color="text.secondary">
+                            {nextAttendance.pending} {t('dashboard.pendingShort')}
+                          </Typography>
+                        </Stack>
+                      </Stack>
+                    )}
                   </Box>
                 )}
 
@@ -339,64 +378,8 @@ export function CoachDashboard() {
           )}
         </Box>
 
-        {/* RIGHT COLUMN: Attendance overview + combined messages */}
+        {/* RIGHT COLUMN: Messages */}
         <Box sx={{ flex: 1, minWidth: 280 }}>
-          {/* Attendance overview per team */}
-          {(firstTeamStats || secondTeamStats) && (
-            <Paper variant="outlined" sx={{ p: 2.5, mb: 2 }}>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>
-                {t('dashboard.attendanceOverview')}
-              </Typography>
-              {[firstTeamStats, secondTeamStats]
-                .filter(Boolean)
-                .map((stats) => (
-                  <Stack
-                    key={stats!.teamId}
-                    direction="row"
-                    alignItems="center"
-                    spacing={1.5}
-                    sx={{ mb: 1.5, '&:last-child': { mb: 0 } }}
-                  >
-                    <Typography
-                      variant="body2"
-                      fontWeight={500}
-                      sx={{ minWidth: 100 }}
-                    >
-                      {stats!.teamName}
-                    </Typography>
-                    <Box sx={{ flex: 1 }}>
-                      <LinearProgress
-                        variant="determinate"
-                        value={stats!.averageAttendanceRate}
-                        color={
-                          stats!.averageAttendanceRate >= 75
-                            ? 'success'
-                            : stats!.averageAttendanceRate >= 50
-                              ? 'warning'
-                              : 'error'
-                        }
-                        sx={{ height: 8, borderRadius: 4 }}
-                      />
-                    </Box>
-                    <Typography
-                      variant="body2"
-                      fontWeight={700}
-                      sx={{ minWidth: 40, textAlign: 'right' }}
-                      color={
-                        stats!.averageAttendanceRate >= 75
-                          ? 'success.main'
-                          : stats!.averageAttendanceRate >= 50
-                            ? 'warning.main'
-                            : 'error.main'
-                      }
-                    >
-                      {Math.round(stats!.averageAttendanceRate)}%
-                    </Typography>
-                  </Stack>
-                ))}
-            </Paper>
-          )}
-
           {/* Combined messages card: team chats + direct messages */}
           <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
             <Stack

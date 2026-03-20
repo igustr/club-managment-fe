@@ -74,8 +74,8 @@ api.interceptors.response.use(
       window.location.href = '/login';
     }
 
-    // Show toast for non-401 errors (401 is handled above with token refresh)
-    if (error.response?.status !== 401) {
+    // Show toast for non-401/403 errors (401 is handled with token refresh, 403 is handled by UI guards)
+    if (error.response?.status !== 401 && error.response?.status !== 403) {
       const message = getApiErrorMessage(error);
       toast.error(message);
     }

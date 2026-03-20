@@ -56,8 +56,8 @@ export function AttendanceList({
   const { t } = useTranslation();
 
   const sorted = [...attendances].sort((a, b) => {
-    const order = { CONFIRMED: 0, PENDING: 1, DECLINED: 2 };
-    return (order[a.status] ?? 1) - (order[b.status] ?? 1);
+    const order = { CONFIRMED: 0, DECLINED: 1, PENDING: 2 };
+    return (order[a.status] ?? 2) - (order[b.status] ?? 2);
   });
 
   return (
