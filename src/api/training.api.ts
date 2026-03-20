@@ -130,8 +130,11 @@ export const useUpdateTraining = (clubId: string, trainingId: string) =>
 export const useCancelTraining = (clubId: string) =>
   useMutation({
     mutationFn: (trainingId: string) => cancelTraining(clubId, trainingId),
-    onSuccess: () => {
+    onSuccess: (_data, trainingId) => {
       queryClient.invalidateQueries({ queryKey: trainingKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: trainingKeys.detail(clubId, trainingId),
+      });
     },
   });
 

@@ -23,6 +23,7 @@ import {
 } from '@/api/chat.api';
 import { useClubId } from '@/hooks/useClubId';
 import { usePermissions } from '@/hooks/usePermissions';
+import { ConversationType } from '@/types/chat.types';
 import { ConversationItem } from './components/ConversationItem';
 import { NewDirectChatDialog } from './components/NewDirectChatDialog';
 import { NewGroupChatDialog } from './components/NewGroupChatDialog';
@@ -90,6 +91,15 @@ export function ConversationListPage() {
       return new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime();
     });
   }, [conversations, search]);
+
+  const teamConversations = useMemo(
+    () => sorted.filter((c) => c.type === ConversationType.TEAM),
+    [sorted],
+  );
+  const otherConversations = useMemo(
+    () => sorted.filter((c) => c.type !== ConversationType.TEAM),
+    [sorted],
+  );
 
   return (
     <Box>
@@ -183,14 +193,48 @@ export function ConversationListPage() {
       ) : (
         <Paper variant="outlined">
           <List disablePadding sx={{ p: 1 }}>
-            {sorted.map((conv) => (
-              <ConversationItem
-                key={conv.id}
-                conversation={conv}
-                selected={false}
-                onClick={() => navigate(`/chat/${conv.id}`)}
-              />
-            ))}
+            {teamConversations.length > 0 && (
+              <>
+                <Box sx={{ px: 2, py: 1, bgcolor: 'action.hover' }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}
+                  >
+                    {t('dashboard.teamChats')}
+                  </Typography>
+                </Box>
+                {teamConversations.map((conv) => (
+                  <ConversationItem
+                    key={conv.id}
+                    conversation={conv}
+                    selected={false}
+                    onClick={() => navigate(`/chat/${conv.id}`)}
+                  />
+                ))}
+              </>
+            )}
+            {otherConversations.length > 0 && (
+              <>
+                <Box sx={{ px: 2, py: 1, bgcolor: 'action.hover' }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}
+                  >
+                    {t('dashboard.directMessages')}
+                  </Typography>
+                </Box>
+                {otherConversations.map((conv) => (
+                  <ConversationItem
+                    key={conv.id}
+                    conversation={conv}
+                    selected={false}
+                    onClick={() => navigate(`/chat/${conv.id}`)}
+                  />
+                ))}
+              </>
+            )}
           </List>
         </Paper>
       )}

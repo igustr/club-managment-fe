@@ -187,7 +187,8 @@
     "planned": "planned",
     "teamChat": "Team Chat",
     "messages": "Messages",
-    "directMessages": "Direct messages"
+    "directMessages": "Direct messages",
+    "teamChats": "Team chats"
   },
   "clubs": {
     "settings": {
@@ -316,6 +317,7 @@
     "statusCompleted": "Completed",
     "allTeams": "All Teams",
     "allStatuses": "All Statuses",
+    "myAttendance": "My Attendance",
     "noTrainings": "No trainings found",
     "createSuccess": "Training created",
     "editSuccess": "Training updated",

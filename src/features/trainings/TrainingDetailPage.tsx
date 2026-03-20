@@ -164,6 +164,17 @@ export function TrainingDetailPage() {
           {t('trainings.trainingInfo')}
         </Typography>
         <Stack spacing={1.5}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ minWidth: 100, ml: 3.5 }}>
+              {t('trainings.status')}
+            </Typography>
+            <Chip
+              label={t(`trainings.status${training.status.charAt(0) + training.status.slice(1).toLowerCase()}`)}
+              size="small"
+              color={statusColors[training.status]}
+              variant={isCancelled ? 'filled' : 'outlined'}
+            />
+          </Box>
           <InfoRow
             icon={<CalendarMonth fontSize="small" color="action" />}
             label={t('trainings.date')}
@@ -196,8 +207,8 @@ export function TrainingDetailPage() {
         </Stack>
       </Paper>
 
-      {/* Attendance */}
-      <AttendanceSection trainingId={trainingId!} />
+      {/* Attendance — hide for cancelled trainings */}
+      {!isCancelled && <AttendanceSection trainingId={trainingId!} />}
 
       {/* Dialogs */}
       <TrainingFormDialog

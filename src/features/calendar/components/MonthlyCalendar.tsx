@@ -132,9 +132,9 @@ export function MonthlyCalendar({ month, events, canCreate, onCreateTraining, on
         };
       default:
         return {
-          bgcolor: teamColor + '1A',
+          bgcolor: teamColor + '20',
           color: teamColor,
-          borderLeft: 'none',
+          borderLeft: `3px solid ${teamColor}`,
         };
     }
   };
@@ -187,7 +187,7 @@ export function MonthlyCalendar({ month, events, canCreate, onCreateTraining, on
                   key={dayStr}
                   onClick={(e) => handleDayClick(e, day)}
                   sx={{
-                    minHeight: 90,
+                    minHeight: 100,
                     p: 0.5,
                     borderRight: 1,
                     borderColor: 'divider',
@@ -258,18 +258,20 @@ export function MonthlyCalendar({ month, events, canCreate, onCreateTraining, on
                               navigate(event.navigateTo);
                             }}
                             sx={{
-                              height: 18,
-                              fontSize: '0.65rem',
-                              fontWeight: 500,
+                              height: 24,
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
                               textDecoration:
                                 styles.textDecoration ?? 'none',
                               bgcolor: styles.bgcolor,
                               color: styles.color,
                               borderLeft: styles.borderLeft,
                               borderRadius: styles.borderLeft
-                                ? '2px'
-                                : undefined,
-                              '& .MuiChip-label': { px: 0.5 },
+                                ? '4px'
+                                : '4px',
+                              '& .MuiChip-label': { px: 0.75 },
+                              cursor: 'pointer',
+                              '&:hover': { opacity: 0.85 },
                             }}
                           />
                         );

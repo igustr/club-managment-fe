@@ -187,7 +187,8 @@
     "planned": "planeeritud",
     "teamChat": "Meeskonna vestlus",
     "messages": "Sõnumid",
-    "directMessages": "Otsesõnumid"
+    "directMessages": "Otsesõnumid",
+    "teamChats": "Meeskondade vestlused"
   },
   "clubs": {
     "settings": {
@@ -316,6 +317,7 @@
     "statusCompleted": "Lõpetatud",
     "allTeams": "Kõik meeskonnad",
     "allStatuses": "Kõik staatused",
+    "myAttendance": "Minu kohalolek",
     "noTrainings": "Treeninguid ei leitud",
     "createSuccess": "Treening loodud",
     "editSuccess": "Treening uuendatud",
