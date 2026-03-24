@@ -1,4 +1,5 @@
 import { SurfaceType } from './common.types';
+import type { TrainingSessionDTO } from './training.types';
 
 export interface PitchDTO {
   id: string;
@@ -21,4 +22,12 @@ export interface UpdatePitchDTO {
   address?: string;
   surfaceType?: SurfaceType;
   capacity?: number;
+}
+
+export interface PitchOccupancyDTO {
+  pitchId: string;
+  pitchName: string;
+  date: string;
+  totalOccupancy: number;
+  sessions: TrainingSessionDTO[];
 }

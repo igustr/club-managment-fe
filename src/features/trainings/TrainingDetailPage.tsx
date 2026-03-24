@@ -21,6 +21,7 @@ import {
   Notes,
   CalendarMonth,
   AccessTime,
+  GridView,
 } from '@mui/icons-material';
 import {
   useTraining,
@@ -34,6 +35,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { useClubId } from '@/hooks/useClubId';
 import { formatDate, formatTime } from '@/utils/date';
 import { TrainingSessionStatus } from '@/types/common.types';
+import { PITCH_PORTIONS } from './schemas';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
 
@@ -195,6 +197,13 @@ export function TrainingDetailPage() {
               icon={<Place fontSize="small" color="action" />}
               label={t('trainings.pitch')}
               value={training.pitchName}
+            />
+          )}
+          {training.pitchName && training.pitchPortion < 1 && (
+            <InfoRow
+              icon={<GridView fontSize="small" color="action" />}
+              label={t('trainings.pitchPortion')}
+              value={PITCH_PORTIONS.find((p) => p.value === training.pitchPortion)?.label ?? `${training.pitchPortion}`}
             />
           )}
           {training.notes && (

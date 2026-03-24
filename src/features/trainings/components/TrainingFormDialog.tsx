@@ -11,6 +11,9 @@ import {
   Button,
   Stack,
   MenuItem,
+  ToggleButtonGroup,
+  ToggleButton,
+  Typography,
 } from '@mui/material';
 import { DateFieldInput } from '@/components/form/DateFieldInput';
 import { TimeFieldInput } from '@/components/form/TimeFieldInput';
@@ -19,6 +22,7 @@ import { useTeams } from '@/api/team.api';
 import { usePitches } from '@/api/pitch.api';
 import {
   trainingSchema,
+  PITCH_PORTIONS,
   type TrainingFormValues,
 } from '@/features/trainings/schemas';
 import type { TrainingSessionDTO } from '@/types/training.types';
@@ -53,6 +57,7 @@ export function TrainingFormDialog({
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<TrainingFormValues>({
     resolver: zodResolver(trainingSchema(t)),
@@ -62,9 +67,12 @@ export function TrainingFormDialog({
       startTime: '',
       endTime: '',
       pitchId: '',
+      pitchPortion: 1,
       notes: '',
     },
   });
+
+  const watchedPitchId = watch('pitchId');
 
   useEffect(() => {
     if (open && training) {
@@ -74,6 +82,7 @@ export function TrainingFormDialog({
         startTime: training.startTime?.slice(0, 5) ?? '',
         endTime: training.endTime?.slice(0, 5) ?? '',
         pitchId: training.pitchId ?? '',
+        pitchPortion: training.pitchPortion ?? 1,
         notes: training.notes ?? '',
       });
     } else if (open) {
@@ -83,6 +92,7 @@ export function TrainingFormDialog({
         startTime: '',
         endTime: '',
         pitchId: '',
+        pitchPortion: 1,
         notes: '',
       });
     }
@@ -95,12 +105,14 @@ export function TrainingFormDialog({
 
   const onSubmit = async (values: TrainingFormValues) => {
     try {
+      const pitchPortion = values.pitchId ? values.pitchPortion : undefined;
       if (isEdit) {
         await updateMutation.mutateAsync({
           date: values.date,
           startTime: values.startTime,
           endTime: values.endTime,
           pitchId: values.pitchId || undefined,
+          pitchPortion,
           notes: values.notes || undefined,
         });
         toast.success(t('trainings.editSuccess'));
@@ -112,6 +124,7 @@ export function TrainingFormDialog({
             startTime: values.startTime,
             endTime: values.endTime,
             pitchId: values.pitchId || undefined,
+            pitchPortion,
             notes: values.notes || undefined,
           },
         });
@@ -204,6 +217,34 @@ export function TrainingFormDialog({
               </TextField>
             )}
           />
+          {watchedPitchId && (
+            <Controller
+              name="pitchPortion"
+              control={control}
+              render={({ field }) => (
+                <Stack spacing={0.5}>
+                  <Typography variant="body2" color="text.secondary">
+                    {t('trainings.pitchPortion')}
+                  </Typography>
+                  <ToggleButtonGroup
+                    value={field.value}
+                    exclusive
+                    onChange={(_, val) => {
+                      if (val !== null) field.onChange(val);
+                    }}
+                    size="small"
+                    fullWidth
+                  >
+                    {PITCH_PORTIONS.map((p) => (
+                      <ToggleButton key={p.value} value={p.value}>
+                        {p.label}
+                      </ToggleButton>
+                    ))}
+                  </ToggleButtonGroup>
+                </Stack>
+              )}
+            />
+          )}
           <Controller
             name="notes"
             control={control}

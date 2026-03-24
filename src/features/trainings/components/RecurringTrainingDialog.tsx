@@ -10,6 +10,9 @@ import {
   Button,
   Stack,
   MenuItem,
+  ToggleButtonGroup,
+  ToggleButton,
+  Typography,
 } from '@mui/material';
 import { DateFieldInput } from '@/components/form/DateFieldInput';
 import { TimeFieldInput } from '@/components/form/TimeFieldInput';
@@ -18,6 +21,7 @@ import { useTeams } from '@/api/team.api';
 import { usePitches } from '@/api/pitch.api';
 import {
   recurringTrainingSchema,
+  PITCH_PORTIONS,
   type RecurringTrainingFormValues,
 } from '@/features/trainings/schemas';
 import { useClubId } from '@/hooks/useClubId';
@@ -54,6 +58,7 @@ export function RecurringTrainingDialog({
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<RecurringTrainingFormValues>({
     resolver: zodResolver(recurringTrainingSchema(t)),
@@ -65,9 +70,12 @@ export function RecurringTrainingDialog({
       startTime: '',
       endTime: '',
       pitchId: '',
+      pitchPortion: 1,
       notes: '',
     },
   });
+
+  const watchedPitchId = watch('pitchId');
 
   const handleClose = () => {
     reset();
@@ -76,6 +84,7 @@ export function RecurringTrainingDialog({
 
   const onSubmit = async (values: RecurringTrainingFormValues) => {
     try {
+      const pitchPortion = values.pitchId ? values.pitchPortion : undefined;
       const result = await createMutation.mutateAsync({
         teamId: values.teamId,
         data: {
@@ -85,6 +94,7 @@ export function RecurringTrainingDialog({
           startTime: values.startTime,
           endTime: values.endTime,
           pitchId: values.pitchId || undefined,
+          pitchPortion,
           notes: values.notes || undefined,
         },
       });
@@ -203,6 +213,34 @@ export function RecurringTrainingDialog({
               </TextField>
             )}
           />
+          {watchedPitchId && (
+            <Controller
+              name="pitchPortion"
+              control={control}
+              render={({ field }) => (
+                <Stack spacing={0.5}>
+                  <Typography variant="body2" color="text.secondary">
+                    {t('trainings.pitchPortion')}
+                  </Typography>
+                  <ToggleButtonGroup
+                    value={field.value}
+                    exclusive
+                    onChange={(_, val) => {
+                      if (val !== null) field.onChange(val);
+                    }}
+                    size="small"
+                    fullWidth
+                  >
+                    {PITCH_PORTIONS.map((p) => (
+                      <ToggleButton key={p.value} value={p.value}>
+                        {p.label}
+                      </ToggleButton>
+                    ))}
+                  </ToggleButtonGroup>
+                </Stack>
+              )}
+            />
+          )}
           <Controller
             name="notes"
             control={control}

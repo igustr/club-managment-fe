@@ -292,6 +292,10 @@
     "schedule": "Ajakava",
     "today": "Täna",
     "noSessions": "Treeninguid pole",
+    "overview": "Ülevaade",
+    "overviewSubtitle": "Väljakute hõivatuse ülevaade nädala kaupa",
+    "pitch": "Väljak",
+    "overbookedWarning": "Väljak on üle broneeritud!",
     "surfaceTypes": {
       "NATURAL_GRASS": "Loomulik muru",
       "ARTIFICIAL_TURF": "Kunstmuru",
@@ -317,6 +321,7 @@
     "team": "Meeskond",
     "pitch": "Väljak",
     "noPitch": "Väljak määramata",
+    "pitchPortion": "Väljaku osa",
     "notes": "Märkmed",
     "status": "Staatus",
     "statusScheduled": "Planeeritud",

@@ -15,6 +15,7 @@ import {
   Grid2 as Grid,
   TextField,
   InputAdornment,
+  Stack,
 } from '@mui/material';
 import {
   Add,
@@ -25,6 +26,7 @@ import {
   Delete,
   CalendarMonth,
   Search,
+  GridView,
 } from '@mui/icons-material';
 import { usePitches, useDeletePitch } from '@/api/pitch.api';
 import { PitchFormDialog } from './components/PitchFormDialog';
@@ -74,13 +76,22 @@ export function PitchListPage() {
           {t('pitches.title')}
         </Typography>
         {isClubAdmin && (
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => setFormOpen(true)}
-          >
-            {t('pitches.createPitch')}
-          </Button>
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="outlined"
+              startIcon={<GridView />}
+              onClick={() => navigate('/pitches/overview')}
+            >
+              {t('pitches.overview')}
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setFormOpen(true)}
+            >
+              {t('pitches.createPitch')}
+            </Button>
+          </Stack>
         )}
       </Box>
 

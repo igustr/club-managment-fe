@@ -10,16 +10,20 @@ import {
   Chip,
   CircularProgress,
   Button,
+  LinearProgress,
+  Tooltip,
 } from '@mui/material';
 import {
   ArrowBack,
   ChevronLeft,
   ChevronRight,
   FiberManualRecord,
+  Warning,
 } from '@mui/icons-material';
 import { usePitch, usePitchSchedule } from '@/api/pitch.api';
 import { useClubId } from '@/hooks/useClubId';
 import { formatDate, formatTime } from '@/utils/date';
+import { PITCH_PORTIONS } from '@/features/trainings/schemas';
 import dayjs from 'dayjs';
 import { TrainingSessionStatus } from '@/types/common.types';
 
@@ -55,6 +59,9 @@ export function PitchSchedulePage() {
         return 'action' as const;
     }
   };
+
+  const getPortionLabel = (portion: number) =>
+    PITCH_PORTIONS.find((p) => p.value === portion)?.label ?? `${portion}`;
 
   if (pitchLoading) {
     return (
@@ -138,6 +145,16 @@ export function PitchSchedulePage() {
             );
             const isToday = day.isSame(dayjs(), 'day');
 
+            const scheduledSessions = daySessions.filter(
+              (s) => s.status === TrainingSessionStatus.SCHEDULED,
+            );
+            const totalOccupancy = scheduledSessions.reduce(
+              (sum, s) => sum + (s.pitchPortion ?? 1),
+              0,
+            );
+            const occupancyPct = Math.round(totalOccupancy * 100);
+            const isOverbooked = totalOccupancy > 1;
+
             return (
               <Paper
                 key={dayStr}
@@ -145,24 +162,62 @@ export function PitchSchedulePage() {
                 sx={{
                   p: 2,
                   bgcolor: isToday ? 'primary.50' : undefined,
-                  borderColor: isToday ? 'primary.main' : undefined,
+                  borderColor: isOverbooked
+                    ? 'warning.main'
+                    : isToday
+                      ? 'primary.main'
+                      : undefined,
                 }}
               >
-                <Typography
-                  variant="subtitle2"
-                  fontWeight={600}
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
                   sx={{ mb: daySessions.length > 0 ? 1 : 0 }}
                 >
-                  {day.format('dddd, DD.MM')}
-                  {isToday && (
-                    <Chip
-                      label={t('pitches.today')}
-                      size="small"
-                      color="primary"
-                      sx={{ ml: 1 }}
-                    />
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    {day.format('dddd, DD.MM')}
+                    {isToday && (
+                      <Chip
+                        label={t('pitches.today')}
+                        size="small"
+                        color="primary"
+                        sx={{ ml: 1 }}
+                      />
+                    )}
+                  </Typography>
+                  {scheduledSessions.length > 0 && (
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      {isOverbooked && (
+                        <Tooltip title={t('pitches.overbookedWarning')}>
+                          <Warning color="warning" sx={{ fontSize: 18 }} />
+                        </Tooltip>
+                      )}
+                      <Chip
+                        label={`${occupancyPct}%`}
+                        size="small"
+                        color={
+                          isOverbooked
+                            ? 'warning'
+                            : occupancyPct === 100
+                              ? 'success'
+                              : 'default'
+                        }
+                        variant="outlined"
+                      />
+                    </Stack>
                   )}
-                </Typography>
+                </Stack>
+
+                {scheduledSessions.length > 0 && (
+                  <LinearProgress
+                    variant="determinate"
+                    value={Math.min(occupancyPct, 100)}
+                    color={isOverbooked ? 'warning' : 'primary'}
+                    sx={{ mb: 1, borderRadius: 1, height: 4 }}
+                  />
+                )}
+
                 {daySessions.length === 0 ? (
                   <Typography variant="body2" color="text.secondary">
                     {t('pitches.noSessions')}
@@ -199,6 +254,14 @@ export function PitchSchedulePage() {
                           <Typography variant="body2" color="text.secondary">
                             {session.teamName}
                           </Typography>
+                          {session.pitchPortion < 1 && (
+                            <Chip
+                              label={getPortionLabel(session.pitchPortion)}
+                              size="small"
+                              variant="outlined"
+                              sx={{ height: 20, fontSize: 11 }}
+                            />
+                          )}
                           {session.status === TrainingSessionStatus.CANCELLED && (
                             <Chip
                               label={t('trainings.statusCancelled')}

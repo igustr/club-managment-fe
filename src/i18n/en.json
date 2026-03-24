@@ -292,6 +292,10 @@
     "schedule": "Schedule",
     "today": "Today",
     "noSessions": "No sessions",
+    "overview": "Overview",
+    "overviewSubtitle": "Weekly pitch occupancy overview",
+    "pitch": "Pitch",
+    "overbookedWarning": "Pitch is overbooked!",
     "surfaceTypes": {
       "NATURAL_GRASS": "Natural Grass",
       "ARTIFICIAL_TURF": "Artificial Turf",
@@ -317,6 +321,7 @@
     "team": "Team",
     "pitch": "Pitch",
     "noPitch": "No pitch assigned",
+    "pitchPortion": "Pitch portion",
     "notes": "Notes",
     "status": "Status",
     "statusScheduled": "Scheduled",

@@ -78,6 +78,11 @@ const PitchSchedulePage = lazy(() =>
     default: m.PitchSchedulePage,
   })),
 );
+const PitchOverviewPage = lazy(() =>
+  import('@/features/pitches/PitchOverviewPage').then((m) => ({
+    default: m.PitchOverviewPage,
+  })),
+);
 const TrainingListPage = lazy(() =>
   import('@/features/trainings/TrainingListPage').then((m) => ({
     default: m.TrainingListPage,
@@ -367,6 +372,14 @@ export const router = createBrowserRouter([
                 element: (
                   <SuspenseWrapper>
                     <PitchSchedulePage />
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: '/pitches/overview',
+                element: (
+                  <SuspenseWrapper>
+                    <PitchOverviewPage />
                   </SuspenseWrapper>
                 ),
               },

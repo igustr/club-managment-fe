@@ -9,6 +9,7 @@ export interface TrainingSessionDTO {
   teamName: string;
   pitchId: string | null;
   pitchName: string | null;
+  pitchPortion: number;
   status: TrainingSessionStatus;
   notes: string | null;
   recurrenceGroupId: string | null;
@@ -19,6 +20,7 @@ export interface CreateTrainingSessionDTO {
   startTime: string;
   endTime: string;
   pitchId?: string;
+  pitchPortion?: number;
   notes?: string;
 }
 
@@ -29,6 +31,7 @@ export interface CreateRecurringTrainingDTO {
   startTime: string;
   endTime: string;
   pitchId?: string;
+  pitchPortion?: number;
   notes?: string;
 }
 
@@ -37,6 +40,7 @@ export interface UpdateTrainingSessionDTO {
   startTime: string;
   endTime: string;
   pitchId?: string;
+  pitchPortion?: number;
   notes?: string;
   status?: TrainingSessionStatus;
 }
