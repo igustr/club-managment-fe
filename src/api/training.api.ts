@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { api } from './axios';
 import { queryClient } from './query-client';
+import { pitchKeys } from './pitch.api';
 import type {
   TrainingSessionDTO,
   CreateTrainingSessionDTO,
@@ -124,6 +125,7 @@ export const useUpdateTraining = (clubId: string, trainingId: string) =>
       queryClient.invalidateQueries({
         queryKey: trainingKeys.detail(clubId, trainingId),
       });
+      queryClient.invalidateQueries({ queryKey: pitchKeys.all });
     },
   });
 

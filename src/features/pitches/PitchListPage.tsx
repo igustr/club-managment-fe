@@ -21,7 +21,6 @@ import {
   Add,
   Place,
   Grass,
-  People,
   Edit,
   Delete,
   CalendarMonth,
@@ -155,14 +154,6 @@ export function PitchListPage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <Grass fontSize="small" color="action" />
                         <Chip label={t(`pitches.surfaceTypes.${pitch.surfaceType}`)} size="small" variant="outlined" />
-                      </Box>
-                    )}
-                    {pitch.capacity && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <People fontSize="small" color="action" />
-                        <Typography variant="body2" color="text.secondary">
-                          {t('pitches.capacityValue', { count: pitch.capacity })}
-                        </Typography>
                       </Box>
                     )}
                   </Box>

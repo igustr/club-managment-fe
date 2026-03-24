@@ -195,7 +195,13 @@
     "viewProfile": "View profile"
   },
   "children": {
-    "subtitle": "Overview of your children's attendance statistics"
+    "subtitle": "Overview of your children's attendance statistics",
+    "attendanceRate": "Attendance Rate",
+    "totalTrainings": "Trainings",
+    "attended": "Attended",
+    "declined": "Missed",
+    "pending": "Pending",
+    "viewDetails": "View details"
   },
   "clubs": {
     "settings": {
@@ -282,8 +288,6 @@
     "name": "Pitch Name",
     "address": "Address",
     "surfaceType": "Surface Type",
-    "capacity": "Capacity",
-    "capacityValue": "{{count}} players",
     "noPitches": "No pitches found",
     "createSuccess": "Pitch created",
     "editSuccess": "Pitch updated",
@@ -296,6 +300,14 @@
     "overviewSubtitle": "Weekly pitch occupancy overview",
     "pitch": "Pitch",
     "overbookedWarning": "Pitch is overbooked!",
+    "selectPitch": "Select pitch",
+    "timeRange": "Time range",
+    "startHour": "Start hour",
+    "endHour": "End hour",
+    "resetTimeRange": "Reset to default",
+    "dragToMove": "Drag to change time",
+    "moveSuccess": "Training moved successfully",
+    "noSessionsToday": "No sessions today",
     "surfaceTypes": {
       "NATURAL_GRASS": "Natural Grass",
       "ARTIFICIAL_TURF": "Artificial Turf",
@@ -427,6 +439,8 @@
   "games": {
     "title": "Games & Tournaments",
     "createGame": "Add Game",
+    "gatheringTime": "Gathering Time",
+    "gatheringBefore": "{{minutes}} min before start",
     "allEvents": "All",
     "gamesOnly": "Games",
     "tournamentsOnly": "Tournaments",
@@ -504,7 +518,9 @@
     "allPitches": "All Pitches",
     "trainings": "Trainings",
     "games": "Games",
-    "tournaments": "Tournaments"
+    "tournaments": "Tournaments",
+    "childFilter": "Child",
+    "allChildren": "All children"
   },
   "notifications": {
     "title": "Notifications",

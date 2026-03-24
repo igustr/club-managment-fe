@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -6,64 +6,144 @@ import {
   Typography,
   IconButton,
   Stack,
-  Paper,
-  Chip,
   CircularProgress,
   Button,
-  LinearProgress,
-  Tooltip,
+  TextField,
+  MenuItem,
+  Chip,
+  Alert,
 } from '@mui/material';
 import {
   ArrowBack,
   ChevronLeft,
   ChevronRight,
-  FiberManualRecord,
+  Settings,
   Warning,
 } from '@mui/icons-material';
-import { usePitch, usePitchSchedule } from '@/api/pitch.api';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { usePitches, usePitchSchedule } from '@/api/pitch.api';
+import { useGames } from '@/api/game.api';
+import { updateTraining } from '@/api/training.api';
+import { pitchKeys } from '@/api/pitch.api';
+import { trainingKeys } from '@/api/training.api';
+import { queryClient } from '@/api/query-client';
 import { useClubId } from '@/hooks/useClubId';
-import { formatDate, formatTime } from '@/utils/date';
-import { PITCH_PORTIONS } from '@/features/trainings/schemas';
-import dayjs from 'dayjs';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useUiStore } from '@/stores/uiStore';
+import { TimelineView } from './components/TimelineView';
+import { TimeRangeSettings } from './components/TimeRangeSettings';
+import { minutesToTime, timeToMinutes, snapToInterval } from './utils/timeline';
+import { findOverbookingRanges } from './utils/timeline';
 import { TrainingSessionStatus } from '@/types/common.types';
+import { VenueType } from '@/types/common.types';
+import toast from 'react-hot-toast';
+import { getApiErrorMessage } from '@/api/axios';
+import dayjs from 'dayjs';
 
 export function PitchSchedulePage() {
   const { t } = useTranslation();
-  const { pitchId } = useParams<{ pitchId: string }>();
+  const { pitchId: urlPitchId } = useParams<{ pitchId: string }>();
   const navigate = useNavigate();
   const clubId = useClubId();
+  const { canCreateTraining } = usePermissions();
 
-  const [weekOffset, setWeekOffset] = useState(0);
-  const startDate = dayjs().startOf('week').add(weekOffset, 'week');
-  const endDate = startDate.add(6, 'day');
+  const startHour = useUiStore((s) => s.scheduleStartHour);
+  const endHour = useUiStore((s) => s.scheduleEndHour);
 
-  const { data: pitch, isLoading: pitchLoading } = usePitch(clubId, pitchId!);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [selectedPitchId, setSelectedPitchId] = useState(urlPitchId ?? '');
+  const [settingsAnchor, setSettingsAnchor] = useState<HTMLElement | null>(null);
+
+  const { data: pitches, isLoading: pitchesLoading } = usePitches(clubId);
+
+  // Auto-select first pitch when pitches load
+  const pitchId = useMemo(() => {
+    if (selectedPitchId) return selectedPitchId;
+    if (pitches && pitches.length > 0) return pitches[0]!.id;
+    return '';
+  }, [selectedPitchId, pitches]);
+
+  const dateStr = selectedDate.format('YYYY-MM-DD');
+
   const { data: schedule, isLoading: scheduleLoading } = usePitchSchedule(
     clubId,
-    pitchId!,
-    startDate.format('YYYY-MM-DD'),
-    endDate.format('YYYY-MM-DD'),
+    pitchId,
+    dateStr,
+    dateStr,
   );
 
-  const days = Array.from({ length: 7 }, (_, i) => startDate.add(i, 'day'));
+  const { data: games } = useGames(clubId);
 
-  const getStatusColor = (status: TrainingSessionStatus) => {
-    switch (status) {
-      case TrainingSessionStatus.SCHEDULED:
-        return 'primary' as const;
-      case TrainingSessionStatus.CANCELLED:
-        return 'error' as const;
-      case TrainingSessionStatus.COMPLETED:
-        return 'success' as const;
-      default:
-        return 'action' as const;
+  // Filter games for this pitch on this date
+  const pitchGames = useMemo(
+    () =>
+      (games ?? []).filter(
+        (g) =>
+          g.venueType === VenueType.HOME &&
+          g.pitchId === pitchId &&
+          g.date === dateStr,
+      ),
+    [games, pitchId, dateStr],
+  );
+
+  // Overbooking detection for warning banner
+  const overbookingRanges = useMemo(() => {
+    const sessions = [
+      ...(schedule ?? [])
+        .filter((s) => s.status !== TrainingSessionStatus.CANCELLED)
+        .map((s) => ({
+          id: s.id,
+          startTime: s.startTime,
+          endTime: s.endTime,
+          pitchPortion: s.pitchPortion,
+        })),
+      ...pitchGames.map((g) => ({
+        id: g.id,
+        startTime: g.startTime,
+        endTime: g.endTime,
+        pitchPortion: 1,
+      })),
+    ];
+    return findOverbookingRanges(sessions);
+  }, [schedule, pitchGames]);
+
+  const selectedPitch = pitches?.find((p) => p.id === pitchId);
+
+  const handleDragEnd = async (trainingId: string, deltaMinutes: number) => {
+    const training = schedule?.find((s) => s.id === trainingId);
+    if (!training || !clubId) return;
+
+    const startMins = timeToMinutes(training.startTime) + deltaMinutes;
+    const endMins = timeToMinutes(training.endTime) + deltaMinutes;
+    const newStart = minutesToTime(snapToInterval(startMins));
+    const newEnd = minutesToTime(snapToInterval(endMins));
+
+    try {
+      await updateTraining(clubId, trainingId, {
+        date: training.date,
+        startTime: newStart,
+        endTime: newEnd,
+        pitchId: training.pitchId ?? undefined,
+        pitchPortion: training.pitchPortion,
+        notes: training.notes ?? undefined,
+      });
+      toast.success(t('pitches.moveSuccess'));
+      queryClient.invalidateQueries({ queryKey: pitchKeys.all });
+      queryClient.invalidateQueries({ queryKey: trainingKeys.lists() });
+    } catch (error) {
+      toast.error(getApiErrorMessage(error));
     }
   };
 
-  const getPortionLabel = (portion: number) =>
-    PITCH_PORTIONS.find((p) => p.value === portion)?.label ?? `${portion}`;
+  const handleBlockClick = (type: 'training' | 'game', id: string) => {
+    if (type === 'training') {
+      navigate(`/trainings/${id}`);
+    } else {
+      navigate(`/games/${id}`);
+    }
+  };
 
-  if (pitchLoading) {
+  if (pitchesLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
         <CircularProgress />
@@ -71,10 +151,10 @@ export function PitchSchedulePage() {
     );
   }
 
-  if (!pitch) {
+  if (!pitches || pitches.length === 0) {
     return (
       <Box sx={{ textAlign: 'center', py: 8 }}>
-        <Typography color="text.secondary">{t('error.notFound')}</Typography>
+        <Typography color="text.secondary">{t('pitches.noPitches')}</Typography>
       </Box>
     );
   }
@@ -96,189 +176,132 @@ export function PitchSchedulePage() {
           </IconButton>
           <Box>
             <Typography variant="h5" fontWeight={700}>
-              {pitch.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
               {t('pitches.schedule')}
             </Typography>
+            {selectedPitch && (
+              <Typography variant="body2" color="text.secondary">
+                {selectedPitch.name}
+              </Typography>
+            )}
           </Box>
         </Stack>
+        <IconButton onClick={(e) => setSettingsAnchor(e.currentTarget)}>
+          <Settings />
+        </IconButton>
       </Box>
 
-      {/* Week navigation */}
+      {/* Pitch selector + Date navigation */}
       <Box
         sx={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'space-between',
+          mb: 2,
+          flexWrap: 'wrap',
           gap: 2,
-          mb: 3,
         }}
       >
-        <IconButton onClick={() => setWeekOffset((w) => w - 1)}>
-          <ChevronLeft />
-        </IconButton>
-        <Typography variant="subtitle1" fontWeight={600}>
-          {formatDate(startDate.toDate())} – {formatDate(endDate.toDate())}
-        </Typography>
-        <IconButton onClick={() => setWeekOffset((w) => w + 1)}>
-          <ChevronRight />
-        </IconButton>
-        {weekOffset !== 0 && (
-          <Button size="small" onClick={() => setWeekOffset(0)}>
-            {t('pitches.today')}
-          </Button>
-        )}
+        <TextField
+          select
+          size="small"
+          value={pitchId}
+          onChange={(e) => setSelectedPitchId(e.target.value)}
+          label={t('pitches.selectPitch')}
+          sx={{ minWidth: 200 }}
+        >
+          {pitches.map((p) => (
+            <MenuItem key={p.id} value={p.id}>
+              {p.name}
+            </MenuItem>
+          ))}
+        </TextField>
+
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <IconButton
+            onClick={() => setSelectedDate((d) => d.subtract(1, 'day'))}
+          >
+            <ChevronLeft />
+          </IconButton>
+          <DatePicker
+            value={selectedDate}
+            onChange={(val) => val && setSelectedDate(val)}
+            slotProps={{
+              textField: { size: 'small', sx: { width: 160 } },
+            }}
+          />
+          <IconButton
+            onClick={() => setSelectedDate((d) => d.add(1, 'day'))}
+          >
+            <ChevronRight />
+          </IconButton>
+          {!selectedDate.isSame(dayjs(), 'day') && (
+            <Button size="small" onClick={() => setSelectedDate(dayjs())}>
+              {t('pitches.today')}
+            </Button>
+          )}
+        </Stack>
       </Box>
 
-      {/* Schedule grid */}
-      {scheduleLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-          <CircularProgress size={28} />
-        </Box>
-      ) : (
-        <Stack spacing={1}>
-          {days.map((day) => {
-            const dayStr = day.format('YYYY-MM-DD');
-            const daySessions = (schedule ?? []).filter(
-              (s) => s.date === dayStr,
-            );
-            const isToday = day.isSame(dayjs(), 'day');
+      {/* Day of week chip */}
+      <Stack direction="row" spacing={1} sx={{ mb: 2 }} alignItems="center">
+        <Chip
+          label={selectedDate.format('dddd, DD.MM.YYYY')}
+          variant="outlined"
+          color={selectedDate.isSame(dayjs(), 'day') ? 'primary' : 'default'}
+        />
+        {scheduleLoading && <CircularProgress size={18} />}
+      </Stack>
 
-            const scheduledSessions = daySessions.filter(
-              (s) => s.status === TrainingSessionStatus.SCHEDULED,
-            );
-            const totalOccupancy = scheduledSessions.reduce(
-              (sum, s) => sum + (s.pitchPortion ?? 1),
-              0,
-            );
-            const occupancyPct = Math.round(totalOccupancy * 100);
-            const isOverbooked = totalOccupancy > 1;
-
-            return (
-              <Paper
-                key={dayStr}
-                variant="outlined"
-                sx={{
-                  p: 2,
-                  bgcolor: isToday ? 'primary.50' : undefined,
-                  borderColor: isOverbooked
-                    ? 'warning.main'
-                    : isToday
-                      ? 'primary.main'
-                      : undefined,
-                }}
-              >
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  sx={{ mb: daySessions.length > 0 ? 1 : 0 }}
-                >
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    {day.format('dddd, DD.MM')}
-                    {isToday && (
-                      <Chip
-                        label={t('pitches.today')}
-                        size="small"
-                        color="primary"
-                        sx={{ ml: 1 }}
-                      />
-                    )}
-                  </Typography>
-                  {scheduledSessions.length > 0 && (
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      {isOverbooked && (
-                        <Tooltip title={t('pitches.overbookedWarning')}>
-                          <Warning color="warning" sx={{ fontSize: 18 }} />
-                        </Tooltip>
-                      )}
-                      <Chip
-                        label={`${occupancyPct}%`}
-                        size="small"
-                        color={
-                          isOverbooked
-                            ? 'warning'
-                            : occupancyPct === 100
-                              ? 'success'
-                              : 'default'
-                        }
-                        variant="outlined"
-                      />
-                    </Stack>
-                  )}
-                </Stack>
-
-                {scheduledSessions.length > 0 && (
-                  <LinearProgress
-                    variant="determinate"
-                    value={Math.min(occupancyPct, 100)}
-                    color={isOverbooked ? 'warning' : 'primary'}
-                    sx={{ mb: 1, borderRadius: 1, height: 4 }}
-                  />
-                )}
-
-                {daySessions.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary">
-                    {t('pitches.noSessions')}
-                  </Typography>
-                ) : (
-                  <Stack spacing={0.5}>
-                    {daySessions
-                      .sort((a, b) => a.startTime.localeCompare(b.startTime))
-                      .map((session) => (
-                        <Box
-                          key={session.id}
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            pl: 1,
-                            cursor: 'pointer',
-                            '&:hover': { bgcolor: 'action.hover' },
-                            borderRadius: 1,
-                            py: 0.5,
-                          }}
-                          onClick={() =>
-                            navigate(`/trainings/${session.id}`)
-                          }
-                        >
-                          <FiberManualRecord
-                            sx={{ fontSize: 8 }}
-                            color={getStatusColor(session.status)}
-                          />
-                          <Typography variant="body2" fontWeight={500}>
-                            {formatTime(session.startTime)} –{' '}
-                            {formatTime(session.endTime)}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {session.teamName}
-                          </Typography>
-                          {session.pitchPortion < 1 && (
-                            <Chip
-                              label={getPortionLabel(session.pitchPortion)}
-                              size="small"
-                              variant="outlined"
-                              sx={{ height: 20, fontSize: 11 }}
-                            />
-                          )}
-                          {session.status === TrainingSessionStatus.CANCELLED && (
-                            <Chip
-                              label={t('trainings.statusCancelled')}
-                              size="small"
-                              color="error"
-                              variant="outlined"
-                            />
-                          )}
-                        </Box>
-                      ))}
-                  </Stack>
-                )}
-              </Paper>
-            );
-          })}
-        </Stack>
+      {/* Overbooking warning */}
+      {overbookingRanges.length > 0 && (
+        <Alert
+          severity="warning"
+          icon={<Warning />}
+          sx={{ mb: 2 }}
+        >
+          {t('pitches.overbookedWarning')}
+        </Alert>
       )}
+
+      {/* Timeline */}
+      {pitchId && (
+        <TimelineView
+          trainings={schedule ?? []}
+          games={pitchGames}
+          date={dateStr}
+          startHour={startHour}
+          endHour={endHour}
+          canDrag={canCreateTraining}
+          onTrainingDragEnd={handleDragEnd}
+          onBlockClick={handleBlockClick}
+        />
+      )}
+
+      {/* Legend */}
+      <Stack direction="row" spacing={2} sx={{ mt: 2, px: 1 }}>
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          <Box sx={{ width: 12, height: 12, bgcolor: '#1976d2', borderRadius: 0.5 }} />
+          <Typography variant="caption" color="text.secondary">
+            {t('calendar.trainings')}
+          </Typography>
+        </Stack>
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          <Box sx={{ width: 12, height: 12, bgcolor: '#F59E0B', borderRadius: 0.5 }} />
+          <Typography variant="caption" color="text.secondary">
+            {t('calendar.games')}
+          </Typography>
+        </Stack>
+        {canCreateTraining && (
+          <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+            {t('pitches.dragToMove')}
+          </Typography>
+        )}
+      </Stack>
+
+      <TimeRangeSettings
+        anchorEl={settingsAnchor}
+        onClose={() => setSettingsAnchor(null)}
+      />
     </Box>
   );
 }

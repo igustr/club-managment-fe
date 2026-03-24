@@ -13,6 +13,7 @@ interface CalendarFiltersProps {
   onTeamChange: (value: string) => void;
   onPitchChange: (value: string) => void;
   onStatusChange: (value: string) => void;
+  showPitchFilter?: boolean;
 }
 
 export function CalendarFilters({
@@ -24,6 +25,7 @@ export function CalendarFilters({
   onTeamChange,
   onPitchChange,
   onStatusChange,
+  showPitchFilter = true,
 }: CalendarFiltersProps) {
   const { t } = useTranslation();
 
@@ -44,21 +46,23 @@ export function CalendarFilters({
           </MenuItem>
         ))}
       </TextField>
-      <TextField
-        select
-        size="small"
-        value={pitchFilter}
-        onChange={(e) => onPitchChange(e.target.value)}
-        label={t('trainings.pitch')}
-        sx={{ minWidth: 160 }}
-      >
-        <MenuItem value="">{t('calendar.allPitches')}</MenuItem>
-        {pitches.map((pitch) => (
-          <MenuItem key={pitch.id} value={pitch.id}>
-            {pitch.name}
-          </MenuItem>
-        ))}
-      </TextField>
+      {showPitchFilter && (
+        <TextField
+          select
+          size="small"
+          value={pitchFilter}
+          onChange={(e) => onPitchChange(e.target.value)}
+          label={t('trainings.pitch')}
+          sx={{ minWidth: 160 }}
+        >
+          <MenuItem value="">{t('calendar.allPitches')}</MenuItem>
+          {pitches.map((pitch) => (
+            <MenuItem key={pitch.id} value={pitch.id}>
+              {pitch.name}
+            </MenuItem>
+          ))}
+        </TextField>
+      )}
       <TextField
         select
         size="small"

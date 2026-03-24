@@ -17,10 +17,6 @@ export const pitchSchema = (t: TFunction) =>
       .nativeEnum(SurfaceType)
       .optional()
       .or(z.literal('')),
-    capacity: z
-      .union([z.number().int().positive(), z.nan(), z.literal(0)])
-      .optional()
-      .transform((val) => (val && !isNaN(val) && val > 0 ? val : undefined)),
   });
 
 export type PitchFormValues = z.infer<ReturnType<typeof pitchSchema>>;

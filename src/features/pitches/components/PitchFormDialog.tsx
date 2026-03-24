@@ -47,7 +47,6 @@ export function PitchFormDialog({ open, onClose, pitch }: PitchFormDialogProps) 
       name: '',
       address: '',
       surfaceType: '',
-      capacity: undefined,
     },
   });
 
@@ -57,14 +56,12 @@ export function PitchFormDialog({ open, onClose, pitch }: PitchFormDialogProps) 
         name: pitch.name ?? '',
         address: pitch.address ?? '',
         surfaceType: pitch.surfaceType ?? '',
-        capacity: pitch.capacity ?? undefined,
       });
     } else if (open) {
       reset({
         name: '',
         address: '',
         surfaceType: '',
-        capacity: undefined,
       });
     }
   }, [open, pitch, reset]);
@@ -79,7 +76,6 @@ export function PitchFormDialog({ open, onClose, pitch }: PitchFormDialogProps) 
       name: values.name,
       address: values.address || undefined,
       surfaceType: values.surfaceType || undefined,
-      capacity: values.capacity || undefined,
     };
 
     try {
@@ -139,48 +135,27 @@ export function PitchFormDialog({ open, onClose, pitch }: PitchFormDialogProps) 
               />
             )}
           />
-          <Stack direction="row" spacing={2}>
-            <Controller
-              name="surfaceType"
-              control={control}
-              render={({ field }) => (
-                <FormControl fullWidth>
-                  <InputLabel>{t('pitches.surfaceType')}</InputLabel>
-                  <Select
-                    {...field}
-                    label={t('pitches.surfaceType')}
-                    error={!!errors.surfaceType}
-                  >
-                    <MenuItem value="">&nbsp;</MenuItem>
-                    {Object.values(SurfaceType).map((st) => (
-                      <MenuItem key={st} value={st}>
-                        {t(`pitches.surfaceTypes.${st}`)}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            />
-            <Controller
-              name="capacity"
-              control={control}
-              render={({ field }) => (
-                <TextField
+          <Controller
+            name="surfaceType"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth>
+                <InputLabel>{t('pitches.surfaceType')}</InputLabel>
+                <Select
                   {...field}
-                  value={field.value ?? ''}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    field.onChange(val === '' ? undefined : Number(val));
-                  }}
-                  fullWidth
-                  label={t('pitches.capacity')}
-                  type="number"
-                  error={!!errors.capacity}
-                  helperText={errors.capacity?.message}
-                />
-              )}
-            />
-          </Stack>
+                  label={t('pitches.surfaceType')}
+                  error={!!errors.surfaceType}
+                >
+                  <MenuItem value="">&nbsp;</MenuItem>
+                  {Object.values(SurfaceType).map((st) => (
+                    <MenuItem key={st} value={st}>
+                      {t(`pitches.surfaceTypes.${st}`)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>

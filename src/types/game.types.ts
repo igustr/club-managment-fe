@@ -3,6 +3,7 @@ import { GameStatus, VenueType } from './common.types';
 export interface GameDTO {
   id: string;
   date: string;
+  gatheringTime: string | null;
   startTime: string;
   endTime: string;
   opponent: string;
@@ -19,6 +20,7 @@ export interface GameDTO {
 
 export interface CreateGameDTO {
   date: string;
+  gatheringTime?: string;
   startTime: string;
   endTime: string;
   opponent: string;
@@ -31,6 +33,7 @@ export interface CreateGameDTO {
 
 export interface UpdateGameDTO {
   date: string;
+  gatheringTime?: string;
   startTime: string;
   endTime: string;
   opponent: string;

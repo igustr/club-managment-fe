@@ -23,6 +23,7 @@ import {
   SportsSoccer,
   Home,
   FlightTakeoff,
+  GroupWork,
 } from '@mui/icons-material';
 import { useGame, useCancelGame, useDeleteGame } from '@/api/game.api';
 import { GameFormDialog } from './components/GameFormDialog';
@@ -34,6 +35,16 @@ import { formatDate, formatTime } from '@/utils/date';
 import { GameStatus, VenueType } from '@/types/common.types';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/api/axios';
+
+function getMinutesBefore(gatheringTime: string, startTime: string): number {
+  const gParts = gatheringTime.split(':').map(Number);
+  const sParts = startTime.split(':').map(Number);
+  const gh = gParts[0] ?? 0;
+  const gm = gParts[1] ?? 0;
+  const sh = sParts[0] ?? 0;
+  const sm = sParts[1] ?? 0;
+  return (sh * 60 + sm) - (gh * 60 + gm);
+}
 
 export function GameDetailPage() {
   const { t } = useTranslation();
@@ -179,6 +190,13 @@ export function GameDetailPage() {
             label={t('trainings.date')}
             value={formatDate(game.date)}
           />
+          {game.gatheringTime && (
+            <InfoRow
+              icon={<GroupWork fontSize="small" color="action" />}
+              label={t('games.gatheringTime')}
+              value={`${formatTime(game.gatheringTime)} (${t('games.gatheringBefore', { minutes: getMinutesBefore(game.gatheringTime, game.startTime) })})`}
+            />
+          )}
           <InfoRow
             icon={<AccessTime fontSize="small" color="action" />}
             label={t('trainings.time')}

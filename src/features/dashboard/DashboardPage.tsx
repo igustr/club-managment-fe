@@ -184,6 +184,13 @@ function AdminDashboard() {
         </Button>
         <Button
           variant="outlined"
+          startIcon={<CalendarMonth />}
+          onClick={() => navigate('/calendar')}
+        >
+          {t('nav.calendar')}
+        </Button>
+        <Button
+          variant="outlined"
           startIcon={<BarChart />}
           onClick={() => navigate('/statistics')}
         >

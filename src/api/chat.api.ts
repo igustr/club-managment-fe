@@ -93,6 +93,7 @@ export const useConversations = (clubId: string | null) =>
     queryKey: chatKeys.conversationList(clubId!),
     queryFn: () => getConversations(clubId!),
     enabled: !!clubId,
+    refetchInterval: 30000,
   });
 
 export const useConversation = (
@@ -158,6 +159,9 @@ export const useSendMessage = (clubId: string, conversationId: string) =>
       });
       queryClient.invalidateQueries({
         queryKey: chatKeys.conversationList(clubId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: chatKeys.unreadCount(clubId),
       });
     },
   });

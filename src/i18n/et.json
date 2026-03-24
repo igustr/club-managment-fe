@@ -195,7 +195,13 @@
     "viewProfile": "Vaata profiili"
   },
   "children": {
-    "subtitle": "Laste kohaloleku statistika ülevaade"
+    "subtitle": "Laste kohaloleku statistika ülevaade",
+    "attendanceRate": "Kohaloleku määr",
+    "totalTrainings": "Treeninguid",
+    "attended": "Osalenud",
+    "declined": "Puudunud",
+    "pending": "Ootel",
+    "viewDetails": "Vaata detaile"
   },
   "clubs": {
     "settings": {
@@ -282,8 +288,6 @@
     "name": "Väljaku nimi",
     "address": "Aadress",
     "surfaceType": "Kattematerjal",
-    "capacity": "Mahutavus",
-    "capacityValue": "{{count}} mängijat",
     "noPitches": "Väljakuid ei leitud",
     "createSuccess": "Väljak loodud",
     "editSuccess": "Väljak uuendatud",
@@ -296,6 +300,14 @@
     "overviewSubtitle": "Väljakute hõivatuse ülevaade nädala kaupa",
     "pitch": "Väljak",
     "overbookedWarning": "Väljak on üle broneeritud!",
+    "selectPitch": "Vali väljak",
+    "timeRange": "Ajavahemik",
+    "startHour": "Algustund",
+    "endHour": "Lõputund",
+    "resetTimeRange": "Lähtesta vaikimisi",
+    "dragToMove": "Lohista aja muutmiseks",
+    "moveSuccess": "Treening edukalt teisaldatud",
+    "noSessionsToday": "Täna treeninguid pole",
     "surfaceTypes": {
       "NATURAL_GRASS": "Loomulik muru",
       "ARTIFICIAL_TURF": "Kunstmuru",
@@ -427,6 +439,8 @@
   "games": {
     "title": "Mängud ja turniirid",
     "createGame": "Lisa mäng",
+    "gatheringTime": "Kogunemise aeg",
+    "gatheringBefore": "{{minutes}} min enne algust",
     "allEvents": "Kõik",
     "gamesOnly": "Mängud",
     "tournamentsOnly": "Turniirid",
@@ -504,7 +518,9 @@
     "allPitches": "Kõik väljakud",
     "trainings": "Treeningud",
     "games": "Mängud",
-    "tournaments": "Turniirid"
+    "tournaments": "Turniirid",
+    "childFilter": "Laps",
+    "allChildren": "Kõik lapsed"
   },
   "notifications": {
     "title": "Teavitused",

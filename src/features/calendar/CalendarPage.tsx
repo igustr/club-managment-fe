@@ -11,6 +11,8 @@ import {
   Switch,
   Stack,
   Chip,
+  TextField,
+  MenuItem,
 } from '@mui/material';
 import {
   ChevronLeft,
@@ -26,6 +28,11 @@ import { useGames } from '@/api/game.api';
 import { useTournaments } from '@/api/tournament.api';
 import { useTeams } from '@/api/team.api';
 import { usePitches } from '@/api/pitch.api';
+import { useChildren } from '@/api/user.api';
+import { useAuthStore } from '@/stores/authStore';
+import { getTeamMembers } from '@/api/team.api';
+import { useQueries } from '@tanstack/react-query';
+import { teamKeys } from '@/api/team.api';
 import { MonthlyCalendar } from './components/MonthlyCalendar';
 import { CalendarFilters } from './components/CalendarFilters';
 import { TrainingFormDialog } from '@/features/trainings/components/TrainingFormDialog';
@@ -40,7 +47,8 @@ export function CalendarPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const clubId = useClubId();
-  const { isClubAdmin, canCreateTraining } = usePermissions();
+  const { isClubAdmin, isParent, canCreateTraining } = usePermissions();
+  const user = useAuthStore((s) => s.user);
 
   const [currentMonth, setCurrentMonth] = useState(dayjs().startOf('month'));
   const [teamFilter, setTeamFilter] = useState('');
@@ -50,6 +58,7 @@ export function CalendarPage() {
   const [showTrainings, setShowTrainings] = useState(true);
   const [showGames, setShowGames] = useState(true);
   const [showTournaments, setShowTournaments] = useState(true);
+  const [childFilter, setChildFilter] = useState('');
   const [trainingFormOpen, setTrainingFormOpen] = useState(false);
   const [gameFormOpen, setGameFormOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
@@ -59,9 +68,48 @@ export function CalendarPage() {
   const { data: tournaments } = useTournaments(clubId);
   const { data: teams } = useTeams(clubId);
   const { data: pitches } = usePitches(clubId);
+  const { data: children } = useChildren(clubId, isParent ? user?.id : undefined);
+
+  // Fetch team members for parent child filter
+  const teamMemberQueries = useQueries({
+    queries: (isParent && clubId && teams ? teams : []).map((team) => ({
+      queryKey: teamKeys.members(clubId!, team.id),
+      queryFn: () => getTeamMembers(clubId!, team.id),
+      enabled: isParent && !!clubId,
+      staleTime: 5 * 60 * 1000,
+    })),
+  });
+
+  // Build child → teamIds mapping
+  const childTeamIds = useMemo(() => {
+    if (!isParent || !children || !teams) return new Map<string, string[]>();
+    const map = new Map<string, string[]>();
+    children.forEach((child) => map.set(child.id, []));
+    teamMemberQueries.forEach((query, index) => {
+      if (query.data && teams[index]) {
+        const teamId = teams[index].id;
+        query.data.forEach((member) => {
+          const existing = map.get(member.userId);
+          if (existing) existing.push(teamId);
+        });
+      }
+    });
+    return map;
+  }, [isParent, children, teams, teamMemberQueries]);
+
+  // Get team IDs for selected child
+  const selectedChildTeamIds = useMemo(
+    () => (childFilter ? childTeamIds.get(childFilter) ?? [] : []),
+    [childFilter, childTeamIds],
+  );
 
   const calendarEvents: CalendarEvent[] = useMemo(() => {
     const events: CalendarEvent[] = [];
+
+    const matchesChildFilter = (teamId: string) => {
+      if (!childFilter) return true;
+      return selectedChildTeamIds.includes(teamId);
+    };
 
     // Trainings
     if (showTrainings && trainings) {
@@ -70,6 +118,7 @@ export function CalendarPage() {
           if (teamFilter && tr.teamId !== teamFilter) return false;
           if (pitchFilter && tr.pitchId !== pitchFilter) return false;
           if (statusFilter && tr.status !== statusFilter) return false;
+          if (!matchesChildFilter(tr.teamId)) return false;
           return true;
         })
         .forEach((tr) => {
@@ -93,6 +142,7 @@ export function CalendarPage() {
         .filter((g) => {
           if (teamFilter && g.teamId !== teamFilter) return false;
           if (statusFilter && g.status !== statusFilter) return false;
+          if (!matchesChildFilter(g.teamId)) return false;
           return true;
         })
         .forEach((g) => {
@@ -116,6 +166,7 @@ export function CalendarPage() {
         .filter((tr) => {
           if (teamFilter && tr.teamId !== teamFilter) return false;
           if (statusFilter && tr.status !== statusFilter) return false;
+          if (!matchesChildFilter(tr.teamId)) return false;
           return true;
         })
         .forEach((tr) => {
@@ -147,6 +198,8 @@ export function CalendarPage() {
     teamFilter,
     pitchFilter,
     statusFilter,
+    childFilter,
+    selectedChildTeamIds,
     showTrainings,
     showGames,
     showTournaments,
@@ -238,6 +291,23 @@ export function CalendarPage() {
               label={t('teams.myTeamsOnly')}
             />
           )}
+          {isParent && children && children.length > 0 && (
+            <TextField
+              select
+              size="small"
+              value={childFilter}
+              onChange={(e) => setChildFilter(e.target.value)}
+              label={t('calendar.childFilter')}
+              sx={{ minWidth: 160 }}
+            >
+              <MenuItem value="">{t('calendar.allChildren')}</MenuItem>
+              {children.map((child) => (
+                <MenuItem key={child.id} value={child.id}>
+                  {child.firstName} {child.lastName}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
           <CalendarFilters
             teams={teams ?? []}
             pitches={pitches ?? []}
@@ -247,6 +317,7 @@ export function CalendarPage() {
             onTeamChange={setTeamFilter}
             onPitchChange={setPitchFilter}
             onStatusChange={setStatusFilter}
+            showPitchFilter={isClubAdmin}
           />
         </Box>
       </Box>

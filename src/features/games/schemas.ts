@@ -6,6 +6,7 @@ export const gameSchema = (t: TFunction) =>
   z.object({
     teamId: z.string().min(1, { message: t('validation.required') }),
     date: z.string().min(1, { message: t('validation.required') }),
+    gatheringTime: z.string().optional().or(z.literal('')),
     startTime: z.string().min(1, { message: t('validation.required') }),
     endTime: z.string().min(1, { message: t('validation.required') }),
     opponent: z

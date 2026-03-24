@@ -7,55 +7,156 @@ import {
   Stack,
   Chip,
   Avatar,
-  LinearProgress,
   CircularProgress,
+  Button,
+  Divider,
 } from '@mui/material';
-import { Person } from '@mui/icons-material';
+import {
+  Person,
+  CheckCircle,
+  Cancel,
+  HourglassEmpty,
+  FitnessCenter,
+  TrendingUp,
+  CalendarMonth,
+  ArrowForward,
+} from '@mui/icons-material';
 import { useChildren } from '@/api/user.api';
 import { usePlayerStatistics } from '@/api/statistics.api';
 import { useClubId } from '@/hooks/useClubId';
 import { useAuthStore } from '@/stores/authStore';
 import type { UserDTO } from '@/types/auth.types';
 
+function AttendanceRing({
+  value,
+  size = 100,
+  thickness = 8,
+}: {
+  value: number;
+  size?: number;
+  thickness?: number;
+}) {
+  const color =
+    value >= 75 ? 'success.main' : value >= 50 ? 'warning.main' : 'error.main';
+
+  return (
+    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+      <CircularProgress
+        variant="determinate"
+        value={100}
+        size={size}
+        thickness={thickness}
+        sx={{ color: 'action.hover' }}
+      />
+      <CircularProgress
+        variant="determinate"
+        value={value}
+        size={size}
+        thickness={thickness}
+        sx={{ color, position: 'absolute', left: 0 }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography variant="h5" fontWeight={800} color={color}>
+          {Math.round(value)}%
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
+function StatBox({
+  icon,
+  label,
+  value,
+  color,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  color: string;
+}) {
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 1.5,
+        flex: 1,
+        minWidth: 100,
+        textAlign: 'center',
+        borderColor: `${color}30`,
+        bgcolor: `${color}08`,
+      }}
+    >
+      <Box sx={{ color, mb: 0.5 }}>{icon}</Box>
+      <Typography variant="h5" fontWeight={700} color={color}>
+        {value}
+      </Typography>
+      <Typography variant="caption" color="text.secondary">
+        {label}
+      </Typography>
+    </Paper>
+  );
+}
+
 function ChildCard({ child, clubId }: { child: UserDTO; clubId: string }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: stats } = usePlayerStatistics(clubId, child.id);
 
-  const rateColor = (rate: number) =>
-    rate >= 75 ? 'success.main' : rate >= 50 ? 'warning.main' : 'error.main';
-
-  const rateBarColor = (rate: number): 'success' | 'warning' | 'error' =>
-    rate >= 75 ? 'success' : rate >= 50 ? 'warning' : 'error';
+  const hasStats = stats && stats.totalTrainings > 0;
 
   return (
     <Paper
       variant="outlined"
       sx={{
-        mb: 2,
-        cursor: 'pointer',
-        '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' },
+        mb: 2.5,
+        overflow: 'hidden',
+        transition: 'border-color 0.2s, box-shadow 0.2s',
+        '&:hover': {
+          borderColor: 'primary.main',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        },
       }}
-      onClick={() => navigate(`/members/${child.id}`)}
     >
-      <Box sx={{ p: 2.5 }}>
-        {/* Child header */}
-        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
-          <Avatar
-            sx={{
-              width: 48,
-              height: 48,
-              bgcolor: 'primary.main',
-              fontWeight: 600,
-            }}
-          >
-            {child.firstName.charAt(0)}
-            {child.lastName.charAt(0)}
-          </Avatar>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h6" fontWeight={700}>
-              {child.firstName} {child.lastName}
-            </Typography>
+      {/* Child header */}
+      <Box
+        sx={{
+          p: 2.5,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          cursor: 'pointer',
+        }}
+        onClick={() => navigate(`/members/${child.id}`)}
+      >
+        <Avatar
+          sx={{
+            width: 56,
+            height: 56,
+            bgcolor: 'primary.main',
+            fontWeight: 600,
+            fontSize: 18,
+          }}
+        >
+          {child.firstName.charAt(0)}
+          {child.lastName.charAt(0)}
+        </Avatar>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h6" fontWeight={700}>
+            {child.firstName} {child.lastName}
+          </Typography>
+          <Stack direction="row" spacing={1} alignItems="center">
             {child.position && (
               <Chip
                 label={t(`positions.${child.position}`)}
@@ -64,76 +165,180 @@ function ChildCard({ child, clubId }: { child: UserDTO; clubId: string }) {
                 sx={{ height: 22 }}
               />
             )}
-          </Box>
-        </Stack>
+          </Stack>
+        </Box>
+        <ArrowForward color="action" />
+      </Box>
 
-        {/* Statistics */}
-        {stats && stats.totalTrainings > 0 ? (
-          <Box>
+      {hasStats ? (
+        <>
+          <Divider />
+          <Box sx={{ p: 2.5 }}>
+            {/* Main stat: Attendance ring + details */}
             <Stack
-              direction="row"
+              direction={{ xs: 'column', sm: 'row' }}
               spacing={3}
-              sx={{ mb: 1.5 }}
-              flexWrap="wrap"
+              alignItems={{ xs: 'center', sm: 'flex-start' }}
             >
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  {t('statistics.totalTrainings')}
-                </Typography>
-                <Typography variant="h5" fontWeight={700}>
-                  {stats.totalTrainings}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  {t('statistics.attendanceRate')}
-                </Typography>
+              {/* Attendance ring */}
+              <Box sx={{ textAlign: 'center' }}>
+                <AttendanceRing value={stats.attendanceRate} />
                 <Typography
-                  variant="h5"
-                  fontWeight={700}
-                  color={rateColor(stats.attendanceRate)}
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ mt: 1, display: 'block' }}
                 >
-                  {stats.attendanceRate}%
+                  {t('children.attendanceRate')}
                 </Typography>
               </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  {t('statistics.attended')}
-                </Typography>
-                <Typography variant="h5" fontWeight={700} color="success.main">
-                  {stats.confirmedCount}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  {t('profile.declined')}
-                </Typography>
-                <Typography variant="h5" fontWeight={700} color="error.main">
-                  {stats.declinedCount}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  {t('profile.pending')}
-                </Typography>
-                <Typography variant="h5" fontWeight={700} color="warning.main">
-                  {stats.pendingCount}
-                </Typography>
+
+              {/* Detail stats grid */}
+              <Box sx={{ flex: 1, width: '100%' }}>
+                <Stack direction="row" spacing={1.5} sx={{ mb: 1.5 }}>
+                  <StatBox
+                    icon={<FitnessCenter sx={{ fontSize: 20 }} />}
+                    label={t('children.totalTrainings')}
+                    value={stats.totalTrainings}
+                    color="#1976d2"
+                  />
+                  <StatBox
+                    icon={<CheckCircle sx={{ fontSize: 20 }} />}
+                    label={t('children.attended')}
+                    value={stats.confirmedCount}
+                    color="#2e7d32"
+                  />
+                </Stack>
+                <Stack direction="row" spacing={1.5}>
+                  <StatBox
+                    icon={<Cancel sx={{ fontSize: 20 }} />}
+                    label={t('children.declined')}
+                    value={stats.declinedCount}
+                    color="#d32f2f"
+                  />
+                  <StatBox
+                    icon={<HourglassEmpty sx={{ fontSize: 20 }} />}
+                    label={t('children.pending')}
+                    value={stats.pendingCount}
+                    color="#ed6c02"
+                  />
+                </Stack>
+
+                {/* Attendance breakdown bar */}
+                <Box sx={{ mt: 2 }}>
+                  <Stack
+                    direction="row"
+                    sx={{
+                      height: 8,
+                      borderRadius: 4,
+                      overflow: 'hidden',
+                      bgcolor: 'action.hover',
+                    }}
+                  >
+                    {stats.confirmedCount > 0 && (
+                      <Box
+                        sx={{
+                          width: `${(stats.confirmedCount / stats.totalTrainings) * 100}%`,
+                          bgcolor: 'success.main',
+                        }}
+                      />
+                    )}
+                    {stats.declinedCount > 0 && (
+                      <Box
+                        sx={{
+                          width: `${(stats.declinedCount / stats.totalTrainings) * 100}%`,
+                          bgcolor: 'error.main',
+                        }}
+                      />
+                    )}
+                    {stats.pendingCount > 0 && (
+                      <Box
+                        sx={{
+                          width: `${(stats.pendingCount / stats.totalTrainings) * 100}%`,
+                          bgcolor: 'warning.main',
+                        }}
+                      />
+                    )}
+                  </Stack>
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    sx={{ mt: 0.5 }}
+                    justifyContent="center"
+                  >
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: 'success.main',
+                        }}
+                      />
+                      <Typography variant="caption" color="text.secondary">
+                        {t('children.attended')}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: 'error.main',
+                        }}
+                      />
+                      <Typography variant="caption" color="text.secondary">
+                        {t('children.declined')}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <Box
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: 'warning.main',
+                        }}
+                      />
+                      <Typography variant="caption" color="text.secondary">
+                        {t('children.pending')}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </Box>
               </Box>
             </Stack>
-            <LinearProgress
-              variant="determinate"
-              value={stats.attendanceRate}
-              color={rateBarColor(stats.attendanceRate)}
-              sx={{ height: 8, borderRadius: 4 }}
-            />
           </Box>
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            {t('statistics.noData')}
-          </Typography>
-        )}
-      </Box>
+
+          {/* Actions footer */}
+          <Divider />
+          <Stack direction="row" spacing={1} sx={{ p: 1.5 }}>
+            <Button
+              size="small"
+              startIcon={<TrendingUp />}
+              onClick={() => navigate(`/members/${child.id}`)}
+            >
+              {t('children.viewDetails')}
+            </Button>
+            <Button
+              size="small"
+              startIcon={<CalendarMonth />}
+              onClick={() => navigate('/calendar')}
+            >
+              {t('nav.calendar')}
+            </Button>
+          </Stack>
+        </>
+      ) : (
+        <>
+          <Divider />
+          <Box sx={{ p: 2.5, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              {t('statistics.noData')}
+            </Typography>
+          </Box>
+        </>
+      )}
     </Paper>
   );
 }

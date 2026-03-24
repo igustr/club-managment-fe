@@ -62,6 +62,7 @@ export function GameFormDialog({
     defaultValues: {
       teamId: '',
       date: '',
+      gatheringTime: '',
       startTime: '',
       endTime: '',
       opponent: '',
@@ -80,6 +81,7 @@ export function GameFormDialog({
       reset({
         teamId: game.teamId,
         date: game.date,
+        gatheringTime: game.gatheringTime?.slice(0, 5) ?? '',
         startTime: game.startTime?.slice(0, 5) ?? '',
         endTime: game.endTime?.slice(0, 5) ?? '',
         opponent: game.opponent,
@@ -93,6 +95,7 @@ export function GameFormDialog({
       reset({
         teamId: '',
         date: defaultDate ?? '',
+        gatheringTime: '',
         startTime: '',
         endTime: '',
         opponent: '',
@@ -114,6 +117,7 @@ export function GameFormDialog({
     try {
       const payload = {
         date: values.date,
+        gatheringTime: values.gatheringTime || undefined,
         startTime: values.startTime,
         endTime: values.endTime,
         opponent: values.opponent,
@@ -206,6 +210,11 @@ export function GameFormDialog({
             label={t('trainings.date')}
             format="DD.MM.YYYY"
             required
+          />
+          <TimeFieldInput
+            name="gatheringTime"
+            control={control}
+            label={t('games.gatheringTime')}
           />
           <Stack direction="row" spacing={2}>
             <TimeFieldInput

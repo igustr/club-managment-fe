@@ -74,6 +74,7 @@ export function Sidebar({
 
   const mainItems: NavItem[] = [
     { key: 'dashboard', path: '/dashboard', icon: <Dashboard />, labelKey: 'nav.dashboard' },
+    { key: 'calendar', path: '/calendar', icon: <CalendarMonth />, labelKey: 'nav.calendar' },
     ...(!isParent
       ? [{ key: 'teams', path: '/teams', icon: <Groups />, labelKey: 'nav.teams' }]
       : []),
@@ -85,7 +86,6 @@ export function Sidebar({
     ...(canManagePitches
       ? [{ key: 'pitches', path: '/pitches', icon: <Stadium />, labelKey: 'nav.pitches' }]
       : []),
-    { key: 'calendar', path: '/calendar', icon: <CalendarMonth />, labelKey: 'nav.calendar' },
     { key: 'chat', path: '/chat', icon: <Chat />, labelKey: 'nav.chat', badge: unreadCount },
   ];
 
