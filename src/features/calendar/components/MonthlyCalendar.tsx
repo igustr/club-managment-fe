@@ -5,7 +5,7 @@ import { Box, Typography, Paper, Chip } from '@mui/material';
 import { DayDetailPopover } from './DayDetailPopover';
 import { eventTypeColors } from '@/theme';
 import { formatTime } from '@/utils/date';
-import dayjs from 'dayjs';
+import { dayjs } from '@/utils/date';
 
 // Stable team color palette
 const TEAM_COLORS = [

@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Club Management",
+    "appName": "Jalgpalliklubi Manager",
     "appSubtitle": "Estonian football club management",
     "loading": "Loading...",
     "save": "Save",
@@ -325,6 +325,8 @@
     "trainingInfo": "Training Info",
     "date": "Date",
     "time": "Time",
+    "gatheringTime": "Gathering Time",
+    "gatheringBefore": "{{minutes}} min before start",
     "startTime": "Start Time",
     "endTime": "End Time",
     "startDate": "Start Date",

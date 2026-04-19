@@ -22,6 +22,7 @@ import {
   CalendarMonth,
   AccessTime,
   GridView,
+  GroupWork,
 } from '@mui/icons-material';
 import {
   useTraining,
@@ -49,6 +50,16 @@ export function TrainingDetailPage() {
   const { data: training, isLoading } = useTraining(clubId, trainingId!);
   const cancelMutation = useCancelTraining(clubId!);
   const deleteMutation = useDeleteTraining(clubId!);
+
+  const getMinutesBefore = (gatheringTime: string, startTime: string): number => {
+    const gParts = gatheringTime.split(':').map(Number);
+    const sParts = startTime.split(':').map(Number);
+    const gh = gParts[0] ?? 0;
+    const gm = gParts[1] ?? 0;
+    const sh = sParts[0] ?? 0;
+    const sm = sParts[1] ?? 0;
+    return (sh * 60 + sm) - (gh * 60 + gm);
+  };
 
   const [editOpen, setEditOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -182,6 +193,13 @@ export function TrainingDetailPage() {
             label={t('trainings.date')}
             value={formatDate(training.date)}
           />
+          {training.gatheringTime && (
+            <InfoRow
+              icon={<GroupWork fontSize="small" color="action" />}
+              label={t('trainings.gatheringTime')}
+              value={`${formatTime(training.gatheringTime)} (${t('trainings.gatheringBefore', { minutes: getMinutesBefore(training.gatheringTime, training.startTime) })})`}
+            />
+          )}
           <InfoRow
             icon={<AccessTime fontSize="small" color="action" />}
             label={t('trainings.time')}

@@ -64,6 +64,7 @@ export function TrainingFormDialog({
     defaultValues: {
       teamId: '',
       date: '',
+      gatheringTime: '',
       startTime: '',
       endTime: '',
       pitchId: '',
@@ -79,6 +80,7 @@ export function TrainingFormDialog({
       reset({
         teamId: training.teamId,
         date: training.date,
+        gatheringTime: training.gatheringTime?.slice(0, 5) ?? '',
         startTime: training.startTime?.slice(0, 5) ?? '',
         endTime: training.endTime?.slice(0, 5) ?? '',
         pitchId: training.pitchId ?? '',
@@ -89,6 +91,7 @@ export function TrainingFormDialog({
       reset({
         teamId: '',
         date: defaultDate ?? '',
+        gatheringTime: '',
         startTime: '',
         endTime: '',
         pitchId: '',
@@ -109,6 +112,7 @@ export function TrainingFormDialog({
       if (isEdit) {
         await updateMutation.mutateAsync({
           date: values.date,
+          gatheringTime: values.gatheringTime || undefined,
           startTime: values.startTime,
           endTime: values.endTime,
           pitchId: values.pitchId || undefined,
@@ -121,6 +125,7 @@ export function TrainingFormDialog({
           teamId: values.teamId,
           data: {
             date: values.date,
+            gatheringTime: values.gatheringTime || undefined,
             startTime: values.startTime,
             endTime: values.endTime,
             pitchId: values.pitchId || undefined,
@@ -179,6 +184,11 @@ export function TrainingFormDialog({
             label={t('trainings.date')}
             format="DD.MM.YYYY"
             required
+          />
+          <TimeFieldInput
+            name="gatheringTime"
+            control={control}
+            label={t('trainings.gatheringTime')}
           />
           <Stack direction="row" spacing={2}>
             <TimeFieldInput

@@ -5,6 +5,7 @@ import timezone from 'dayjs/plugin/timezone';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.locale('et');
 dayjs.tz.setDefault('Europe/Tallinn');
 
 export const TIMEZONE = 'Europe/Tallinn';

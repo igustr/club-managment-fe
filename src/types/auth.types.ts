@@ -12,6 +12,7 @@ export interface UserDTO {
   role: ClubRole | null;
   systemRole: SystemRole | null;
   clubId: string | null;
+  clubName: string | null;
   active: boolean;
 }
 

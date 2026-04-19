@@ -67,6 +67,7 @@ export function RecurringTrainingDialog({
       startDate: '',
       endDate: '',
       dayOfWeek: '',
+      gatheringTime: '',
       startTime: '',
       endTime: '',
       pitchId: '',
@@ -91,6 +92,7 @@ export function RecurringTrainingDialog({
           startDate: values.startDate,
           endDate: values.endDate,
           dayOfWeek: values.dayOfWeek,
+          gatheringTime: values.gatheringTime || undefined,
           startTime: values.startTime,
           endTime: values.endTime,
           pitchId: values.pitchId || undefined,
@@ -176,6 +178,11 @@ export function RecurringTrainingDialog({
               required
             />
           </Stack>
+          <TimeFieldInput
+            name="gatheringTime"
+            control={control}
+            label={t('trainings.gatheringTime')}
+          />
           <Stack direction="row" spacing={2}>
             <TimeFieldInput
               name="startTime"

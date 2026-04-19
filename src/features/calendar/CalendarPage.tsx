@@ -41,7 +41,7 @@ import { useClubId } from '@/hooks/useClubId';
 import { usePermissions } from '@/hooks/usePermissions';
 import { eventTypeColors } from '@/theme';
 import type { CalendarEvent } from './components/MonthlyCalendar';
-import dayjs from 'dayjs';
+import { dayjs } from '@/utils/date';
 
 export function CalendarPage() {
   const { t } = useTranslation();

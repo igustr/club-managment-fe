@@ -20,7 +20,7 @@ import {
 } from '@mui/icons-material';
 import type { CalendarEvent } from './MonthlyCalendar';
 import { formatTime } from '@/utils/date';
-import dayjs from 'dayjs';
+import { dayjs } from '@/utils/date';
 
 interface DayDetailPopoverProps {
   anchorEl: HTMLElement | null;

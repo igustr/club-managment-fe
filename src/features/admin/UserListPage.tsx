@@ -148,7 +148,7 @@ export function UserListPage() {
                   <TableCell>{user.phone || '—'}</TableCell>
                   <TableCell>
                     {user.clubId ? (
-                      <Chip label={user.clubId.slice(0, 8)} size="small" variant="outlined" />
+                      <Chip label={user.clubName ?? user.clubId.slice(0, 8)} size="small" variant="outlined" />
                     ) : (
                       <Typography variant="body2" color="text.secondary">
                         {t('admin.users.noClub')}

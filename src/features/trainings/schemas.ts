@@ -12,6 +12,7 @@ export const trainingSchema = (t: TFunction) =>
   z.object({
     teamId: z.string().min(1, { message: t('validation.required') }),
     date: z.string().min(1, { message: t('validation.required') }),
+    gatheringTime: z.string().optional().or(z.literal('')),
     startTime: z.string().min(1, { message: t('validation.required') }),
     endTime: z.string().min(1, { message: t('validation.required') }),
     pitchId: z.string().optional().or(z.literal('')),
@@ -31,6 +32,7 @@ export const recurringTrainingSchema = (t: TFunction) =>
     startDate: z.string().min(1, { message: t('validation.required') }),
     endDate: z.string().min(1, { message: t('validation.required') }),
     dayOfWeek: z.string().min(1, { message: t('validation.required') }),
+    gatheringTime: z.string().optional().or(z.literal('')),
     startTime: z.string().min(1, { message: t('validation.required') }),
     endTime: z.string().min(1, { message: t('validation.required') }),
     pitchId: z.string().optional().or(z.literal('')),
