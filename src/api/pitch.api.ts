@@ -6,6 +6,7 @@ import type {
   CreatePitchDTO,
   UpdatePitchDTO,
   PitchOccupancyDTO,
+  PitchScheduleDTO,
 } from '@/types/pitch.types';
 import type { TrainingSessionDTO } from '@/types/training.types';
 
@@ -21,6 +22,8 @@ export const pitchKeys = {
     [...pitchKeys.all, 'schedule', clubId, pitchId, startDate, endDate] as const,
   overview: (clubId: string, startDate: string, endDate: string) =>
     [...pitchKeys.all, 'overview', clubId, startDate, endDate] as const,
+  scheduleOverview: (clubId: string, from: string, to: string) =>
+    [...pitchKeys.all, 'scheduleOverview', clubId, from, to] as const,
 };
 
 // --- API functions ---
@@ -74,6 +77,18 @@ export const getPitchOverview = (
     )
     .then((r) => r.data);
 
+export const getPitchScheduleOverview = (
+  clubId: string,
+  from: string,
+  to: string,
+) =>
+  api
+    .get<PitchScheduleDTO>(
+      `/api/clubs/${clubId}/pitches/schedule`,
+      { params: { from, to } },
+    )
+    .then((r) => r.data);
+
 // --- Query hooks ---
 export const usePitches = (clubId: string | null) =>
   useQuery({
@@ -110,6 +125,17 @@ export const usePitchOverview = (
     queryKey: pitchKeys.overview(clubId!, startDate, endDate),
     queryFn: () => getPitchOverview(clubId!, startDate, endDate),
     enabled: !!clubId && !!startDate && !!endDate,
+  });
+
+export const usePitchScheduleOverview = (
+  clubId: string | null,
+  from: string,
+  to: string,
+) =>
+  useQuery({
+    queryKey: pitchKeys.scheduleOverview(clubId!, from, to),
+    queryFn: () => getPitchScheduleOverview(clubId!, from, to),
+    enabled: !!clubId && !!from && !!to,
   });
 
 // --- Mutation hooks ---

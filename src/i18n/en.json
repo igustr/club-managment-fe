@@ -312,7 +312,35 @@
       "NATURAL_GRASS": "Natural Grass",
       "ARTIFICIAL_TURF": "Artificial Turf",
       "INDOOR": "Indoor"
-    }
+    },
+    "conflictsView": {
+      "title": "Pitch Conflicts",
+      "subtitle": "Club-wide pitch usage and schedule overlaps",
+      "noConflicts": "No conflicts detected — all pitch bookings are clean.",
+      "conflictCount_one": "{{count}} conflict detected",
+      "conflictCount_other": "{{count}} conflicts detected",
+      "conflictMark": "Conflict",
+      "eventsInvolved_one": "{{count}} event involved",
+      "eventsInvolved_other": "{{count}} events involved",
+      "eventsShort": "events",
+      "timelineTitle": "Daily timeline by pitch",
+      "timelineHint": "Each row shows one pitch's usage for the selected day. Click a training/game to open its detail view."
+    },
+    "scheduleView": {
+      "title": "Pitch Schedule",
+      "subtitle": "Club-wide pitch usage by day",
+      "noConflicts": "No conflicts detected — all pitch bookings are clean.",
+      "conflictCount_one": "{{count}} conflict detected",
+      "conflictCount_other": "{{count}} conflicts detected",
+      "conflictMark": "Conflict",
+      "eventsInvolved_one": "{{count}} event involved",
+      "eventsInvolved_other": "{{count}} events involved",
+      "eventsShort": "events"
+    },
+    "manageTitle": "Manage pitches",
+    "manageSubtitle": "Add, edit, or remove club training pitches",
+    "manageButton": "Manage pitches",
+    "backToSchedule": "Back to schedule"
   },
   "trainings": {
     "title": "Trainings",

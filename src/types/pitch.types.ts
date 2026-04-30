@@ -28,3 +28,41 @@ export interface PitchOccupancyDTO {
   totalOccupancy: number;
   sessions: TrainingSessionDTO[];
 }
+
+// Conflict view types
+export type PitchEventType = 'TRAINING' | 'GAME';
+
+export interface PitchScheduleEventDTO {
+  id: string;
+  eventType: PitchEventType;
+  date: string;
+  startTime: string;
+  endTime: string;
+  teamId: string;
+  teamName: string;
+  pitchPortion: number;
+  label: string | null;
+}
+
+export interface PitchScheduleEntryDTO {
+  pitchId: string;
+  pitchName: string;
+  events: PitchScheduleEventDTO[];
+}
+
+export interface PitchConflictDTO {
+  pitchId: string;
+  pitchName: string;
+  date: string;
+  overlapStart: string;
+  overlapEnd: string;
+  totalOccupancy: number;
+  eventIds: string[];
+}
+
+export interface PitchScheduleDTO {
+  from: string;
+  to: string;
+  pitches: PitchScheduleEntryDTO[];
+  conflicts: PitchConflictDTO[];
+}

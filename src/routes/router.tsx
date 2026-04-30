@@ -83,6 +83,11 @@ const PitchOverviewPage = lazy(() =>
     default: m.PitchOverviewPage,
   })),
 );
+const PitchConflictsPage = lazy(() =>
+  import('@/features/pitches/PitchConflictsPage').then((m) => ({
+    default: m.PitchConflictsPage,
+  })),
+);
 const TrainingListPage = lazy(() =>
   import('@/features/trainings/TrainingListPage').then((m) => ({
     default: m.TrainingListPage,
@@ -275,6 +280,38 @@ export const router = createBrowserRouter([
                       </SuspenseWrapper>
                     ),
                   },
+                  {
+                    path: '/pitches',
+                    element: (
+                      <SuspenseWrapper>
+                        <PitchConflictsPage />
+                      </SuspenseWrapper>
+                    ),
+                  },
+                  {
+                    path: '/pitches/manage',
+                    element: (
+                      <SuspenseWrapper>
+                        <PitchListPage />
+                      </SuspenseWrapper>
+                    ),
+                  },
+                  {
+                    path: '/pitches/overview',
+                    element: (
+                      <SuspenseWrapper>
+                        <PitchOverviewPage />
+                      </SuspenseWrapper>
+                    ),
+                  },
+                  {
+                    path: '/pitches/:pitchId/schedule',
+                    element: (
+                      <SuspenseWrapper>
+                        <PitchSchedulePage />
+                      </SuspenseWrapper>
+                    ),
+                  },
                 ],
               },
 
@@ -359,31 +396,6 @@ export const router = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
-              {
-                path: '/pitches',
-                element: (
-                  <SuspenseWrapper>
-                    <PitchListPage />
-                  </SuspenseWrapper>
-                ),
-              },
-              {
-                path: '/pitches/:pitchId/schedule',
-                element: (
-                  <SuspenseWrapper>
-                    <PitchSchedulePage />
-                  </SuspenseWrapper>
-                ),
-              },
-              {
-                path: '/pitches/overview',
-                element: (
-                  <SuspenseWrapper>
-                    <PitchOverviewPage />
-                  </SuspenseWrapper>
-                ),
-              },
-
               // CLUB_ADMIN/COACH
               {
                 element: (

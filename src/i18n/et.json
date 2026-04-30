@@ -312,7 +312,35 @@
       "NATURAL_GRASS": "Loomulik muru",
       "ARTIFICIAL_TURF": "Kunstmuru",
       "INDOOR": "Siseruumid"
-    }
+    },
+    "conflictsView": {
+      "title": "Väljakute konfliktid",
+      "subtitle": "Klubiülene väljakute kasutus ja ajakavade kattuvused",
+      "noConflicts": "Konflikte ei tuvastatud — kõik väljakud on selgelt broneeritud.",
+      "conflictCount_one": "Tuvastatud {{count}} konflikt",
+      "conflictCount_other": "Tuvastatud {{count}} konflikti",
+      "conflictMark": "Konflikt",
+      "eventsInvolved_one": "{{count}} sündmus seotud",
+      "eventsInvolved_other": "{{count}} sündmust seotud",
+      "eventsShort": "sündmust",
+      "timelineTitle": "Päevane ajatelg väljakute kaupa",
+      "timelineHint": "Iga rida näitab ühe väljaku hõivatust valitud päeval. Klikk treeningul/mängul avab detailvaate."
+    },
+    "scheduleView": {
+      "title": "Treeningväljakute ajakava",
+      "subtitle": "Klubiülene väljakute kasutus päeva lõikes",
+      "noConflicts": "Konflikte ei tuvastatud — kõik väljakud on selgelt broneeritud.",
+      "conflictCount_one": "Tuvastatud {{count}} konflikt",
+      "conflictCount_other": "Tuvastatud {{count}} konflikti",
+      "conflictMark": "Konflikt",
+      "eventsInvolved_one": "{{count}} sündmus seotud",
+      "eventsInvolved_other": "{{count}} sündmust seotud",
+      "eventsShort": "sündmust"
+    },
+    "manageTitle": "Väljakute haldus",
+    "manageSubtitle": "Lisa, muuda või kustuta klubi treeningväljakuid",
+    "manageButton": "Halda väljakuid",
+    "backToSchedule": "Tagasi ajakavasse"
   },
   "trainings": {
     "title": "Treeningud",

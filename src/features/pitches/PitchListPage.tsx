@@ -25,9 +25,16 @@ import {
   Delete,
   CalendarMonth,
   Search,
-  GridView,
+  ArrowBack,
+  Warning,
 } from '@mui/icons-material';
-import { usePitches, useDeletePitch } from '@/api/pitch.api';
+import Badge from '@mui/material/Badge';
+import {
+  usePitches,
+  useDeletePitch,
+  usePitchScheduleOverview,
+} from '@/api/pitch.api';
+import dayjs from 'dayjs';
 import { PitchFormDialog } from './components/PitchFormDialog';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -44,6 +51,16 @@ export function PitchListPage() {
 
   const { data: pitches, isLoading } = usePitches(clubId);
   const deleteMutation = useDeletePitch(clubId!);
+
+  // Background poll for conflicts in the next 30 days, only when admin can see the button.
+  const conflictRangeFrom = dayjs().format('YYYY-MM-DD');
+  const conflictRangeTo = dayjs().add(30, 'day').format('YYYY-MM-DD');
+  const { data: scheduleData } = usePitchScheduleOverview(
+    isClubAdmin ? clubId : null,
+    conflictRangeFrom,
+    conflictRangeTo,
+  );
+  const conflictCount = scheduleData?.conflicts.length ?? 0;
 
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
@@ -69,20 +86,40 @@ export function PitchListPage() {
           justifyContent: 'space-between',
           alignItems: 'center',
           mb: 3,
+          flexWrap: 'wrap',
+          gap: 1,
         }}
       >
-        <Typography variant="h5" fontWeight={700}>
-          {t('pitches.title')}
-        </Typography>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <IconButton onClick={() => navigate('/pitches')} size="small">
+            <ArrowBack />
+          </IconButton>
+          <Box>
+            <Typography variant="h5" fontWeight={700}>
+              {t('pitches.manageTitle')}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t('pitches.manageSubtitle')}
+            </Typography>
+          </Box>
+        </Stack>
         {isClubAdmin && (
           <Stack direction="row" spacing={1}>
-            <Button
-              variant="outlined"
-              startIcon={<GridView />}
-              onClick={() => navigate('/pitches/overview')}
+            <Badge
+              badgeContent={conflictCount}
+              color="error"
+              max={99}
+              overlap="rectangular"
             >
-              {t('pitches.overview')}
-            </Button>
+              <Button
+                variant="outlined"
+                color={conflictCount > 0 ? 'error' : 'inherit'}
+                startIcon={<Warning />}
+                onClick={() => navigate('/pitches')}
+              >
+                {t('pitches.backToSchedule')}
+              </Button>
+            </Badge>
             <Button
               variant="contained"
               startIcon={<Add />}
